@@ -9,8 +9,8 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
     override fun saveUserInfo(token: String, username: String, role : String) {
         println("Saving userinfo to settings...")
         settings.putString(KEY_TOKEN, token)
-        settings.putString(KEY_USERNAME, token)
-        settings.putString(KEY_ROLE, token)
+        settings.putString(KEY_USERNAME, username)
+        settings.putString(KEY_ROLE, role)
     }
 
     override fun getToken(): String? {

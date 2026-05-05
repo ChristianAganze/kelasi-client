@@ -14,7 +14,7 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
     override fun login(loginRequest: LoginRequest): Flow<Resource<LoginResponse>> {
         return flow {
-            emit(Resource.Loading)
+            emit(Resource.Loading())
             val loginResponse = authAPIService.login(loginRequest)
             settingStorage.saveUserInfo(
                 token = loginResponse.token,
@@ -24,6 +24,6 @@ class AuthRepositoryImpl(
             emit(Resource.Success(loginResponse))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
-        } as Flow<Resource<LoginResponse>>
+        }
     }
 }
