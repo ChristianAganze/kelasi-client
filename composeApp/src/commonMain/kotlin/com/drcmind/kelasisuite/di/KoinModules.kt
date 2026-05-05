@@ -1,7 +1,7 @@
 package com.drcmind.kelasisuite.di
 
-import com.drcmind.kelasisuite.data.datasource.settings.SettingsStorage
-import com.drcmind.kelasisuite.data.datasource.settings.SettingsStorageImpl
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout

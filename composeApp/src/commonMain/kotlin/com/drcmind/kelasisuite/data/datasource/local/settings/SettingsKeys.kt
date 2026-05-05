@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.data.datasource.settings
+package com.drcmind.kelasisuite.data.datasource.local.settings
 
 object SettingsKeys {
     const val KEY_TOKEN = "TOKEN"

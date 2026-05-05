@@ -1,8 +1,8 @@
-package com.drcmind.kelasisuite.data.datasource.settings
+package com.drcmind.kelasisuite.data.datasource.local.settings
 
-import com.drcmind.kelasisuite.data.datasource.settings.SettingsKeys.KEY_ROLE
-import com.drcmind.kelasisuite.data.datasource.settings.SettingsKeys.KEY_TOKEN
-import com.drcmind.kelasisuite.data.datasource.settings.SettingsKeys.KEY_USERNAME
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_ROLE
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_TOKEN
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_USERNAME
 import com.russhwolf.settings.Settings
 
 class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
