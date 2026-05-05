@@ -21,6 +21,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,14 +36,16 @@ import org.koin.compose.koinInject
 
 @Composable
 fun AuthScreen(
-    onAuthSuccess: () -> Unit,
+    onAuthSuccess: (String) -> Unit,
     viewModel: AuthViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
 
     // Handle success state
-    if (state.authState is AuthState.Success) {
-        onAuthSuccess()
+    LaunchedEffect(state.authState) {
+        if (state.authState is AuthState.Success) {
+            onAuthSuccess((state.authState as AuthState.Success).role)
+        }
     }
 
     Box(

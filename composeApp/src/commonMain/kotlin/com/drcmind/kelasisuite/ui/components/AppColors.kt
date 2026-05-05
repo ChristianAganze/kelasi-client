@@ -18,6 +18,11 @@ object AppColors {
     val surfaceBorder = Color(0xFFE5E7EB)
 
     val surfaceContainer = Color(0xFFFFFFFF)
+    val surfaceContainerLow = Color(0xFFF1F3FF)
+    val surfaceContainerHigh = Color(0xFFE1E8FD)
+    val onSurfaceVariant = Color(0xFF4C4546)
+    val outlineVariant = Color(0xFFCFC4C5)
+    val secondaryContainer = Color(0xFFDCE2F3)
 
     val textPrimary = Color(0xFF1F2937)
 
