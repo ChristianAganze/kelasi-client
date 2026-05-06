@@ -13,6 +13,15 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
         settings.putString(KEY_ROLE, role)
     }
 
+
+    override fun getUserInfo(): UserInfo {
+        val storedUsername =
+            settings.getString(KEY_USERNAME, "Utilisateur") // "username" est la valeur par défaut
+        val storedRole = settings.getString(KEY_ROLE, "Role")
+        return UserInfo(storedUsername, storedRole)
+    }
+
+
     override fun getToken(): String? {
         val token = settings.getStringOrNull(KEY_TOKEN)
         println("Reading token from settings: ${if (token != null) "Found" else "Not Found"}")

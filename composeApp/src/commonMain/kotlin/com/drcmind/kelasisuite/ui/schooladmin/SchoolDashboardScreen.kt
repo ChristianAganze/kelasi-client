@@ -260,7 +260,7 @@ fun FooterSection(status: String, lastConnection: String) {
             }
 
             Text(
-                text = "© 2024 KELASI CORE. SOLUTIONS ÉDUCATIVES PREMIUM.",
+                text = "© 2026 KELASI SUITE. DrcMind.",
                 fontSize = 10.sp,
                 color = AppColors.outlineVariant,
                 letterSpacing = 0.5.sp
