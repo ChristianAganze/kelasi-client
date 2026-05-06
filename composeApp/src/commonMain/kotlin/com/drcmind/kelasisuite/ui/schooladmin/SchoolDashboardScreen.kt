@@ -3,14 +3,22 @@ package com.drcmind.kelasisuite.ui.schooladmin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drcmind.kelasisuite.ui.components.AppColors
+import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.koinInject
 
 @Composable
@@ -61,7 +70,7 @@ fun HeaderSection(username: String) {
             text = "Bienvenue, $username",
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
-            color = AppColors. onSurfaceVariant,
+            color = AppColors.onSurfaceVariant,
             letterSpacing = (-0.5).sp
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -76,12 +85,15 @@ fun HeaderSection(username: String) {
 @Composable
 fun BentoGrid() {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        Row(modifier = Modifier.height(320.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        Row(
+            modifier = Modifier.height(320.dp),
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
             // Gestion Académique (Large)
             BentoCard(
                 title = "Gestion Académique",
                 description = "Focus on student data, classroom assignments, and the overarching school organizational structure.",
-                icon = Icons.Default.School,
+                icon = AppIcons.school,
                 modifier = Modifier.weight(2f),
                 isDark = false
             )
@@ -90,18 +102,21 @@ fun BentoGrid() {
             BentoCard(
                 title = "Curriculum & Notes",
                 description = "Access the grading matrix, subject management, and student performance tracking.",
-                icon = Icons.Default.MenuBook,
+                icon = AppIcons.curriculum,
                 modifier = Modifier.weight(1f),
                 isDark = true
             )
         }
 
-        Row(modifier = Modifier.height(240.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        Row(
+            modifier = Modifier.height(240.dp),
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
             // Inscriptions
             BentoCard(
                 title = "Inscriptions",
                 description = "Manage new student enrollments and digital student profiles.",
-                icon = Icons.Default.PersonAdd,
+                icon = AppIcons.personAdd,
                 modifier = Modifier.weight(1f),
                 isDark = false
             )
@@ -110,7 +125,7 @@ fun BentoGrid() {
             BentoCard(
                 title = "Finances & Facturation",
                 description = "Track payments, tuition fees, and institutional billing cycles.",
-                icon = Icons.Default.Payments,
+                icon = AppIcons.payments,
                 modifier = Modifier.weight(1f),
                 isDark = false
             )
@@ -119,7 +134,7 @@ fun BentoGrid() {
             BentoCard(
                 title = "Communication",
                 description = "Real-time updates, announcements, and parent-teacher messaging.",
-                icon = Icons.Default.Chat,
+                icon = AppIcons.communication,
                 modifier = Modifier.weight(1f),
                 isDark = false
             )
@@ -136,8 +151,9 @@ fun BentoCard(
     isDark: Boolean = false
 ) {
     val backgroundColor = if (isDark) AppColors.primary else Color.White
-    val contentColor = if (isDark) Color.White else AppColors. onSurfaceVariant
-    val secondaryContentColor = if (isDark) Color.White.copy(alpha = 0.7f) else AppColors.onSurfaceVariant
+    val contentColor = if (isDark) Color.White else AppColors.onSurfaceVariant
+    val secondaryContentColor =
+        if (isDark) Color.White.copy(alpha = 0.7f) else AppColors.onSurfaceVariant
 
     Box(
         modifier = modifier
@@ -175,7 +191,7 @@ fun BentoCard(
                 }
 
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    imageVector = AppIcons.arrowFWD,
                     contentDescription = null,
                     tint = if (isDark) Color.White.copy(alpha = 0.4f) else AppColors.outlineVariant,
                     modifier = Modifier.size(24.dp)
@@ -204,7 +220,7 @@ fun BentoCard(
 @Composable
 fun FooterSection(status: String, lastConnection: String) {
     Column {
-        Divider(color = Color(0xFFE9EDFF), thickness = 1.dp)
+        HorizontalDivider(Modifier, thickness = 1.dp, color = Color(0xFFE9EDFF))
         Spacer(modifier = Modifier.height(24.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -220,8 +236,14 @@ fun FooterSection(status: String, lastConnection: String) {
                         color = AppColors.outlineVariant,
                         letterSpacing = 1.sp
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(modifier = Modifier.size(6.dp).background(Color(0xFF10B981), RoundedCornerShape(3.dp)))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.size(6.dp)
+                                .background(Color(0xFF10B981), RoundedCornerShape(3.dp))
+                        )
                         Text(text = status, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                     }
                 }

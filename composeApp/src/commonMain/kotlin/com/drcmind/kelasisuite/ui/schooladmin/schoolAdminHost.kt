@@ -3,45 +3,105 @@ package com.drcmind.kelasisuite.ui.schooladmin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.drcmind.kelasisuite.domain.util.AdaptiveUtil
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppColors
+import com.drcmind.kelasisuite.ui.components.AppIcons
+
 
 @Composable
 fun SchoolAdminAppScreen() {
     var currentRoute by remember { mutableStateOf<Route>(Route.SystemAdmin.Dashboard) }
 
-    Row(modifier = Modifier.fillMaxSize()) {
-        // Sidebar (Hidden on small screens in a real app, but here we'll keep it simple as per design)
-        Sidebar(
-            currentRoute = currentRoute,
-            onRouteSelected = { currentRoute = it },
-            modifier = Modifier.width(260.dp).fillMaxHeight()
-        )
+    val navItems = listOf(
+        SidebarItem("Tableau de bord", AppIcons.dashboard, Route.SystemAdmin.Dashboard),
+        SidebarItem("Programme", AppIcons.curriculum, Route.SystemAdmin.Curriculum),
+        SidebarItem("Inscriptions", AppIcons.enrollment, Route.SystemAdmin.Schools),
+        SidebarItem("Finances", AppIcons.financial, Route.SystemAdmin.Profile),
+        SidebarItem("Communication", AppIcons.communication, Route.SystemAdmin.Settings)
+    )
 
-        // Main Content
-        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-            when (currentRoute) {
-                is Route.SystemAdmin.Dashboard -> {
-                    SchoolDashboardScreen()
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val with = maxWidth
+
+        if (!AdaptiveUtil.isMedium(with) && !AdaptiveUtil.isCompact(with)) {
+             Row(modifier = Modifier.fillMaxSize()) {
+                Sidebar(
+                    navItems = navItems,
+                    currentRoute = currentRoute,
+                    onRouteSelected = { currentRoute = it },
+                    modifier = Modifier.width(260.dp).fillMaxHeight()
+                )
+
+                Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    MainContentArea(currentRoute)
                 }
-                else -> {
-                    // Placeholder for other routes
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Module en cours de développement")
+            }
+        } else {
+             Scaffold(
+                bottomBar = {
+                    NavigationBar(
+                        containerColor = Color.White,
+                        tonalElevation = 8.dp
+                    ) {
+                        navItems.forEach { item ->
+                            val isSelected = currentRoute == item.route
+                            NavigationBarItem(
+                                selected = isSelected,
+                                onClick = { currentRoute = item.route },
+                                icon = {
+                                    Icon(item.icon, contentDescription = item.label)
+                                },
+                                label = {
+                                    Text(item.label, fontSize = 12.sp, textAlign = TextAlign.Center)
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = AppColors.primary,
+                                    selectedTextColor = AppColors.primary,
+                                    unselectedIconColor = AppColors.onSurfaceVariant,
+                                    indicatorColor = AppColors.surfaceContainerLow
+                                )
+                            )
+                        }
                     }
+                }
+            ) { paddingValues ->
+                Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                    MainContentArea(currentRoute)
                 }
             }
         }
@@ -49,7 +109,20 @@ fun SchoolAdminAppScreen() {
 }
 
 @Composable
+fun MainContentArea(currentRoute: Route) {
+    when (currentRoute) {
+        is Route.SystemAdmin.Dashboard -> SchoolDashboardScreen()
+        else -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Module en cours de développement")
+            }
+        }
+    }
+}
+
+@Composable
 fun Sidebar(
+    navItems: List<SidebarItem>,
     currentRoute: Route,
     onRouteSelected: (Route) -> Unit,
     modifier: Modifier = Modifier
@@ -71,7 +144,7 @@ fun Sidebar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.MenuBook,
+                    imageVector = AppIcons.curriculum,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
                     tint = Color.White
@@ -79,21 +152,11 @@ fun Sidebar(
             }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "Kelasi School Admin",
+                text = "Kelasi Admin",
                 fontWeight = FontWeight.Black,
-                fontSize = 18.sp,
-                letterSpacing = (-0.5).sp
+                fontSize = 18.sp
             )
         }
-
-        // Nav Items
-        val navItems = listOf(
-            SidebarItem("Dashboard", Icons.Default.Dashboard, Route.SystemAdmin.Dashboard),
-            SidebarItem("Curriculum", Icons.Default.MenuBook, Route.SystemAdmin.Curriculum),
-            SidebarItem("Enrollment", Icons.Default.PersonAdd, Route.SystemAdmin.Schools), // Using Schools for Enrollment as placeholder
-            SidebarItem("Financial", Icons.Default.Payments, Route.SystemAdmin.Profile), // Placeholder
-            SidebarItem("Communication", Icons.Default.Chat, Route.SystemAdmin.Settings) // Placeholder
-        )
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             navItems.forEach { item ->
@@ -108,7 +171,7 @@ fun Sidebar(
         Spacer(modifier = Modifier.weight(1f))
 
         // Profile Section
-        Divider(color = AppColors.surfaceContainerLow, thickness = 1.dp)
+        HorizontalDivider(Modifier, thickness = 1.dp, color = AppColors.surfaceContainerLow)
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -118,7 +181,11 @@ fun Sidebar(
                     .background(AppColors.surfaceContainerLow, RoundedCornerShape(20.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Person, contentDescription = null, tint = AppColors.onSurfaceVariant)
+                Icon(
+                    AppIcons.person,
+                    contentDescription = null,
+                    tint = AppColors.onSurfaceVariant
+                )
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
@@ -138,6 +205,8 @@ fun Sidebar(
         }
     }
 }
+
+
 
 data class SidebarItem(val label: String, val icon: ImageVector, val route: Route)
 
@@ -173,3 +242,4 @@ fun SidebarNavLink(
         )
     }
 }
+
