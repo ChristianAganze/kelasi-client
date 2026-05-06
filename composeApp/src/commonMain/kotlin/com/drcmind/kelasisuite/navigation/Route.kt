@@ -60,6 +60,9 @@ sealed interface Route : NavKey {
         }
 
         @Serializable
+        data object Academic : Route
+
+        @Serializable
         data object Profile : NavigationBarRoute {
             override val icon: ImageVector = Icons.Default.Person
             override val label: String = "Profile"
@@ -85,12 +88,44 @@ sealed interface Route : NavKey {
     data object SchoolAdmin : Route {
         @Serializable
         data object Admin : Route {
-            @Serializable
+                @Serializable
             data object Home : NavigationBarRoute {
                 override val icon: ImageVector = Icons.Default.Home
-                override val label: String = "Accueil"
-
+                override val label: String = "Tableau de bord"
             }
+
+            @Serializable
+            data object Programme : NavigationBarRoute {
+                override val icon: ImageVector = Icons.Default.Person
+                override val label: String = "Programme"
+            }
+
+            @Serializable
+            data object Inscriptions : NavigationBarRoute {
+                override val icon: ImageVector = Icons.Default.Person
+                override val label: String = "Inscriptions"
+            }
+
+            @Serializable
+            data object Finances : NavigationBarRoute {
+                override val icon: ImageVector = Icons.Default.Person
+                override val label: String = "Finances"
+            }
+
+            @Serializable
+            data object Communication : NavigationBarRoute {
+                override val icon: ImageVector = Icons.Default.Person
+                override val label: String = "Communication"
+            }
+
+            @Serializable
+            data object AcademicHome : Route
+
+            @Serializable
+            data object AcademicAdd : Route
+
+            @Serializable
+            data class ClassDetails(val classId: Int) : Route
 
             @Serializable
             data object Profile : NavigationBarRoute {

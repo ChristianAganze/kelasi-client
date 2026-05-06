@@ -50,6 +50,8 @@ object AppColors {
 
     val socialGithub = Color(0xFF000000)
 
+    val sucess = Color(0xFF0E6245)
+
     object Button {
         val primary = AppColors.primary
         val primaryText = AppColors.onPrimary

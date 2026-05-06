@@ -16,7 +16,7 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
 
     override fun getUserInfo(): UserInfo {
         val storedUsername =
-            settings.getString(KEY_USERNAME, "Utilisateur") // "username" est la valeur par défaut
+            settings.getString(KEY_USERNAME, "Utilisateur")
         val storedRole = settings.getString(KEY_ROLE, "Role")
         return UserInfo(storedUsername, storedRole)
     }

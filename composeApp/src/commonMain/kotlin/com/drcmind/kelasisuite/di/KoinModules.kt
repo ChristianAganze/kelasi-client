@@ -8,8 +8,11 @@ import com.drcmind.kelasisuite.data.repository.AuthRepository
 import com.drcmind.kelasisuite.data.repository.AuthRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.SchoolAdminHostViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.AcademicRepository
+import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.AddClassViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.CreateClassFromTemplateRequest
 import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.SchoolAdminHostViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -22,10 +25,10 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import io.ktor.serialization.kotlinx.json.*
 
 fun commonModule() = listOf(
     platformModule,
@@ -51,11 +54,19 @@ val localStorageModule = module {
 
 val repositoryModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+    single<AcademicRepository> {
+        object : AcademicRepository {
+            override suspend fun createClassFromTemplate(request: CreateClassFromTemplateRequest): Any? {
+                return null
+            }
+        }
+    }
 }
 
 val viewModelModule = module {
     single { AuthViewModel(get()) }
     single { SchoolDashboardViewModel() }
+    single { AddClassViewModel(get()) }
     single { SchoolAdminHostViewModel(get()) }
 }
 

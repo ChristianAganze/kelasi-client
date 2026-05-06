@@ -36,7 +36,8 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SchoolDashboardScreen(
-    viewModel: SchoolDashboardViewModel = koinInject()
+    viewModel: SchoolDashboardViewModel = koinInject(),
+    onAcademicClick: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -53,7 +54,7 @@ fun SchoolDashboardScreen(
         Spacer(modifier = Modifier.height(64.dp))
 
         // Bento Grid
-        BentoGrid()
+        BentoGrid(onAcademicClick = onAcademicClick)
 
         Spacer(modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.height(64.dp))
@@ -83,7 +84,9 @@ fun HeaderSection(username: String) {
 }
 
 @Composable
-fun BentoGrid() {
+fun BentoGrid(
+    onAcademicClick: () -> Unit = {}
+) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Row(
             modifier = Modifier.height(320.dp),
@@ -95,7 +98,8 @@ fun BentoGrid() {
                 description = "Focus on student data, classroom assignments, and the overarching school organizational structure.",
                 icon = AppIcons.school,
                 modifier = Modifier.weight(2f),
-                isDark = false
+                isDark = false,
+                onClick = onAcademicClick
             )
 
             // Curriculum & Notes (Tall/Dark)
@@ -148,7 +152,8 @@ fun BentoCard(
     description: String,
     icon: ImageVector,
     modifier: Modifier = Modifier,
-    isDark: Boolean = false
+    isDark: Boolean = false,
+    onClick: () -> Unit = {}
 ) {
     val backgroundColor = if (isDark) AppColors.primary else Color.White
     val contentColor = if (isDark) Color.White else AppColors.onSurfaceVariant
@@ -164,7 +169,7 @@ fun BentoCard(
                 color = if (isDark) Color.Transparent else Color(0xFFE9EDFF),
                 shape = RoundedCornerShape(32.dp)
             )
-            .clickable { /* Navigate */ }
+            .clickable { onClick() }
             .padding(32.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {

@@ -39,6 +39,9 @@ import com.drcmind.kelasisuite.domain.util.AdaptiveUtil
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppColors
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.AddClassScreen
+import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.ClassDetailsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.HomeScreen
 import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardScreen
 import org.koin.compose.koinInject
 
@@ -51,11 +54,11 @@ fun SchoolAdminAppScreen(
     val userInfo by viewModel.userInfo.collectAsState()
 
     val navItems = listOf(
-        SidebarItem("Tableau de bord", AppIcons.dashboard, Route.SystemAdmin.Dashboard),
-        SidebarItem("Programme", AppIcons.curriculum, Route.SystemAdmin.Curriculum),
-        SidebarItem("Inscriptions", AppIcons.enrollment, Route.SystemAdmin.Schools),
-        SidebarItem("Finances", AppIcons.financial, Route.SystemAdmin.Profile),
-        SidebarItem("Communication", AppIcons.communication, Route.SystemAdmin.Settings)
+        SidebarItem("Tableau de bord", AppIcons.dashboard, Route.SchoolAdmin.Admin.Home),
+        SidebarItem("Programme", AppIcons.curriculum, Route.SchoolAdmin.Admin.Programme),
+        SidebarItem("Inscriptions", AppIcons.enrollment, Route.SchoolAdmin.Admin.Inscriptions),
+        SidebarItem("Finances", AppIcons.financial, Route.SchoolAdmin.Admin.Finances),
+        SidebarItem("Communication", AppIcons.communication, Route.SchoolAdmin.Admin.Communication)
     )
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -73,7 +76,14 @@ fun SchoolAdminAppScreen(
                 )
 
                 Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                    MainContentArea(currentRoute)
+                    MainContentArea(
+                        currentRoute,
+                        onAcademicOpen = { viewModel.updateRoute(Route.SchoolAdmin.Admin.AcademicHome) },
+                        onAcademicBack = { viewModel.updateRoute(Route.SchoolAdmin.Admin.Home) },
+                        onAddClass = { viewModel.updateRoute(Route.SchoolAdmin.Admin.AcademicAdd) },
+                        onSelectClass = { viewModel.updateRoute(Route.SchoolAdmin.Admin.ClassDetails(it)) },
+                        onClassCreated = { viewModel.updateRoute(Route.SchoolAdmin.Admin.AcademicHome) }
+                    )
                 }
             }
         } else {
@@ -106,7 +116,14 @@ fun SchoolAdminAppScreen(
                 }
             ) { paddingValues ->
                 Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                    MainContentArea(currentRoute)
+                    MainContentArea(
+                        currentRoute,
+                        onAcademicOpen = { viewModel.updateRoute(Route.SchoolAdmin.Admin.AcademicHome) },
+                        onAcademicBack = { viewModel.updateRoute(Route.SchoolAdmin.Admin.Home) },
+                        onAddClass = { viewModel.updateRoute(Route.SchoolAdmin.Admin.AcademicAdd) },
+                        onSelectClass = { viewModel.updateRoute(Route.SchoolAdmin.Admin.ClassDetails(it)) },
+                        onClassCreated = { viewModel.updateRoute(Route.SchoolAdmin.Admin.AcademicHome) }
+                    )
                 }
             }
         }
@@ -114,9 +131,31 @@ fun SchoolAdminAppScreen(
 }
 
 @Composable
-fun MainContentArea(currentRoute: Route) {
+fun MainContentArea(
+    currentRoute: Route,
+    onAcademicOpen: () -> Unit,
+    onAcademicBack: () -> Unit,
+    onAddClass: () -> Unit,
+    onSelectClass: (Int) -> Unit,
+    onClassCreated: () -> Unit
+) {
     when (currentRoute) {
-        is Route.SystemAdmin.Dashboard -> SchoolDashboardScreen()
+        is Route.SchoolAdmin.Admin.Home -> SchoolDashboardScreen(
+            onAcademicClick = onAcademicOpen
+        )
+        is Route.SchoolAdmin.Admin.AcademicHome -> HomeScreen(
+            onBack = onAcademicBack,
+            onAddClass = onAddClass,
+            onSelectClass = onSelectClass
+        )
+        is Route.SchoolAdmin.Admin.AcademicAdd -> AddClassScreen(
+            onBack = onAcademicBack,
+            onClassCreated = onClassCreated
+        )
+        is Route.SchoolAdmin.Admin.ClassDetails -> ClassDetailsScreen(
+            classId = currentRoute.classId,
+            onBack = onAcademicBack
+        )
         else -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Module en cours de développement")

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class SchoolAdminHostViewModel(private val settingsStorage: SettingsStorage) : ViewModel() {
 
-    private val _currentRoute = MutableStateFlow<Route>(Route.SystemAdmin.Dashboard)
+    private val _currentRoute = MutableStateFlow<Route>(Route.SchoolAdmin.Admin.Home)
     val currentRoute: StateFlow<Route> = _currentRoute.asStateFlow()
 
     private val _userInfo = MutableStateFlow(settingsStorage.getUserInfo())
