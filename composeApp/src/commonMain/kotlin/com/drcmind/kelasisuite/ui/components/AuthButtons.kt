@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -37,10 +38,8 @@ fun PrimaryButton(
         contentAlignment = Alignment.Center
     ) {
         if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .height(24.dp)
-                    .align(Alignment.Center),
+             CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
                 color = AppColors.Button.primaryText,
                 strokeWidth = 2.dp
             )
