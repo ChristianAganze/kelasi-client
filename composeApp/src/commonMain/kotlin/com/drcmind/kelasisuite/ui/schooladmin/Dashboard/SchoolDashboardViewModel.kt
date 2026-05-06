@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.ui.schooladmin
+package com.drcmind.kelasisuite.ui.schooladmin.Dashboard
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,12 +15,4 @@ data class SchoolDashboardState(
 class SchoolDashboardViewModel : ViewModel() {
     private val _state = MutableStateFlow(SchoolDashboardState())
     val state: StateFlow<SchoolDashboardState> = _state.asStateFlow()
-
-    fun updateUsername(name: String) {
-        _state.value = _state.value.copy(username = name)
-    }
-
-    fun updateRole(role: String) {
-        _state.value = _state.value.copy(role = role)
-    }
 }

@@ -8,7 +8,8 @@ import com.drcmind.kelasisuite.data.repository.AuthRepository
 import com.drcmind.kelasisuite.data.repository.AuthRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.SchoolAdminHostViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -55,6 +56,7 @@ val repositoryModule = module {
 val viewModelModule = module {
     single { AuthViewModel(get()) }
     single { SchoolDashboardViewModel() }
+    single { SchoolAdminHostViewModel(get()) }
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage) : HttpClient {

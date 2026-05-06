@@ -25,10 +25,8 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,11 +39,16 @@ import com.drcmind.kelasisuite.domain.util.AdaptiveUtil
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppColors
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardScreen
+import org.koin.compose.koinInject
 
 
 @Composable
-fun SchoolAdminAppScreen() {
-    var currentRoute by remember { mutableStateOf<Route>(Route.SystemAdmin.Dashboard) }
+fun SchoolAdminAppScreen(
+    viewModel: SchoolAdminHostViewModel = koinInject()
+) {
+    val currentRoute by viewModel.currentRoute.collectAsState()
+    val userInfo by viewModel.userInfo.collectAsState()
 
     val navItems = listOf(
         SidebarItem("Tableau de bord", AppIcons.dashboard, Route.SystemAdmin.Dashboard),
@@ -63,7 +66,9 @@ fun SchoolAdminAppScreen() {
                 Sidebar(
                     navItems = navItems,
                     currentRoute = currentRoute,
-                    onRouteSelected = { currentRoute = it },
+                    onRouteSelected = { viewModel.updateRoute(it) },
+                    username = userInfo.username,
+                    role = userInfo.roles,
                     modifier = Modifier.width(260.dp).fillMaxHeight()
                 )
 
@@ -82,7 +87,7 @@ fun SchoolAdminAppScreen() {
                             val isSelected = currentRoute == item.route
                             NavigationBarItem(
                                 selected = isSelected,
-                                onClick = { currentRoute = item.route },
+                                onClick = { viewModel.updateRoute(item.route) },
                                 icon = {
                                     Icon(item.icon, contentDescription = item.label)
                                 },
@@ -125,6 +130,8 @@ fun Sidebar(
     navItems: List<SidebarItem>,
     currentRoute: Route,
     onRouteSelected: (Route) -> Unit,
+    username: String,
+    role: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -190,15 +197,15 @@ fun Sidebar(
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = "Administrator",
+                    text = username,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "CORE ADMIN",
+                    text = role.uppercase().replace("_", " "),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AppColors.onSurfaceVariant,
+                    color = AppColors. textSecondary,
                     letterSpacing = 1.sp
                 )
             }
