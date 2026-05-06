@@ -1,6 +1,4 @@
-package com.drcmind.kelasisuite.ui.systemadmin
-
-import androidx.compose.material3.Text
+package com.drcmind.kelasisuite.ui.schooladmin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -12,7 +10,6 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -32,38 +30,41 @@ import kotlinx.serialization.modules.polymorphic
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun SystemAdminAppScreen(
+fun SchoolAdminAppScreen(
     onLogout: () -> Unit
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            NavigationSuiteType.WideNavigationRailExpanded
+            NavigationSuiteType.NavigationDrawer
         } else {
-            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+            NavigationSuiteType.WideNavigationRailExpanded
         }
     }
 
     val isCompact = layoutType == NavigationSuiteType.NavigationBar
 
-    val systemAdminBackStack = rememberNavBackStack(
+    val schoolAdminBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {
                 polymorphic(NavKey::class) {
-                    subclass(Route.SystemAdmin.Dashboard::class, Route.SystemAdmin.Dashboard.serializer())
-                    subclass(Route.SystemAdmin.Curriculum::class, Route.SystemAdmin.Curriculum.serializer())
-                    subclass(Route.SystemAdmin.Subjects::class, Route.SystemAdmin.Subjects.serializer())
-                    subclass(Route.SystemAdmin.Schools::class, Route.SystemAdmin.Schools.serializer())
-                    subclass(Route.SystemAdmin.Templates::class, Route.SystemAdmin.Templates.serializer())
-                    subclass(Route.SystemAdmin.Settings::class, Route.SystemAdmin.Settings.serializer())
+                    subclass(Route.SchoolAdmin.SchoolDashboard::class, Route.SchoolAdmin.SchoolDashboard.serializer())
+                    subclass(Route.SchoolAdmin.Academics::class, Route.SchoolAdmin.Academics.serializer())
+                    subclass(Route.SchoolAdmin.Students::class, Route.SchoolAdmin.Students.serializer())
+                    subclass(Route.SchoolAdmin.Parents::class, Route.SchoolAdmin.Parents.serializer())
+                    subclass(Route.SchoolAdmin.StaffHR::class, Route.SchoolAdmin.StaffHR.serializer())
+                    subclass(Route.SchoolAdmin.Finance::class, Route.SchoolAdmin.Finance.serializer())
+                    subclass(Route.SchoolAdmin.Logistics::class, Route.SchoolAdmin.Logistics.serializer())
+                    subclass(Route.SchoolAdmin.Communication::class, Route.SchoolAdmin.Communication.serializer())
+                    subclass(Route.SchoolAdmin.Settings::class, Route.SchoolAdmin.Settings.serializer())
                 }
             }
         },
-        Route.SystemAdmin.Dashboard
+        Route.SchoolAdmin.SchoolDashboard
     )
 
-    var currentKey by rememberSaveable(stateSaver = Route.SystemAdmin.stateSaver) {
-        mutableStateOf(Route.SystemAdmin.Dashboard)
+    var currentKey by rememberSaveable(stateSaver = Route.SchoolAdmin.stateSaver) {
+        mutableStateOf(Route.SchoolAdmin.SchoolDashboard)
     }
 
     var showMenu by rememberSaveable { mutableStateOf(false) }
@@ -72,7 +73,7 @@ fun SystemAdminAppScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Kelasi Admin")
+                    Text(text = "Kelasi School Admin", softWrap = false, overflow = TextOverflow.Ellipsis)
                 },
                 navigationIcon = {
                     Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
@@ -118,6 +119,7 @@ fun SystemAdminAppScreen(
                                         Text("Déconnexion")
                                     }
                                 },
+
                                 onClick = {
                                     showMenu = false
                                     onLogout()
@@ -132,24 +134,23 @@ fun SystemAdminAppScreen(
         NavigationSuiteScaffold(
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
-                Route.SystemAdmin.items.forEach { item ->
+                Route.SchoolAdmin.items.forEach { item ->
                     item(
                         selected = item == currentKey,
                         onClick = {
                             if (currentKey != item) {
                                 currentKey = item
-                                systemAdminBackStack.add(item)
+                                schoolAdminBackStack.add(item)
                             }
                         },
                         icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) },
-                        alwaysShowLabel = false
+                        label = { Text(item.label) }
                     )
                 }
             },
             layoutType = layoutType
         ) {
-            SystemAdminNavigation(systemAdminBackStack = systemAdminBackStack)
+            SchoolAdminNavigation(schoolAdminBackStack = schoolAdminBackStack)
         }
     }
 }
