@@ -1,9 +1,19 @@
 package com.drcmind.kelasisuite.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.Subject
+import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.Apartment
+import androidx.compose.material.icons.filled.Architecture
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ModelTraining
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Streetview
+import androidx.compose.material.icons.filled.Subject
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
@@ -30,39 +40,33 @@ sealed interface Route : NavKey {
     data object SystemAdmin : Route {
         @Serializable
         data object Dashboard : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Home
+            override val icon: ImageVector = Icons.Default.Dashboard
             override val label: String = "Tableau de bord"
-
-            @Serializable
-            data object Route1 : Route
-
-            @Serializable
-            data class Route2(val id: Int) : Route
-        }
-
-        @Serializable
-        data object Schools : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Person
-            override val label: String = "Profile"
         }
 
         @Serializable
         data object Curriculum : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Person
-            override val label: String = "Profile"
-
-            @Serializable
-            data object Route1 : Route
-
-            @Serializable
-            data class Route2(val id: Int) : Route
-
+            override val icon: ImageVector = Icons.Default.AccountTree
+            override val label: String = "Curriculum"
         }
 
         @Serializable
-        data object Profile : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Person
-            override val label: String = "Profile"
+        data object Subjects : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Filled.Book
+            override val label: String = "Subject"
+        }
+
+        @Serializable
+        data object Schools : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Apartment
+            override val label: String = "Schools"
+        }
+
+
+        @Serializable
+        data object Templates : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Architecture
+            override val label: String = "Templates"
         }
 
         @Serializable
@@ -71,7 +75,7 @@ sealed interface Route : NavKey {
             override val label: String = "Settings"
         }
 
-        val items = listOf(Dashboard, Schools, Curriculum, Profile, Settings)
+        val items = listOf(Dashboard,Curriculum, Subjects, Schools, Templates,  Settings)
 
         val stateSaver = Saver<NavigationBarRoute, String>(
             save = { it::class.qualifiedName ?: "" },

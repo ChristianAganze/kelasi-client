@@ -42,7 +42,6 @@ fun NavigationRoot(
             entry<Route.Auth> {
                 AuthScreen(
                     onAuthSuccess = {
-                        // Only add Home if it's not already the top route
                         if (rootBackStack.lastOrNull() != Route.SystemAdmin) {
                             rootBackStack.add(Route.SystemAdmin)
                         }
@@ -50,7 +49,9 @@ fun NavigationRoot(
                 )
             }
             entry<Route.SystemAdmin> {
-                SystemAdminAppScreen()
+                SystemAdminAppScreen(
+                    onLogout = {}
+                )
             }
             entry<Route.SchoolAdmin> {
                 SchoolAdminAppScreen()
