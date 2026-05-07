@@ -3,18 +3,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -25,15 +14,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.ui.components.AppColors
 import com.drcmind.kelasisuite.ui.components.AppIcons
 
 @Composable
@@ -57,7 +37,7 @@ fun HomeScreen(
     )
 
     Scaffold(
-        containerColor = AppColors.surfaceBackground,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopHeader(onBack, onAddClass)
         }
@@ -77,19 +57,19 @@ fun HomeScreen(
                     text = "ACADÉMIE",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
-                    color = AppColors.textSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Icon(
                     Icons.Default.ChevronRight,
                     null,
                     modifier = Modifier.size(12.dp),
-                    tint = AppColors.textIcon
+                    tint = MaterialTheme.colorScheme.outline
                 )
                 Text(
                     text = "GESTION DES CLASSES",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
-                    color = AppColors.primary
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -98,11 +78,11 @@ fun HomeScreen(
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Black,
                 letterSpacing = (-1.5).sp,
-                color = AppColors.textPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = "Gérez et organisez les sections académiques pour l'année 2024-2025.",
-                color = AppColors.textSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
 
@@ -137,14 +117,14 @@ fun TopHeader(onBack: () -> Unit, onAddClass: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
-            .background(AppColors.surfaceContainer)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             .padding(horizontal = 32.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, "Retour", tint = AppColors.primary)
+                Icon(Icons.Default.ArrowBack, "Retour", tint = MaterialTheme.colorScheme.primary)
             }
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -153,21 +133,21 @@ fun TopHeader(onBack: () -> Unit, onAddClass: () -> Unit) {
                 modifier = Modifier
                     .width(300.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(AppColors.surfaceInput)
-                    .border(1.dp, AppColors.surfaceBorder, RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Search,
                         null,
-                        tint = AppColors.textIcon,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Rechercher une classe...",
-                        color = AppColors.textPlaceholder,
+                        color = MaterialTheme.colorScheme.outline,
                         fontSize = 14.sp
                     )
                 }
@@ -178,8 +158,8 @@ fun TopHeader(onBack: () -> Unit, onAddClass: () -> Unit) {
             onClick = onAddClass,
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = AppColors.Button.primary,
-                contentColor = AppColors.Button.primaryText
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
         ) {
@@ -197,8 +177,8 @@ private fun AcademicClassCard(item: ClassItem, onClick: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
-            .border(1.dp, AppColors.surfaceBorder, RoundedCornerShape(24.dp)),
-        colors = CardDefaults.cardColors(containerColor = AppColors.surfaceContainer),
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(24.dp)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
@@ -207,24 +187,24 @@ private fun AcademicClassCard(item: ClassItem, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                // Icône Bento utilisant AppIcons
+                // Icône Bento
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .background(AppColors.surfaceContainerLow, RoundedCornerShape(12.dp)),
+                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = AppIcons.school,
                         contentDescription = null,
-                        tint = AppColors.primary,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(24.dp)
                     )
                 }
 
                 // Badge Catégorie
                 Surface(
-                    color = AppColors.secondaryContainer,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
@@ -232,7 +212,7 @@ private fun AcademicClassCard(item: ClassItem, onClick: () -> Unit) {
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        color = AppColors.textPrimary
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }
@@ -243,12 +223,12 @@ private fun AcademicClassCard(item: ClassItem, onClick: () -> Unit) {
                 text = item.title,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = AppColors.textPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = item.subtitle,
                 fontSize = 14.sp,
-                color = AppColors.textSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -263,22 +243,22 @@ private fun AcademicClassCard(item: ClassItem, onClick: () -> Unit) {
                         AppIcons.person,
                         null,
                         modifier = Modifier.size(14.dp),
-                        tint = AppColors.textIcon
+                        tint = MaterialTheme.colorScheme.outline
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${item.studentCount} Élèves",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AppColors.textTertiary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
                 Button(
                     onClick = onClick,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = AppColors.surfaceContainerLow,
-                        contentColor = AppColors.primary
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp)
@@ -298,7 +278,7 @@ fun AddClassEmptyCard(onClick: () -> Unit) {
             .height(240.dp)
             .clip(RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
-            .border(2.dp, AppColors.outlineVariant, RoundedCornerShape(24.dp))
+            .border(2.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(24.dp))
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -306,27 +286,26 @@ fun AddClassEmptyCard(onClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .border(1.dp, AppColors.textIcon, CircleShape),
+                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Add, null, tint = AppColors.textIcon)
+                Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.outline)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Créer une nouvelle classe",
                 fontWeight = FontWeight.Bold,
-                color = AppColors.textSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "SECTION 2024",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
-                color = AppColors.textPlaceholder
+                color = MaterialTheme.colorScheme.outline
             )
         }
     }
 }
-
 data class ClassItem(
     val id: Int,
     val title: String,

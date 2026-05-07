@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.drcmind.kelasisuite.di.commonModule
 import com.drcmind.kelasisuite.navigation.NavigationRoot
+import com.drcmind.kelasisuite.ui.theme.KelasiSuiteTheme
 
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
@@ -13,7 +14,7 @@ import org.koin.dsl.koinConfiguration
 @Preview
 fun App() {
     KoinApplication(configuration = koinConfiguration(declaration = { modules(commonModule()) }), content = {
-        MaterialTheme {
+        KelasiSuiteTheme {
             NavigationRoot()
         }
     })

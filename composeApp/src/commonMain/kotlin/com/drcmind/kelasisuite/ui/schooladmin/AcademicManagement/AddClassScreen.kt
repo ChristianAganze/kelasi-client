@@ -2,28 +2,11 @@ package com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.ui.components.AppColors
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.koinInject
 
@@ -49,7 +31,7 @@ fun AddClassScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppColors.surfaceBackground)
+            .background(MaterialTheme.colorScheme.surface) // Remplacé surfaceBackground
             .padding(48.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -125,12 +107,12 @@ private fun Header(onBack: () -> Unit) {
             onClick = onBack,
             modifier = Modifier
                 .size(44.dp)
-                .background(AppColors.surfaceContainer, RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Retour",
-                tint = AppColors.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -139,13 +121,13 @@ private fun Header(onBack: () -> Unit) {
                 text = "Ajouter une classe",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = AppColors.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Configurez les paramètres académiques pour la nouvelle promotion.",
                 fontSize = 16.sp,
-                color = AppColors.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -244,13 +226,13 @@ private fun CapacityBlock(capacity: Int, onSetCapacity: (Int) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
-                .background(AppColors.surfaceContainer)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(24.dp)
         ) {
             Text(
                 text = "Nombre de sièges disponibles",
                 fontSize = 14.sp,
-                color = AppColors.textSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(20.dp))
             Slider(
@@ -264,9 +246,9 @@ private fun CapacityBlock(capacity: Int, onSetCapacity: (Int) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "MIN : 10", fontSize = 12.sp, color = AppColors.textSecondary)
+                Text(text = "MIN : 10", fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
                 Text(text = "$capacity", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(text = "MAX : 60", fontSize = 12.sp, color = AppColors.textSecondary)
+                Text(text = "MAX : 60", fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
             }
         }
     }
@@ -281,15 +263,19 @@ private fun ActionsBlock(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = onCreate, enabled = !isLoading) {
+            Button(
+                onClick = onCreate,
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
                 Text(text = if (isLoading) "Création..." else "Créer la classe", fontWeight = FontWeight.SemiBold)
             }
             OutlinedButton(onClick = onCancel, enabled = !isLoading) {
-                Text(text = "Annuler", color = AppColors.onSurfaceVariant)
+                Text(text = "Annuler", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         if (!errorMessage.isNullOrBlank()) {
-            Text(text = errorMessage, color = AppColors.error, fontSize = 12.sp)
+            Text(text = errorMessage, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
         }
     }
 }
@@ -300,7 +286,7 @@ private fun PreviewPanel(state: AddClassState, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .background(AppColors.surfaceContainer)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -308,7 +294,7 @@ private fun PreviewPanel(state: AddClassState, modifier: Modifier = Modifier) {
             text = "Preview",
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = AppColors.textSecondary
+            color = MaterialTheme.colorScheme.onSecondaryContainer
         )
 
         Box(
@@ -316,7 +302,7 @@ private fun PreviewPanel(state: AddClassState, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(180.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(AppColors.surfaceContainerLow)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
         ) {
             Box(
                 modifier = Modifier
@@ -327,7 +313,7 @@ private fun PreviewPanel(state: AddClassState, modifier: Modifier = Modifier) {
                     text = "Classe 102 - ${state.selectedSection.name}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AppColors.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -336,16 +322,16 @@ private fun PreviewPanel(state: AddClassState, modifier: Modifier = Modifier) {
             text = "Section",
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            color = AppColors.textSecondary
+            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
         )
         Text(
             text = state.selectedSection.name,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
-            color = AppColors.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSecondaryContainer
         )
 
-        HorizontalDivider(color = AppColors.surfaceBorder)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         PreviewRow(label = "Option", value = when (state.selectedOption) {
             AcademicOption.MathPhysique -> "Math & Physique"
@@ -365,8 +351,8 @@ private fun PreviewRow(label: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, fontSize = 12.sp, color = AppColors.textSecondary)
-        Text(text = value, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        Text(text = label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f))
+        Text(text = value, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSecondaryContainer)
     }
 }
 
@@ -376,7 +362,7 @@ private fun SectionTitle(label: String) {
         text = label,
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold,
-        color = AppColors.onSurfaceVariant
+        color = MaterialTheme.colorScheme.onSurface
     )
 }
 
@@ -387,9 +373,9 @@ private fun AcademicSectionCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val background = if (isSelected) AppColors.primary else AppColors.surfaceContainer
-    val textColor = if (isSelected) Color.White else AppColors.onSurfaceVariant
-    val subtitleColor = if (isSelected) Color.White.copy(alpha = 0.8f) else AppColors.textSecondary
+    val background = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    val textColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val subtitleColor = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
 
     Column(
         modifier = Modifier
@@ -417,8 +403,8 @@ private fun AcademicOptionChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val background = if (selected) AppColors.primary else AppColors.surfaceContainer
-    val textColor = if (selected) Color.White else AppColors.onSurfaceVariant
+    val background = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    val textColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = Modifier

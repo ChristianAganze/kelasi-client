@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.ui.components.AppColors
 import com.drcmind.kelasisuite.ui.components.AppIcons
 
 @Composable
@@ -29,15 +28,15 @@ fun ClassDetailsScreen(
     onBack: () -> Unit
 ) {
     Scaffold(
-        containerColor = AppColors.surfaceBackground,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             DetailTopBar(onBack)
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* Action ajout */ },
-                containerColor = AppColors.Button.primary,
-                contentColor = AppColors.Button.primaryText,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Ajouter")
@@ -52,7 +51,7 @@ fun ClassDetailsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             contentPadding = PaddingValues(bottom = 32.dp, top = 16.dp)
         ) {
-            // 1. SECTION HERO (Bento Glass)
+            // 1. SECTION HERO (Bento)
             item {
                 ClassHeroSection()
             }
@@ -70,7 +69,7 @@ fun ClassDetailsScreen(
                     }
                     HorizontalDivider(
                         thickness = 1.dp,
-                        color = AppColors.surfaceBorder
+                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                 }
             }
@@ -86,14 +85,14 @@ fun ClassDetailsScreen(
                         text = "3 ÉLÈVES INSCRITS",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        color = AppColors.textSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         letterSpacing = 1.sp
                     )
                     Text(
                         text = "VOIR TOUT",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        color = AppColors.primary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -101,7 +100,7 @@ fun ClassDetailsScreen(
             // 4. LISTE DES ÉLÈVES
             items(sampleStudents) { student ->
                 StudentRowItem(student)
-                HorizontalDivider(thickness = 0.5.dp, color = AppColors.surfaceInput)
+                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.surfaceVariant)
             }
 
             // 5. BENTO GRID - VUE D'ENSEMBLE
@@ -110,7 +109,7 @@ fun ClassDetailsScreen(
                     text = "VUE D'ENSEMBLE",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
-                    color = AppColors.textSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
                 Row(
@@ -131,7 +130,7 @@ fun DetailTopBar(onBack: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
-            .background(AppColors.surfaceContainer.copy(alpha = 0.9f))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
             .padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -140,13 +139,13 @@ fun DetailTopBar(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable { onBack() }
         ) {
-            Icon(Icons.Default.ArrowBack, null, modifier = Modifier.size(20.dp), tint = AppColors.primary)
+            Icon(Icons.Default.ArrowBack, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 "Back to list",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = AppColors.textPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -155,8 +154,8 @@ fun DetailTopBar(onBack: () -> Unit) {
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(AppColors.surfaceContainerLow)
-                .border(1.dp, AppColors.surfaceBorder, CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
         )
     }
 }
@@ -167,8 +166,8 @@ fun ClassHeroSection() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .background(AppColors.surfaceContainer)
-            .border(1.dp, AppColors.surfaceBorder, RoundedCornerShape(32.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(32.dp))
             .padding(32.dp)
     ) {
         // Décoration d'arrière-plan
@@ -177,12 +176,12 @@ fun ClassHeroSection() {
                 .align(Alignment.TopEnd)
                 .offset(x = 30.dp, y = (-30).dp)
                 .size(120.dp)
-                .background(AppColors.surfaceBackground, CircleShape)
+                .background(MaterialTheme.colorScheme.surface, CircleShape)
         )
 
         Column {
             Surface(
-                color = AppColors.surfaceContainerLow,
+                color = MaterialTheme.colorScheme.primaryContainer,
                 shape = RoundedCornerShape(50.dp)
             ) {
                 Text(
@@ -190,7 +189,7 @@ fun ClassHeroSection() {
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
-                    color = AppColors.primary
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
@@ -202,7 +201,7 @@ fun ClassHeroSection() {
                 fontWeight = FontWeight.Black,
                 letterSpacing = (-1.5).sp,
                 lineHeight = 38.sp,
-                color = AppColors.textPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -219,8 +218,8 @@ fun ClassHeroSection() {
 @Composable
 fun HeroStat(label: String, value: String) {
     Column {
-        Text(label, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = AppColors.textSecondary)
-        Text(value, fontSize = 18.sp, fontWeight = FontWeight.Black, color = AppColors.textPrimary)
+        Text(label, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, fontSize = 18.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -238,29 +237,32 @@ fun StudentRowItem(student: Student) {
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(AppColors.surfaceInput),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(AppIcons.person, null, tint = AppColors.textIcon, modifier = Modifier.size(20.dp))
+                Icon(AppIcons.person, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(student.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimary)
-                Text("Student ID: ${student.id}", fontSize = 11.sp, color = AppColors.textSecondary)
+                Text(student.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("Student ID: ${student.id}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
+        val badgeColor = if(student.isActive) Color(0xFFE1FBEF) else MaterialTheme.colorScheme.errorContainer
+        val contentColor = if(student.isActive) Color(0xFF0E6245) else MaterialTheme.colorScheme.onErrorContainer
+
         Surface(
-            color = if(student.isActive) AppColors.textPlaceholder else AppColors.errorBackground,
+            color = badgeColor,
             shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(1.dp, if(student.isActive) AppColors.textIcon else AppColors.surfaceBorder)
+            border = BorderStroke(1.dp, contentColor.copy(alpha = 0.2f))
         ) {
             Text(
                 text = if(student.isActive) "ACTIVE" else "PROBATION",
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Black,
-                color = if(student.isActive) AppColors.sucess else AppColors.error
+                color = contentColor
             )
         }
     }
@@ -271,13 +273,13 @@ fun DailyPlanningCard(modifier: Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(24.dp))
-            .background(AppColors.primary)
+            .background(MaterialTheme.colorScheme.primary)
             .padding(24.dp)
     ) {
-        Icon(AppIcons.curriculum, null, tint = AppColors.onPrimary, modifier = Modifier.size(20.dp))
+        Icon(AppIcons.curriculum, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Planning", color = AppColors.onPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-        Text("08:00 - Chimie", color = AppColors.textPlaceholder, fontSize = 11.sp)
+        Text("Planning", color = MaterialTheme.colorScheme.onPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        Text("08:00 - Chimie", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f), fontSize = 11.sp)
     }
 }
 
@@ -286,14 +288,14 @@ fun TeacherMiniCard(modifier: Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(24.dp))
-            .border(1.dp, AppColors.surfaceBorder, RoundedCornerShape(24.dp))
-            .background(AppColors.surfaceContainer)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(24.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(24.dp)
     ) {
-        Icon(AppIcons.person, null, tint = AppColors.primary, modifier = Modifier.size(20.dp))
+        Icon(AppIcons.person, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Prof. Jean", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimary)
-        Text("Mathématiques", color = AppColors.textSecondary, fontSize = 11.sp)
+        Text("Prof. Jean", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        Text("Mathématiques", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
     }
 }
 
@@ -304,11 +306,11 @@ fun TabItem(text: String, active: Boolean) {
             text = text,
             fontSize = 13.sp,
             fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
-            color = if (active) AppColors.primary else AppColors.textSecondary
+            color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (active) {
             Spacer(modifier = Modifier.height(6.dp))
-            Box(modifier = Modifier.width(24.dp).height(2.dp).background(AppColors.primary))
+            Box(modifier = Modifier.width(24.dp).height(2.dp).background(MaterialTheme.colorScheme.primary))
         }
     }
 }

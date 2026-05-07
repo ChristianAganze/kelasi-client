@@ -3,22 +3,12 @@ package com.drcmind.kelasisuite.ui.schooladmin.Dashboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +20,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.ui.components.AppColors
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.koinInject
 
@@ -44,7 +33,7 @@ fun SchoolDashboardScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppColors.surfaceBackground)
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .padding(horizontal = 48.dp, vertical = 64.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -71,14 +60,14 @@ fun HeaderSection(username: String) {
             text = "Bienvenue, $username",
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
-            color = AppColors.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
             letterSpacing = (-0.5).sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Sélectionnez un module pour commencer la gestion de votre établissement.",
             fontSize = 16.sp,
-            color = AppColors.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -155,10 +144,9 @@ fun BentoCard(
     isDark: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    val backgroundColor = if (isDark) AppColors.primary else Color.White
-    val contentColor = if (isDark) Color.White else AppColors.onSurfaceVariant
-    val secondaryContentColor =
-        if (isDark) Color.White.copy(alpha = 0.7f) else AppColors.onSurfaceVariant
+    val backgroundColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer
+    val contentColor = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+    val secondaryContentColor = if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = modifier
@@ -166,7 +154,7 @@ fun BentoCard(
             .background(backgroundColor)
             .border(
                 width = 1.dp,
-                color = if (isDark) Color.Transparent else Color(0xFFE9EDFF),
+                color = if (isDark) Color.Transparent else MaterialTheme.colorScheme.outlineVariant,
                 shape = RoundedCornerShape(32.dp)
             )
             .clickable { onClick() }
@@ -182,7 +170,7 @@ fun BentoCard(
                     modifier = Modifier
                         .size(56.dp)
                         .background(
-                            color = if (isDark) Color.White.copy(alpha = 0.1f) else AppColors.surfaceContainerLow,
+                            color = if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.primaryContainer,
                             shape = RoundedCornerShape(16.dp)
                         ),
                     contentAlignment = Alignment.Center
@@ -190,7 +178,7 @@ fun BentoCard(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = contentColor,
+                        tint = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -198,7 +186,7 @@ fun BentoCard(
                 Icon(
                     imageVector = AppIcons.arrowFWD,
                     contentDescription = null,
-                    tint = if (isDark) Color.White.copy(alpha = 0.4f) else AppColors.outlineVariant,
+                    tint = if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -225,7 +213,11 @@ fun BentoCard(
 @Composable
 fun FooterSection(status: String, lastConnection: String) {
     Column {
-        HorizontalDivider(Modifier, thickness = 1.dp, color = Color(0xFFE9EDFF))
+        HorizontalDivider(
+            Modifier,
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
         Spacer(modifier = Modifier.height(24.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -238,7 +230,7 @@ fun FooterSection(status: String, lastConnection: String) {
                         text = "STATUS SYSTÈME",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AppColors.outlineVariant,
+                        color = MaterialTheme.colorScheme.outline,
                         letterSpacing = 1.sp
                     )
                     Row(
@@ -246,10 +238,16 @@ fun FooterSection(status: String, lastConnection: String) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Box(
-                            modifier = Modifier.size(6.dp)
-                                .background(Color(0xFF10B981), RoundedCornerShape(3.dp))
+                            modifier = Modifier
+                                .size(6.dp)
+                                .background(Color(0xFF10B981), CircleShape)
                         )
-                        Text(text = status, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        Text(
+                            text = status,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
                 Column {
@@ -257,17 +255,22 @@ fun FooterSection(status: String, lastConnection: String) {
                         text = "DERNIÈRE CONNEXION",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AppColors.outlineVariant,
+                        color = MaterialTheme.colorScheme.outline,
                         letterSpacing = 1.sp
                     )
-                    Text(text = lastConnection, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = lastConnection,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
 
             Text(
                 text = "© 2026 KELASI SUITE. DrcMind.",
                 fontSize = 10.sp,
-                color = AppColors.outlineVariant,
+                color = MaterialTheme.colorScheme.outline,
                 letterSpacing = 0.5.sp
             )
         }

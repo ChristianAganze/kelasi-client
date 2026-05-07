@@ -3,7 +3,6 @@ package com.drcmind.kelasisuite.ui.auth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,35 +15,45 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.domain.util.AdaptiveUtil
-import com.drcmind.kelasisuite.ui.components.AppColors
-import com.drcmind.kelasisuite.ui.components.AuthInputField
-import com.drcmind.kelasisuite.ui.components.PrimaryButton
-import org.koin.compose.koinInject
+import androidx.window.core.layout.WindowSizeClass
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AuthScreen(
     onAuthSuccess: (String) -> Unit,
-    viewModel: AuthViewModel = koinInject()
+    viewModel: AuthViewModel = koinViewModel()
 ) {
+
+    val adaptiveInfo = currentWindowAdaptiveInfoV2()
+    val isExpanded =
+        adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(state.authState) {
@@ -52,41 +61,32 @@ fun AuthScreen(
             onAuthSuccess((state.authState as AuthState.Success).role)
         }
     }
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val width = maxWidth
+    Surface(Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize()) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(AppColors.Surface.background), // Assure-toi que c'est un gris très clair/blanc
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.85f)
-                    .background(
-                        AppColors.Surface.container,
-                        RoundedCornerShape(32.dp)
-                    ),
+                    .fillMaxHeight(0.85f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AuthFormSection(
                     state = state,
-                    onEmailChange = viewModel::updateEmail,
-                    onPasswordChange = viewModel::updatePassword,
                     onRememberMeChange = viewModel::updateRememberMe,
                     onLogin = viewModel::login,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 48.dp)
+                    modifier = Modifier.weight(1f),
+                    isExpanded = isExpanded
                 )
-                if (!AdaptiveUtil.isCompact(width) && !AdaptiveUtil.isMedium(width)) {
+                if (isExpanded) {
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
                             .weight(1f)
                             .background(
-                                color = androidx.compose.ui.graphics.Color(0xFF0C0C0C), // visual-card-bg
+                                color = MaterialTheme.colorScheme.primary, // visual-card-bg
                                 shape = RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp)
                             )
                             .padding(48.dp)
@@ -101,7 +101,8 @@ fun AuthScreen(
 }
 
 @Composable
-fun VisualBrandingContent() {
+fun VisualBrandingContent(
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
@@ -112,15 +113,15 @@ fun VisualBrandingContent() {
                 modifier = Modifier
                     .size(24.dp)
                     .background(
-                        androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f),
+                        Color.White.copy(alpha = 0.2f),
                         RoundedCornerShape(50)
                     )
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 "Kelasi Suite",
-                color = AppColors.disabled,
-                fontSize = 14.sp
+                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
@@ -128,15 +129,14 @@ fun VisualBrandingContent() {
         Column {
             Text(
                 text = "Bienvenue chez Kelasi",
-                color = androidx.compose.ui.graphics.Color.White,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = MaterialTheme.typography.displayLargeEmphasized.fontSize,
                 lineHeight = 44.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Kelasi aide les institution scolaire et académique à s'organiser et digitaliser la gestion de leur établissement.",
-                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 18.sp
             )
 
@@ -147,16 +147,16 @@ fun VisualBrandingContent() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        androidx.compose.ui.graphics.Color.White.copy(alpha = 0.05f),
+                        Color.White.copy(alpha = 0.05f),
                         RoundedCornerShape(20.dp)
                     )
                     .padding(24.dp)
             ) {
                 Text(
                     "Trouvez votre rythme d'apprentissage dès maintenant",
-                    color = androidx.compose.ui.graphics.Color.White,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
         }
@@ -170,7 +170,7 @@ fun VisualBrandingContent() {
 
             Text(
                 "© 2026 DrcMind",
-                color = AppColors.disabled,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
                 fontSize = 12.sp
             )
             TextButton(
@@ -179,7 +179,7 @@ fun VisualBrandingContent() {
             ) {
                 Text(
                     "A propos",
-                    color = AppColors.disabled,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
                     fontSize = 12.sp
                 )
             }
@@ -190,19 +190,32 @@ fun VisualBrandingContent() {
 @Composable
 fun AuthFormSection(
     state: AuthViewModelState,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
     onRememberMeChange: (Boolean) -> Unit,
-    onLogin: () -> Unit,
-    modifier: Modifier = Modifier
+    onLogin: (email: String, password: String) -> Unit,
+    modifier: Modifier = Modifier,
+    isExpanded: Boolean = false
 ) {
+
     Column(
         modifier = modifier
-            .background(AppColors.Surface.container, RoundedCornerShape(24.dp))
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.surfaceContainerHighest,
+                RoundedCornerShape(
+                    topStart = 32.dp,
+                    bottomStart = 32.dp,
+                    topEnd = if (!isExpanded) 32.dp else 0.dp,
+                    bottomEnd = if (!isExpanded) 32.dp else 0.dp
+                )
+            )
             .padding(32.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Center
     ) {
+
+        val emailState = rememberTextFieldState("")
+        val passwordState = rememberTextFieldState("")
+
         // Logo Section
         Row(
             modifier = Modifier
@@ -213,14 +226,17 @@ fun AuthFormSection(
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .background(AppColors.primary, RoundedCornerShape(6.dp)),
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.shapes.small
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "K",
-                    color = AppColors.onPrimary,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -228,7 +244,6 @@ fun AuthFormSection(
                 text = "Kelasi",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = AppColors.primary,
                 letterSpacing = (-0.5).sp
             )
         }
@@ -238,54 +253,50 @@ fun AuthFormSection(
             text = "Connexion",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = AppColors.surfaceContent,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Text(
             text = "Veuillez entrer vos coordonnées pour accéder à votre compte.",
             fontSize = 14.sp,
-            color = AppColors.Text.secondary,
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
         // Email Input
-        AuthInputField(
-            value = state.email,
-            onValueChange = onEmailChange,
-            label = "Adresse e-mail",
-            placeholder = "nom@exemple.com",
-            icon = Icons.Default.Mail,
-            isError = state.emailError != null,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
 
+        OutlinedTextField(
+            state = emailState,
+            label = { Text("Adresse e-mail") },
+            placeholder = { Text("nom@exemple.com") },
+            leadingIcon = { Icon(Icons.Default.Mail, contentDescription = "Email") },
+            isError = state.emailError != null,
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
+        )
         if (state.emailError != null) {
             Text(
                 text = state.emailError,
                 fontSize = 12.sp,
-                color = AppColors.error,
+                color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
 
-        // Password Input
-        AuthInputField(
-            value = state.password,
-            onValueChange = onPasswordChange,
-            label = "Mot de passe",
-            placeholder = "••••••••",
-            icon = Icons.Default.Lock,
-            isPassword = true,
+        OutlinedSecureTextField(
+            state = passwordState,
+            label = { Text("Password") },
+            placeholder = { Text("••••••••") },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
             isError = state.passwordError != null,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
+
         )
 
         if (state.passwordError != null) {
             Text(
                 text = state.passwordError,
-                fontSize = 12.sp,
-                color = AppColors.error,
+                color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -304,27 +315,17 @@ fun AuthFormSection(
                 Checkbox(
                     checked = state.rememberMe,
                     onCheckedChange = onRememberMeChange,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = AppColors.primary,
-                        uncheckedColor = AppColors.Text.secondary
-                    ),
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Se souvenir de moi",
-                    fontSize = 14.sp,
-                    color = AppColors.Text.tertiary
-                )
+                Text(text = "Se souvenir de moi")
             }
             TextButton(
                 onClick = {}
             ) {
                 Text(
                     text = "Mot de passe oublié ?",
-                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = AppColors.Text.disabled,
                     modifier = Modifier
                 )
             }
@@ -335,26 +336,33 @@ fun AuthFormSection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(AppColors.errorBackground, RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(8.dp))
                     .padding(12.dp)
                     .padding(bottom = 16.dp)
             ) {
                 Text(
                     text = state.authState.message,
                     fontSize = 14.sp,
-                    color = AppColors.error
+                    color = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
         }
 
         // Login Button
-        PrimaryButton(
-            text = "Se connecter",
-            isLoading = state.authState is AuthState.Loading,
-            onClick = onLogin,
-            modifier = Modifier.padding(bottom = 20.dp)
-        )
-
-
+        Button(
+            onClick = { onLogin(emailState.text.toString(), passwordState.text.toString()) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (state.authState is AuthState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Se connecter")
+            }
+        }
     }
 }
