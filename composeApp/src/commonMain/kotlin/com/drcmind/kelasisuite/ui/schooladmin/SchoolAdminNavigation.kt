@@ -11,12 +11,15 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardScreen
+import com.drcmind.kelasisuite.ui.schooladmin.Students.AddStudentScreen
+import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentsViewModel
 
 @Composable
 fun SchoolAdminNavigation(
     modifier: Modifier = Modifier,
-    schoolAdminBackStack : NavBackStack<NavKey>
-){
+    schoolAdminBackStack: NavBackStack<NavKey>
+) {
     NavDisplay(
         modifier = modifier,
         backStack = schoolAdminBackStack,
@@ -31,8 +34,35 @@ fun SchoolAdminNavigation(
             entry<Route.SchoolAdmin.Academics> {
                 Text("Affaires académiques")
             }
+
             entry<Route.SchoolAdmin.Students> {
-                Text("Elèves")
+                StudentsScreen(
+                    viewModel = StudentsViewModel(),
+                    onBack = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    },
+                    onNavigateToAddStudent = {
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent)
+                    },
+                )
+            }
+
+            entry<Route.SchoolAdmin.AddStudent> {
+                AddStudentScreen(
+                    onBack = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    },
+
+                    onConfirm = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    }
+                )
             }
 
             entry<Route.SchoolAdmin.Parents> {

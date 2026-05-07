@@ -85,6 +85,10 @@ fun SchoolAdminAppScreen(
                         Route.SchoolAdmin.Settings::class,
                         Route.SchoolAdmin.Settings.serializer()
                     )
+                    subclass(
+                        Route.SchoolAdmin.AddStudent::class,
+                        Route.SchoolAdmin.AddStudent.serializer()
+                    )
                 }
             }
         },
@@ -167,6 +171,7 @@ fun SchoolAdminAppScreen(
         }
     ) { innerPadding ->
         NavigationSuiteScaffold(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
                 Route.SchoolAdmin.items.forEach { item ->

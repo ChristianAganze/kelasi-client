@@ -3,10 +3,10 @@ package com.drcmind.kelasisuite.di
 import com.drcmind.kelasisuite.AppViewModel
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
-import com.drcmind.kelasisuite.data.datasource.remote.AuthAPIService
-import com.drcmind.kelasisuite.data.datasource.remote.AuthAPIServiceImpl
-import com.drcmind.kelasisuite.data.repository.AuthRepository
-import com.drcmind.kelasisuite.data.repository.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.datasource.remote.Auth.AuthAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.Auth.AuthAPIServiceImpl
+import com.drcmind.kelasisuite.data.repository.Auth.AuthRepository
+import com.drcmind.kelasisuite.data.repository.Auth.AuthRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardViewModel

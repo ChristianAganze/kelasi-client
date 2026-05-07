@@ -135,6 +135,7 @@ fun BentoGrid(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BentoCard(
     title: String,
@@ -144,18 +145,21 @@ fun BentoCard(
     isDark: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    val backgroundColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer
-    val contentColor = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-    val secondaryContentColor = if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val backgroundColor =
+        if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer
+    val contentColor =
+        if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+    val secondaryContentColor =
+        if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(32.dp))
+            .clip(MaterialTheme.shapes.extraExtraLarge)
             .background(backgroundColor)
             .border(
                 width = 1.dp,
                 color = if (isDark) Color.Transparent else MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(32.dp)
+                shape = MaterialTheme.shapes.extraExtraLarge
             )
             .clickable { onClick() }
             .padding(32.dp)
