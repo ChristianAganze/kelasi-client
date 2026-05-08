@@ -1,7 +1,9 @@
 package com.drcmind.kelasisuite.data.datasource.local.settings
 
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_ROLE
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_SCHOOL_ID
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_TOKEN
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_USER_ID
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_USERNAME
 import com.drcmind.kelasisuite.domain.model.JwtPayload
 import com.drcmind.kelasisuite.domain.model.UserInfo
@@ -13,19 +15,23 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
-    override fun saveUserInfo(token: String, username: String, role : String) {
-        println("SettingsStorageImpl: Saving userinfo - Token: [HIDDEN], Username: $username, Role: $role")
+    override fun saveUserInfo(token: String, username: String, role : String, userId: Long?, schoolId: Long?) {
+        println("SettingsStorageImpl: Saving userinfo - Token: [HIDDEN], Username: $username, Role: $role, UserId: $userId, SchoolId: $schoolId")
         settings.putString(KEY_TOKEN, token)
         settings.putString(KEY_USERNAME, username)
         settings.putString(KEY_ROLE, role)
+        if (userId != null) settings.putLong(KEY_USER_ID, userId)
+        if (schoolId != null) settings.putLong(KEY_SCHOOL_ID, schoolId)
     }
 
     override fun getUserInfo(): UserInfo {
         val storedToken = settings.getStringOrNull(KEY_TOKEN)
         val storedUsername = settings.getString(KEY_USERNAME, "Utilisateur")
         val storedRole = settings.getString(KEY_ROLE, "Role")
-        println("SettingsStorageImpl: Retrieved UserInfo - Token: ${if (storedToken != null) "Exists" else "Null"}, Username: $storedUsername, Role: $storedRole")
-        return UserInfo(storedToken,storedUsername, storedRole)
+        val storedUserId = settings.getLongOrNull(KEY_USER_ID)
+        val storedSchoolId = settings.getLongOrNull(KEY_SCHOOL_ID)
+        println("SettingsStorageImpl: Retrieved UserInfo - Token: ${if (storedToken != null) "Exists" else "Null"}, Username: $storedUsername, Role: $storedRole, UserId: $storedUserId, SchoolId: $storedSchoolId")
+        return UserInfo(storedToken, storedUsername, storedRole, storedUserId, storedSchoolId)
     }
 
     override fun getToken(): String? {
@@ -39,6 +45,8 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
         settings.remove(KEY_TOKEN)
         settings.remove(KEY_USERNAME)
         settings.remove(KEY_ROLE)
+        settings.remove(KEY_USER_ID)
+        settings.remove(KEY_SCHOOL_ID)
     }
 
     override fun isTokenExpired(): Boolean {

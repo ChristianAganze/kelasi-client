@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
 interface SettingsStorage {
-    fun saveUserInfo(token: String, username: String, role: String)
+    fun saveUserInfo(token: String, username: String, role: String, userId: Long? = null, schoolId: Long? = null)
     fun getUserInfo(): UserInfo
     fun getToken(): String?
     fun clearUserInfo()

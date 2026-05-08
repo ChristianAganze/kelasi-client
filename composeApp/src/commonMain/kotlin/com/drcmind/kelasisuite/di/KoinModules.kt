@@ -5,12 +5,16 @@ import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
 import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.profile.ProfileAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.profile.ProfileAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIServiceImpl
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.profile.ProfileRepository
+import com.drcmind.kelasisuite.data.repository.profile.ProfileRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
@@ -20,6 +24,7 @@ import com.drcmind.kelasisuite.ui.auth.AuthViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AddClassViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.ClassesViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsViewModel
@@ -56,6 +61,7 @@ val networkModule = module {
     single<AuthAPIService> { AuthAPIServiceImpl(get()) }
     single<StudentsAPIService> { StudentsAPIServiceImpl(get()) }
     single<SchoolsAPIService> { SchoolsAPIServiceImpl(get()) }
+    single<ProfileAPIService> { ProfileAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -66,9 +72,10 @@ val localStorageModule = module {
 }
 
 val repositoryModule = module {
-    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get(),get()) }
     single<StudentsRepository> { StudentsRepositoryImpl(get()) }
     single<SchoolRepository> { SchoolRepositoryImpl(get()) }
+    single<ProfileRepository> { ProfileRepositoryImpl(get()) }
 }
 
 val viewModelModule = module {
@@ -80,6 +87,7 @@ val viewModelModule = module {
     viewModelOf(::StudentDetailViewModel)
     viewModelOf(::AddClassViewModel)
     viewModelOf(::ClassesViewModel)
+    viewModelOf(::ProfileViewModel)
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {

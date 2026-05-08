@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.academicManagement
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.domain.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.domain.util.Resource
@@ -12,15 +13,18 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 class ClassesViewModel(
-    private val schoolRepository: SchoolRepository
+    private val schoolRepository: SchoolRepository,
+    private val settingsStorage: SettingsStorage
 ) : ViewModel() {
     private val _state = MutableStateFlow(ClassesState())
     val state: StateFlow<ClassesState> = _state.asStateFlow()
 
-    private val schoolId: Long = 1 // Placeholder
+    private val schoolId: Long = settingsStorage.getUserInfo().schoolId ?: -1L
 
     init {
-        loadClasses()
+        if (schoolId != -1L) {
+            loadClasses()
+        }
     }
 
     fun loadClasses() {

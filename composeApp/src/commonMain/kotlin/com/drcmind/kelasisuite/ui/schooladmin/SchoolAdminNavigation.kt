@@ -13,6 +13,7 @@ import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AcademicManagementScreen
 import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AddClassScreen
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardScreen
+import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsScreen
@@ -66,6 +67,10 @@ fun SchoolAdminNavigation(
             entry<Route.SchoolAdmin.ClassDetail> { key ->
                 // Placeholder for ClassDetailScreen
                 Text("Détails de la classe ${key.classId}")
+            }
+
+            entry<Route.SchoolAdmin.Profile> {
+                ProfileScreen()
             }
 
             entry<Route.SchoolAdmin.Students> {

@@ -48,8 +48,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun StudentsScreen(
     viewModel: StudentsViewModel = koinViewModel(),
-    onBack: () -> Unit,
-    onNavigateToAddStudent: () -> Unit, // Ajoute ce paramètre pour la navigation
+    onNavigateToAddStudent: () -> Unit,
     onNavigateToStudentDetail: (Long) -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()

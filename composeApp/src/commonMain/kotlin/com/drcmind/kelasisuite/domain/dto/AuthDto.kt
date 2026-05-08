@@ -9,3 +9,12 @@ data class LoginRequest(val username: String, val password: String)
 data class LoginResponse(
     val token: String, val username: String, val roles: List<String>
 )
+
+@Serializable
+data class UserResponseDTO(
+    val id: Long,
+    val username: String,
+    val email: String,
+    val roles: List<String>,
+    val schoolId: Long? = null
+)

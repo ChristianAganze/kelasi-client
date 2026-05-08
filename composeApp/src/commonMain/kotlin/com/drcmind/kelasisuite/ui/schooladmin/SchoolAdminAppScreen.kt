@@ -89,6 +89,10 @@ fun SchoolAdminAppScreen(
                         Route.SchoolAdmin.AddStudent::class,
                         Route.SchoolAdmin.AddStudent.serializer()
                     )
+                    subclass(
+                        Route.SchoolAdmin.Profile::class,
+                        Route.SchoolAdmin.Profile.serializer()
+                    )
                 }
             }
         },
@@ -147,6 +151,23 @@ fun SchoolAdminAppScreen(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false }
                         ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            Icons.Default.AccountCircle,
+                                            contentDescription = null
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Mon Profil")
+                                    }
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    schoolAdminBackStack.add(Route.SchoolAdmin.Profile)
+                                }
+                            )
+
                             DropdownMenuItem(
                                 text = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {

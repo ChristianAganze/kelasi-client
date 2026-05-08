@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.academicManagement
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.domain.dto.CreateClassFromTemplateRequest
 import com.drcmind.kelasisuite.domain.dto.SchoolSectionDTO
@@ -13,21 +14,23 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 class AddClassViewModel(
-    private val schoolRepository: SchoolRepository
+    private val schoolRepository: SchoolRepository,
+    private val settingsStorage: SettingsStorage
 ) : ViewModel() {
     private val _state = MutableStateFlow(AddClassState())
     val state: StateFlow<AddClassState> = _state.asStateFlow()
 
-    // Assuming a hardcoded schoolId for now, ideally this comes from session/settings
-    private val schoolId: Long = 1
+    private val schoolId: Long = settingsStorage.getUserInfo().schoolId ?: -1L
 
     init {
-        loadSections()
+        if (schoolId != -1L) {
+            loadSections()
+        } else {
+            _state.value = _state.value.copy(errorMessage = "Identifiant d'école manquant")
+        }
     }
 
     fun loadClassDetails(classId: Long) {
-        // In a real app, we'd fetch the class details from the repository
-        // and update the state. For now, assuming we might already have it or fetch it.
         _state.value = _state.value.copy(isLoading = true)
         schoolRepository.getClasses(schoolId).onEach { resource ->
             if (resource is Resource.Success) {
