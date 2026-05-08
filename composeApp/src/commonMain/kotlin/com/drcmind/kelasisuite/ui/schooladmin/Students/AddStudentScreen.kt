@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +26,6 @@ import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -72,7 +70,6 @@ fun AddStudentScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
-
         topBar = {
             TopAppBar(
                 title = {
@@ -108,7 +105,7 @@ fun AddStudentScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Inscrire un Élève",
+                        "Ajouter un Élève",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -280,7 +277,7 @@ fun AddStudentScreen(
                                     )
                                     Spacer(Modifier.width(8.dp))
                                     Text(
-                                        "INSCRIRE L'ÉLÈVE",
+                                        "AJOUTER L'ÉLÈVE",
                                         fontWeight = FontWeight.Black,
                                         fontSize = 12.sp
                                     )

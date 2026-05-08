@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlin.time.Clock
 
 class AddStudentViewModel(
     private val studentsRepository: StudentsRepository
@@ -43,20 +45,13 @@ class AddStudentViewModel(
         _state.value = _state.value.copy(address = value)
     }
 
-    fun onStudentIdNumberChange(value: String) {
-        _state.value = _state.value.copy(studentIdNumber = value)
-    }
-
-    fun onSernieNumberChange(value: String) {
-        _state.value = _state.value.copy(sernieNumber = value)
-    }
-
     fun createStudent() {
         val currentState = _state.value
-        
+
         // Basic validation
-        if (currentState.lastName.isBlank() || currentState.firstName.isBlank()) {
-            _state.value = currentState.copy(error = "Le nom et le prénom sont obligatoires")
+        if (currentState.lastName.isBlank() || currentState.firstName.isBlank() || currentState.dateOfBirth.isBlank() || currentState.address.isBlank()) {
+            _state.value =
+                currentState.copy(error = "Le nom, prénom, date de naissance et adresse sont obligatoires")
             return
         }
 
@@ -85,12 +80,15 @@ class AddStudentViewModel(
                 is Resource.Loading -> {
                     _state.value = _state.value.copy(isLoading = true, error = null)
                 }
+
                 is Resource.Success -> {
                     _state.value = _state.value.copy(isLoading = false, isSuccess = true)
                 }
+
                 is Resource.Error -> {
                     _state.value = _state.value.copy(isLoading = false, error = resource.message)
                 }
+
                 else -> Unit
             }
         }.launchIn(viewModelScope)
@@ -104,8 +102,12 @@ data class AddStudentState(
     val religion: String = "",
     val previousSchool: String = "",
     val address: String = "",
-    val studentIdNumber: String = "STU-${(100..999).random()}",
-    val sernieNumber: String = "SER-${(100..999).random()}",
+    val studentIdNumber: String = "STU-${(100..999).random()}-${
+        Clock.System.now().toEpochMilliseconds()
+    }",
+    val sernieNumber: String = "SER-${(100..999).random()}-${
+        Clock.System.now().toEpochMilliseconds()
+    }",
     val isLoading: Boolean = false,
     val error: String? = null,
     val isSuccess: Boolean = false
