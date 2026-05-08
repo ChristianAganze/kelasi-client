@@ -75,11 +75,7 @@ fun SchoolAdminNavigation(
 
             entry<Route.SchoolAdmin.Students> {
                 StudentsScreen(
-                    onBack = {
-                        if (schoolAdminBackStack.size > 1) {
-                            schoolAdminBackStack.removeLast()
-                        }
-                    },
+
                     onNavigateToAddStudent = {
                         schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent)
                     },

@@ -85,7 +85,6 @@ fun ProfileScreen(
         }
     }
 }
-
 @Composable
 fun ProfileContent(user: UserDTO, school: SchoolDTO) {
     Column(
@@ -95,7 +94,7 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
             .padding(32.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
-        // Page Header
+        // En-tête de la page
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -103,26 +102,17 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
         ) {
             Column {
                 Text(
-                    text = "School Profile",
+                    text = "Profil de l'école",
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Manage and view official educational establishment details.",
+                    text = "Gérez les informations de votre établissement scolaire.",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(
-                    onClick = { },
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-                ) {
-                    Icon(Icons.Default.Print, null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text("Export Dossier", fontWeight = FontWeight.Bold)
-                }
                 Button(
                     onClick = { },
                     shape = RoundedCornerShape(12.dp),
@@ -130,7 +120,7 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                 ) {
                     Icon(Icons.Default.Edit, null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Update Information", fontWeight = FontWeight.Bold)
+                    Text("Modifier", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -141,17 +131,20 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // Left Column
+            // Colonne Gauche
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Admin Profile Card
+                // Carte Profil Administrateur
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = MaterialTheme.shapes.extraLarge,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(32.dp),
@@ -161,10 +154,10 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                             Box(
                                 modifier = Modifier
                                     .size(128.dp)
-                                    .clip(RoundedCornerShape(24.dp))
+                                    .clip(MaterialTheme.shapes.extraLarge)
                                     .background(MaterialTheme.colorScheme.surfaceVariant)
                             ) {
-                                // Placeholder for profile image
+                                // Emplacement pour l'image de profil
                                 Icon(
                                     imageVector = Icons.Default.Verified,
                                     contentDescription = null,
@@ -182,7 +175,7 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                                     Icons.Default.Verified,
                                     null,
                                     modifier = Modifier.size(16.dp).padding(2.dp),
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.surface
                                 )
                             }
                         }
@@ -194,7 +187,7 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = user.email ?: "no-email@kelasi.com",
+                            text = user.email ?: "nom@ecole.com",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -208,11 +201,14 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(Modifier.size(8.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
+                                Box(
+                                    Modifier.size(8.dp)
+                                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = user.roles.firstOrNull()?.uppercase() ?: "ADMIN",
-                                    style = MaterialTheme.typography.labelSmall,
+                                    text = user.roles.firstOrNull()?.uppercase() ?: "--",
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.sp
                                 )
@@ -220,53 +216,82 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                         }
 
                         Spacer(Modifier.height(32.dp))
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(
+                                alpha = 0.3f
+                            )
+                        )
                         Spacer(Modifier.height(32.dp))
 
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            StatMiniCard(label = "Status", value = if (user.isActive) "Connected" else "Offline", modifier = Modifier.weight(1f))
-                            StatMiniCard(label = "Last Sync", value = "2h ago", modifier = Modifier.weight(1f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            StatMiniCard(
+                                label = "Statut",
+                                value = if (user.isActive) "Connecté" else "Hors-ligne",
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatMiniCard(
+                                label = "Dernière Sync",
+                                value = "--",
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
 
-                // Map Placeholder
+                // Emplacement Carte (Map)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(256.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color.Black)
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .background(MaterialTheme.colorScheme.primary)
                 ) {
-                    // Image would go here
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)))
                     Column(
                         modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)
                     ) {
-                        Text("Location", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.6f), fontWeight = FontWeight.Black)
-                        Text("${school.address.cityTerritory}, ${school.address.province}", style = MaterialTheme.typography.titleMedium, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(
+                            "Localisation",
+                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surfaceVariant),
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            "${school.address.cityTerritory}, ${school.address.province}",
+                            style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.surface),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                     Surface(
                         modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(Icons.Default.Map, null, modifier = Modifier.size(40.dp).padding(8.dp), tint = Color.Black)
+                        Icon(
+                            Icons.Default.Map,
+                            null,
+                            modifier = Modifier.size(40.dp).padding(8.dp),
+                            tint = MaterialTheme.colorScheme.surface
+                        )
                     }
                 }
             }
 
-            // Right Column
+            // Colonne Droite
             Column(
                 modifier = Modifier.weight(2f),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                // School Main Card
+                // Carte Principale de l'École
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = MaterialTheme.shapes.extraLarge,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
                 ) {
                     Column(modifier = Modifier.padding(32.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -277,50 +302,112 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                                     .background(MaterialTheme.colorScheme.primaryContainer),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.AccountBalance, null, modifier = Modifier.size(40.dp), tint = Color.White)
+                                Icon(
+                                    Icons.Default.AccountBalance,
+                                    null,
+                                    modifier = Modifier.size(40.dp),
+                                    tint = MaterialTheme.colorScheme.surface
+                                )
                             }
                             Spacer(Modifier.width(24.dp))
                             Column {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(school.officialName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        school.officialName,
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                     Spacer(Modifier.width(12.dp))
                                     Surface(
                                         color = Color(0xFFE6F4EA),
                                         shape = CircleShape,
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCEEAD6))
+                                        border = androidx.compose.foundation.BorderStroke(
+                                            1.dp,
+                                            if (school.isActive) Color(0xFFCEEAD6) else MaterialTheme.colorScheme.error
+                                        )
                                     ) {
                                         Row(
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 4.dp
+                                            ),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Box(Modifier.size(6.dp).background(Color(0xFF34A853), CircleShape))
+                                            Box(
+                                                Modifier.size(6.dp)
+                                                    .background(
+                                                        if (school.isActive) Color(0xFF34A853) else MaterialTheme.colorScheme.onError,
+                                                        CircleShape
+                                                    )
+                                            )
                                             Spacer(Modifier.width(6.dp))
-                                            Text("ACTIVE / AGRÉÉ", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF0D652D))
+                                            Text(
+                                                when (school.isActive) {
+                                                    true -> "ACTIF"
+                                                    false -> "INACTIF"
+                                                },
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Black,
+                                                color =
+                                                    if (school.isActive) Color(0xFF0D652D) else MaterialTheme.colorScheme.onError
+
+                                            )
                                         }
                                     }
                                 }
                                 Spacer(Modifier.height(8.dp))
                                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    IconText(Icons.Default.Tag, "ID: KLS-2024-001")
-                                    IconText(Icons.Default.Public, "${school.address.cityTerritory}, DRC")
+                                    IconText(Icons.Default.Tag, "Id. Nat. : ${school.nationalIdentificationNumber}")
+                                    IconText(
+                                        Icons.Default.Public,
+                                        school.address.province
+                                    )
                                 }
                             }
                         }
 
                         Spacer(Modifier.height(40.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Text("GENERAL INFO", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
-                                InfoRow("Legal Status", school.legalStatus)
-                                InfoRow("Authority", school.supervisoryAuthority)
-                                InfoRow("Nat. ID Number", school.nationalIdentificationNumber ?: "N/A")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(32.dp)
+                        ) {
+                            Column(
+                                Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Text(
+                                    "INFORMATIONS GÉNÉRALES",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 2.sp
+                                )
+                                InfoRow("Statut Juridique", school.legalStatus)
+                                InfoRow("Autorité de Tutelle", school.supervisoryAuthority)
+                                InfoRow(
+                                    "N° Identification Nat.",
+                                    school.nationalIdentificationNumber ?: "N/A"
+                                )
                             }
-                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Text("CONTACT DETAILS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
-                                InfoRow("Phone", school.phone ?: "N/A")
-                                InfoRow("Email", school.email ?: "N/A")
+                            Column(
+                                Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Text(
+                                    "COORDONNÉES DE CONTACT",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 2.sp
+                                )
+                                InfoRow("Téléphone", school.phone ?: "N/A")
+                                InfoRow("E-mail", school.email ?: "N/A")
                                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                                    Text("Address", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(
+                                        "Adresse",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     Text(
                                         text = "${school.address.streetAndNumber}, ${school.address.neighborhood}, ${school.address.cityTerritory}",
                                         style = MaterialTheme.typography.bodySmall,
@@ -333,36 +420,42 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                     }
                 }
 
-                // Bento Grid
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                // Bento Grid (Cartes de statistiques/certificats)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
                     BentoCard(
                         icon = Icons.Default.VerifiedUser,
-                        label = "Accreditation",
+                        label = "Agrément",
                         value = school.accreditationNumber,
                         modifier = Modifier.weight(1f)
                     )
                     BentoCard(
-                        icon = Icons.Default.Approval,
-                        label = "Approval Number",
-                        value = school.approvalNumber ?: "N/A",
-                        date = "12/03/2023",
+                        icon = Icons.Default.TaskAlt,
+                        label = "Autorisation",
+                        date = school.operatingAuthorizationDate.toString(),
                         isDark = true,
+                        value = school.operatingAuthorizationNumber ?: "N/A",
                         modifier = Modifier.weight(1f)
                     )
                     BentoCard(
-                        icon = Icons.Default.TaskAlt,
-                        label = "Authorization",
-                        value = school.operatingAuthorizationNumber ?: "N/A",
+                        icon = Icons.Default.Approval,
+                        label = "N° d'Approbation",
+                        value = school.approvalNumber ?: "N/A",
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                // Documents Card
+                // Carte des Documents
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = MaterialTheme.shapes.extraLarge,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
                 ) {
                     Column(modifier = Modifier.padding(32.dp)) {
                         Row(
@@ -370,23 +463,57 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Important Documents", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text(
+                                "Documents Importants",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
                             TextButton(onClick = { }) {
-                                Text("View All", fontWeight = FontWeight.Bold)
+                                Text("Voir Tout", fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.width(4.dp))
-                                Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(16.dp))
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowForward,
+                                    null,
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
                         }
 
                         Spacer(Modifier.height(32.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                DocumentItem(Icons.Default.Description, "School_Statutes_2024.pdf", "Legal Document • 2.4 MB", Modifier.weight(1f))
-                                DocumentItem(Icons.Default.HistoryEdu, "Operating_Permit.pdf", "Accreditation • 1.1 MB", Modifier.weight(1f))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                DocumentItem(
+                                    Icons.Default.Description,
+                                    "Statuts_Ecole_2024.pdf",
+                                    "Document Légal • 2.4 Mo",
+                                    Modifier.weight(1f)
+                                )
+                                DocumentItem(
+                                    Icons.Default.HistoryEdu,
+                                    "Permis_Exploitation.pdf",
+                                    "Agrément • 1.1 Mo",
+                                    Modifier.weight(1f)
+                                )
                             }
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                DocumentItem(Icons.Default.AssignmentTurnedIn, "Quality_Certification.pdf", "Academic • 3.8 MB", Modifier.weight(1f))
-                                DocumentItem(Icons.Default.AccountBalance, "Organogram_Structure.png", "Management • 0.9 MB", Modifier.weight(1f))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                DocumentItem(
+                                    Icons.Default.AssignmentTurnedIn,
+                                    "Certificat_Qualite.pdf",
+                                    "Académique • 3.8 Mo",
+                                    Modifier.weight(1f)
+                                )
+                                DocumentItem(
+                                    Icons.Default.AccountBalance,
+                                    "Organigramme_Structure.png",
+                                    "Gestion • 0.9 Mo",
+                                    Modifier.weight(1f)
+                                )
                             }
                         }
                     }
@@ -395,38 +522,63 @@ fun ProfileContent(user: UserDTO, school: SchoolDTO) {
         }
     }
 }
-
 @Composable
 fun StatMiniCard(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                RoundedCornerShape(16.dp)
+            )
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                RoundedCornerShape(16.dp)
+            )
             .padding(16.dp)
     ) {
-        Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
-        Text(value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+        Text(
+            label.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.outline,
+            fontWeight = FontWeight.Bold
+        )
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
 fun IconText(icon: ImageVector, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(
+            icon,
+            null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Spacer(Modifier.width(4.dp))
-        Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
 @Composable
 fun InfoRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).border(width = 0.dp, color = Color.Transparent).padding(bottom = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            .border(width = 0.dp, color = Color.Transparent).padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+        Text(
+            label,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
 }
@@ -444,36 +596,82 @@ fun BentoCard(
         modifier = modifier.height(160.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isDark) Color(0xFF1B1B1B) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.3f
+            )
         ),
-        border = if (isDark) null else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        border = if (isDark) null else androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
     ) {
-        Column(modifier = Modifier.padding(24.dp).fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-                Icon(icon, null, modifier = Modifier.size(32.dp), tint = if (isDark) Color.White else MaterialTheme.colorScheme.primary)
+        Column(
+            modifier = Modifier.padding(24.dp).fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    icon,
+                    null,
+                    modifier = Modifier.size(32.dp),
+                    tint = if (isDark) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
+                )
                 if (date != null) {
                     Surface(
-                        color = Color.White.copy(alpha = 0.1f),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(6.dp)
                     ) {
-                        Text(date, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelSmall, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(
+                            date,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.surface,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
             Column {
-                Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = if (isDark) Color.White.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface)
+                Text(
+                    label.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isDark) MaterialTheme.colorScheme.surface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    value,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isDark) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
 }
 
 @Composable
-fun DocumentItem(icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier) {
+fun DocumentItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                RoundedCornerShape(20.dp)
+            )
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                RoundedCornerShape(20.dp)
+            )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -484,14 +682,29 @@ fun DocumentItem(icon: ImageVector, title: String, subtitle: String, modifier: M
             shadowElevation = 2.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(icon, null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    icon,
+                    null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-            Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                fontWeight = FontWeight.Bold
+            )
         }
-        Icon(Icons.Default.Download, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.outline)
+        Icon(
+            Icons.Default.Download,
+            null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.outline
+        )
     }
 }
