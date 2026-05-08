@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.ui.schooladmin.Dashboard
+package com.drcmind.kelasisuite.ui.schooladmin.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

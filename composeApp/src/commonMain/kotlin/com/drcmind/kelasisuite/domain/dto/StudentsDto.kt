@@ -1,6 +1,6 @@
 package com.drcmind.kelasisuite.domain.dto
 
-import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentStatus
+import com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 

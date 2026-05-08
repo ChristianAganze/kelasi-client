@@ -17,11 +17,12 @@ import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.AddClassViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.Students.AddStudentViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentDetailViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentsViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AddClassViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.ClassesViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -78,6 +79,7 @@ val viewModelModule = module {
     viewModelOf(::AddStudentViewModel)
     viewModelOf(::StudentDetailViewModel)
     viewModelOf(::AddClassViewModel)
+    viewModelOf(::ClassesViewModel)
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {

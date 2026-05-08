@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.ui.schooladmin.Students
+package com.drcmind.kelasisuite.ui.schooladmin.students
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

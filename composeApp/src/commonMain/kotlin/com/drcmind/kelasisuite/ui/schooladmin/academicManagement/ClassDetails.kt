@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement
+package com.drcmind.kelasisuite.ui.schooladmin.academicManagement
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

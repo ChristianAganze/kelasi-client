@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.ui.schooladmin.Students
+package com.drcmind.kelasisuite.ui.schooladmin.students
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
