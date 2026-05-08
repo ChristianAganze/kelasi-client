@@ -5,10 +5,14 @@ import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
 import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIServiceImpl
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
+import com.drcmind.kelasisuite.data.repository.schools.SchoolRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
@@ -50,6 +54,7 @@ val networkModule = module {
     single { createKtorHttpClient(get()) }
     single<AuthAPIService> { AuthAPIServiceImpl(get()) }
     single<StudentsAPIService> { StudentsAPIServiceImpl(get()) }
+    single<SchoolsAPIService> { SchoolsAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -62,6 +67,7 @@ val localStorageModule = module {
 val repositoryModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<StudentsRepository> { StudentsRepositoryImpl(get()) }
+    single<SchoolRepository> { SchoolRepositoryImpl(get()) }
 }
 
 val viewModelModule = module {
