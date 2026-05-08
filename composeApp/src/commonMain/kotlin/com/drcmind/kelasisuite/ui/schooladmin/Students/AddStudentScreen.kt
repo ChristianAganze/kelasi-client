@@ -45,6 +45,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,13 +55,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddStudentScreen(
     onBack: () -> Unit,
-    onConfirm: () -> Unit
+    onStudentAdded: () -> Unit,
+    viewModel: AddStudentViewModel = koinViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
+
+    if (state.isSuccess) {
+        onStudentAdded()
+    }
+
     Scaffold(
         containerColor = Color.Transparent,
 
@@ -68,7 +78,6 @@ fun AddStudentScreen(
                 title = {
                     Text(
                         "Ajout d'un élève",
-
                         style = MaterialTheme.typography.titleLarge,
                     )
                 },
@@ -105,7 +114,7 @@ fun AddStudentScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        "Veuillez remplir les informations ci-dessous pour enregistrer officiellement le nouvel étudiant dans le système Kelasi.",
+                        "Veuillez remplir les informations ci-dessous pour enregistrer officiellement le nouvel étudiant dans le système.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -171,9 +180,9 @@ fun AddStudentScreen(
                             letterSpacing = 1.sp
                         )
                         Spacer(modifier = Modifier.height(32.dp))
-                        InfoTag(Icons.Default.Badge, "MATRICULE", "STU-001")
+                        InfoTag(Icons.Default.Badge, "MATRICULE", state.studentIdNumber)
                         Spacer(modifier = Modifier.height(12.dp))
-                        InfoTag(Icons.Default.AppRegistration, "SERNIE", "SER-001")
+                        InfoTag(Icons.Default.AppRegistration, "SERNIE", state.sernieNumber)
                     }
 
                     Column(
@@ -183,36 +192,67 @@ fun AddStudentScreen(
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            KelasiInputField("Nom", "ISHARA", Modifier.weight(1f))
-                            KelasiInputField("Prénom", "BYAMANA", Modifier.weight(1f))
+                            KelasiInputField(
+                                "Nom",
+                                state.lastName,
+                                placeHolderText = "Ex: BARAKA SHANGWE",
+                                Modifier.weight(1f),
+                                onValueChange = viewModel::onLastNameChange
+                            )
+                            KelasiInputField(
+                                "Prénom",
+                                state.firstName,
+                                placeHolderText = "Ex: John",
+                                Modifier.weight(1f),
+                                onValueChange = viewModel::onFirstNameChange
+                            )
                         }
 
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             KelasiInputField(
                                 "Date de naissance",
-                                "2010-05-10",
+                                state.dateOfBirth,
+                                placeHolderText = "Ex: 2010-05-10",
                                 Modifier.weight(1f),
-                                icon = Icons.Default.CalendarToday
+                                icon = Icons.Default.CalendarToday,
+                                onValueChange = viewModel::onDateOfBirthChange
                             )
                             KelasiInputField(
                                 "Religion",
-                                "Chrétien",
+                                state.religion,
+                                placeHolderText = "Ex: Catholique",
                                 Modifier.weight(1f),
-                                isDropdown = true
+                                isDropdown = false,
+                                onValueChange = viewModel::onReligionChange
                             )
                         }
 
-                        KelasiInputField("École de provenance", "KASALI")
-                        KelasiInputField("Adresse", "Kadutu, Kasali", singleLine = false)
+                        KelasiInputField(
+                            "École de provenance", state.previousSchool,
+                            placeHolderText = "Ex: CS Baraka",
+                            onValueChange = viewModel::onPreviousSchoolChange
+                        )
+                        KelasiInputField(
+                            "Adresse",
+                            state.address,
+                            placeHolderText = "Ex: Kadutu/Kasali",
+
+                            singleLine = false,
+                            onValueChange = viewModel::onAddressChange
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
+
+                        if (state.error != null) {
+                            Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                        }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            TextButton(onClick = { }) {
+                            TextButton(onClick = onBack) {
                                 Text(
                                     "ANNULER",
                                     color = MaterialTheme.colorScheme.outline,
@@ -221,7 +261,8 @@ fun AddStudentScreen(
                             }
                             Spacer(Modifier.width(16.dp))
                             Button(
-                                onClick = onConfirm,
+                                onClick = viewModel::createStudent,
+                                enabled = !state.isLoading,
                                 modifier = Modifier.height(52.dp).padding(horizontal = 16.dp),
                                 shape = MaterialTheme.shapes.large,
                                 colors = ButtonDefaults.buttonColors(
@@ -229,13 +270,21 @@ fun AddStudentScreen(
                                     contentColor = MaterialTheme.colorScheme.onPrimary
                                 )
                             ) {
-                                Icon(Icons.Default.HowToReg, null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    "INSCRIRE L'ÉLÈVE",
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 12.sp
-                                )
+                                if (state.isLoading) {
+                                    Text("CHARGEMENT...")
+                                } else {
+                                    Icon(
+                                        Icons.Default.HowToReg,
+                                        null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        "INSCRIRE L'ÉLÈVE",
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 12.sp
+                                    )
+                                }
                             }
                         }
                     }
@@ -251,10 +300,12 @@ fun AddStudentScreen(
 private fun KelasiInputField(
     label: String,
     value: String,
+    placeHolderText: String,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     isDropdown: Boolean = false,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    onValueChange: (String) -> Unit
 ) {
     Column(modifier = modifier) {
         Text(
@@ -266,10 +317,11 @@ private fun KelasiInputField(
         )
         OutlinedTextField(
             value = value,
-            onValueChange = {},
+            onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
             singleLine = singleLine,
+            placeholder = { Text(placeHolderText) },
             trailingIcon = {
                 if (isDropdown) Icon(Icons.Default.KeyboardArrowDown, null)
                 else if (icon != null) Icon(icon, null, modifier = Modifier.size(18.dp))

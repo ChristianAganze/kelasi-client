@@ -3,13 +3,21 @@ package com.drcmind.kelasisuite.di
 import com.drcmind.kelasisuite.AppViewModel
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
-import com.drcmind.kelasisuite.data.datasource.remote.Auth.AuthAPIService
-import com.drcmind.kelasisuite.data.datasource.remote.Auth.AuthAPIServiceImpl
-import com.drcmind.kelasisuite.data.repository.Auth.AuthRepository
-import com.drcmind.kelasisuite.data.repository.Auth.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIServiceImpl
+import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
+import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
+import com.drcmind.kelasisuite.data.repository.students.StudentsRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.AcademicManagement.AddClassViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.Students.AddStudentViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentDetailViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentsViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -41,6 +49,7 @@ expect val platformModule: Module
 val networkModule = module {
     single { createKtorHttpClient(get()) }
     single<AuthAPIService> { AuthAPIServiceImpl(get()) }
+    single<StudentsAPIService> { StudentsAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -52,15 +61,20 @@ val localStorageModule = module {
 
 val repositoryModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+    single<StudentsRepository> { StudentsRepositoryImpl(get()) }
 }
 
 val viewModelModule = module {
     viewModelOf(::AppViewModel)
     viewModelOf(::AuthViewModel)
     viewModelOf(::SchoolDashboardViewModel)
+    viewModelOf(::StudentsViewModel)
+    viewModelOf(::AddStudentViewModel)
+    viewModelOf(::StudentDetailViewModel)
+    viewModelOf(::AddClassViewModel)
 }
 
-private fun createKtorHttpClient(settingsStorage: SettingsStorage) : HttpClient {
+private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {
     return HttpClient {
         install(ContentNegotiation) {
             json(Json {

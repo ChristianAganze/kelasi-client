@@ -12,8 +12,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardScreen
 import com.drcmind.kelasisuite.ui.schooladmin.Students.AddStudentScreen
+import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentDetailScreen
 import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentsScreen
-import com.drcmind.kelasisuite.ui.schooladmin.Students.StudentsViewModel
 
 @Composable
 fun SchoolAdminNavigation(
@@ -37,7 +37,6 @@ fun SchoolAdminNavigation(
 
             entry<Route.SchoolAdmin.Students> {
                 StudentsScreen(
-                    viewModel = StudentsViewModel(),
                     onBack = {
                         if (schoolAdminBackStack.size > 1) {
                             schoolAdminBackStack.removeLast()
@@ -45,6 +44,9 @@ fun SchoolAdminNavigation(
                     },
                     onNavigateToAddStudent = {
                         schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent)
+                    },
+                    onNavigateToStudentDetail = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
                     },
                 )
             }
@@ -56,8 +58,18 @@ fun SchoolAdminNavigation(
                             schoolAdminBackStack.removeLast()
                         }
                     },
+                    onStudentAdded = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    }
+                )
+            }
 
-                    onConfirm = {
+            entry<Route.SchoolAdmin.StudentDetail> { key ->
+                StudentDetailScreen(
+                    studentId = key.studentId,
+                    onBack = {
                         if (schoolAdminBackStack.size > 1) {
                             schoolAdminBackStack.removeLast()
                         }

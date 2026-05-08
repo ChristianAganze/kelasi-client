@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -41,84 +42,91 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.drcmind.kelasisuite.ui.components.AppIcons
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentsScreen(
-    viewModel: StudentsViewModel = viewModel(),
+    viewModel: StudentsViewModel = koinViewModel(),
     onBack: () -> Unit,
-    onNavigateToAddStudent: () -> Unit // Ajoute ce paramètre pour la navigation
+    onNavigateToAddStudent: () -> Unit, // Ajoute ce paramètre pour la navigation
+    onNavigateToStudentDetail: (Long) -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp)
-        ) {
-            item {
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                item {
 
-                Column {
-                    Spacer(modifier = Modifier.height(64.dp))
-                    FlowRow(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column() {
-                            Text(
-                                text = "Gestion des Élèves",
-                                fontSize = 36.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                letterSpacing = (-0.5).sp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Gérez la base de données académique et les profils de vos élèves/étudiants.",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        ElevatedButton(
-                            colors = ButtonDefaults.buttonColors(),
-                            onClick = {
-                                onNavigateToAddStudent()
-                            }
+                    Column {
+                        Spacer(modifier = Modifier.height(64.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
+                            Column() {
+                                Text(
+                                    text = "Gestion des Élèves",
+                                    style = MaterialTheme.typography.displayLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    letterSpacing = (-0.5).sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Gérez la base de données académique et les profils de vos élèves/étudiants.",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                            Row(
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
+                            ElevatedButton(
+                                colors = ButtonDefaults.buttonColors(),
+                                onClick = {
+                                    onNavigateToAddStudent()
+                                }
                             ) {
-                                Icon(Icons.Default.Add, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Ajouter un élève")
+
+                                Row(
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Ajouter un élève")
+                                }
                             }
                         }
+
                     }
-
                 }
+
+                item {
+                    StatsGrid(uiState)
+                }
+
+                item {
+                    StudentTableCard(uiState.students, onNavigateToStudentDetail)
+                }
+
+
+
+                item { Spacer(modifier = Modifier.height(32.dp)) }
             }
-
-            item {
-                StatsGrid(uiState)
-            }
-
-            item {
-                StudentTableCard(uiState.students)
-            }
-
-
-
-            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
 }
@@ -177,7 +185,10 @@ fun StatCard(
 }
 
 @Composable
-fun StudentTableCard(students: List<StudentItem>) {
+fun StudentTableCard(
+    students: List<StudentItem>,
+    onNavigateToStudentDetail: (Long) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -222,22 +233,42 @@ fun StudentTableCard(students: List<StudentItem>) {
                 )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            when (students.isEmpty()) {
+                true -> Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(Modifier.height(15.dp))
 
-            students.forEach { student ->
-                StudentRow(student)
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
+                    Icon(AppIcons.peoples, contentDescription = null, Modifier.size(100.dp))
+                    Spacer(Modifier.height(10.dp))
+                    Text("Aucun élève/étudiant trouvé")
+                    Spacer(Modifier.height(20.dp))
+
+                };
+                false -> students.forEach { student ->
+                    StudentRow(student) {
+                        onNavigateToStudentDetail(student.id.toLong())
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                }
             }
+
         }
     }
 }
 
 @Composable
-fun StudentRow(student: StudentItem) {
+fun StudentRow(
+    student: StudentItem,
+    onClick: () -> Unit
+) {
     Box(
-        modifier = Modifier.clickable {}
+        modifier = Modifier.clickable { onClick() }
 
     ) {
 
@@ -259,7 +290,7 @@ fun StudentRow(student: StudentItem) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        student.email,
+                        student. dateOfBirth,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -274,7 +305,7 @@ fun StudentRow(student: StudentItem) {
 
             )
             Text(
-                student.gpa,
+                student.adress,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp).weight(1f),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Black

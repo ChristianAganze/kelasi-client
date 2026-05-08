@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.data.datasource.remote.Auth
+package com.drcmind.kelasisuite.data.datasource.remote.auth
 
 import com.drcmind.kelasisuite.domain.dto.LoginRequest
 import com.drcmind.kelasisuite.domain.dto.LoginResponse

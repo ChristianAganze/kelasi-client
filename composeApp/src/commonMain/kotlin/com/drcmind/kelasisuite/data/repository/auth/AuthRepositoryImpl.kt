@@ -1,7 +1,7 @@
-package com.drcmind.kelasisuite.data.repository.Auth
+package com.drcmind.kelasisuite.data.repository.auth
 
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
-import com.drcmind.kelasisuite.data.datasource.remote.Auth.AuthAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIService
 import com.drcmind.kelasisuite.domain.dto.LoginRequest
 import com.drcmind.kelasisuite.domain.dto.LoginResponse
 import com.drcmind.kelasisuite.domain.util.Resource

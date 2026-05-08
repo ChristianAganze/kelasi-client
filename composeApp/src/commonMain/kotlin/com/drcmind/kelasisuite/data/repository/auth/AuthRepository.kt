@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.data.repository.Auth
+package com.drcmind.kelasisuite.data.repository.auth
 
 import com.drcmind.kelasisuite.domain.dto.LoginRequest
 import com.drcmind.kelasisuite.domain.dto.LoginResponse

@@ -2,7 +2,7 @@ package com.drcmind.kelasisuite.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drcmind.kelasisuite.data.repository.Auth.AuthRepository
+import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.domain.dto.LoginRequest
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow

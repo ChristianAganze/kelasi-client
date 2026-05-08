@@ -2,12 +2,18 @@ package com.drcmind.kelasisuite.ui.schooladmin.Students
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
+import com.drcmind.kelasisuite.domain.dto.StudentDTO
+import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
-class StudentsViewModel : ViewModel() {
+class StudentsViewModel(
+    private val studentsRepository: StudentsRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(StudentUiState())
     val state: StateFlow<StudentUiState> = _state.asStateFlow()
 
@@ -15,37 +21,57 @@ class StudentsViewModel : ViewModel() {
         loadStudents()
     }
 
-    private fun loadStudents() {
-        viewModelScope.launch {
-            // Simulation d'un chargement API
-            val mockStudents = listOf(
-                StudentItem("1", "Jean-Baptiste Kim", "jb.kim@student.cd", "#KL-2023-0842", "3e Scientifique B", 0.94f, "Qu. Ndendere n°12", StudentStatus.ACTIVE),
-                StudentItem("2", "Sarah Mubiala", "s.mubiala@student.cd", "#KL-2023-0129", "3e Scientifique B", 0.72f, "Qu. Ndendere n°12", StudentStatus.PROBATION),
-                StudentItem("3", "Marc Bolongo", "m.bolongo@student.cd", "#KL-2022-0941", "3e Scientifique B", 0.98f, "Qu. Ndendere n°12", StudentStatus.ACTIVE),
-                StudentItem("4", "Marie-Ange Lelo", "ma.lelo@student.cd", "#KL-2023-0056", "3e Scientifique B", 0.00f, "N/A", StudentStatus.INACTIVE)
-            )
-            _state.value = _state.value.copy(students = mockStudents)
-        }
+    fun loadStudents() {
+        studentsRepository.getStudents(1).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> {
+                    _state.value = _state.value.copy(isLoading = true)
+                }
+
+                is Resource.Success -> {
+                    val students = resource.data?.map { it.toStudentItem() } ?: emptyList()
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        students = students,
+                        totalStudents = students.size // Or from API if available
+                    )
+                }
+
+                is Resource.Error -> {
+                    _state.value = _state.value.copy(isLoading = false)
+                    // Handle error (e.g., show snackbar)
+                }
+
+                else -> Unit
+            }
+        }.launchIn(viewModelScope)
     }
 
-    fun onAddStudent() { /* Logique d'ajout */ }
+    private fun StudentDTO.toStudentItem(): StudentItem {
+        return StudentItem(
+            id = id.toString(),
+            name = fullName,
+            matricule = studentIdNumber,
+            className = currentEnrollment?.className ?: "Non assigné",
+            adress = address
+                ?: "N/A", // Reusing GPA field as address for the table as per current UI
+            status = status,
+            dateOfBirth = dateOfBirth.toString()
+        )
+    }
+
+    fun onAddStudent() { /* Logique d'ajout */
+    }
 }
-
-
-
-
-
-
 
 
 data class StudentItem(
     val id: String,
     val name: String,
-    val email: String,
     val matricule: String,
     val className: String,
-    val attendance: Float, // 0.0f to 1.0f
-    val gpa: String,
+    val adress: String,
+    val dateOfBirth: String,
     val status: StudentStatus
 )
 
