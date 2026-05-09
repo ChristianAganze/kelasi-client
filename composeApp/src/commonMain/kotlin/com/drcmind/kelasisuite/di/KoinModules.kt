@@ -3,13 +3,31 @@ package com.drcmind.kelasisuite.di
 import com.drcmind.kelasisuite.AppViewModel
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
-import com.drcmind.kelasisuite.data.datasource.remote.AuthAPIService
-import com.drcmind.kelasisuite.data.datasource.remote.AuthAPIServiceImpl
-import com.drcmind.kelasisuite.data.repository.AuthRepository
-import com.drcmind.kelasisuite.data.repository.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.profile.ProfileAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.profile.ProfileAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIServiceImpl
+import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
+import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.profile.ProfileRepository
+import com.drcmind.kelasisuite.data.repository.profile.ProfileRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
+import com.drcmind.kelasisuite.data.repository.schools.SchoolRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
+import com.drcmind.kelasisuite.data.repository.students.StudentsRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.Dashboard.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AddClassViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.ClassesViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -41,6 +59,9 @@ expect val platformModule: Module
 val networkModule = module {
     single { createKtorHttpClient(get()) }
     single<AuthAPIService> { AuthAPIServiceImpl(get()) }
+    single<StudentsAPIService> { StudentsAPIServiceImpl(get()) }
+    single<SchoolsAPIService> { SchoolsAPIServiceImpl(get()) }
+    single<ProfileAPIService> { ProfileAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -51,16 +72,25 @@ val localStorageModule = module {
 }
 
 val repositoryModule = module {
-    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get(),get()) }
+    single<StudentsRepository> { StudentsRepositoryImpl(get()) }
+    single<SchoolRepository> { SchoolRepositoryImpl(get()) }
+    single<ProfileRepository> { ProfileRepositoryImpl(get()) }
 }
 
 val viewModelModule = module {
     viewModelOf(::AppViewModel)
     viewModelOf(::AuthViewModel)
     viewModelOf(::SchoolDashboardViewModel)
+    viewModelOf(::StudentsViewModel)
+    viewModelOf(::AddStudentViewModel)
+    viewModelOf(::StudentDetailViewModel)
+    viewModelOf(::AddClassViewModel)
+    viewModelOf(::ClassesViewModel)
+    viewModelOf(::ProfileViewModel)
 }
 
-private fun createKtorHttpClient(settingsStorage: SettingsStorage) : HttpClient {
+private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {
     return HttpClient {
         install(ContentNegotiation) {
             json(Json {

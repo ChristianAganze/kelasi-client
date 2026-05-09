@@ -1,5 +1,6 @@
 package com.drcmind.kelasisuite.ui.schooladmin
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -48,15 +49,50 @@ fun SchoolAdminAppScreen(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {
                 polymorphic(NavKey::class) {
-                    subclass(Route.SchoolAdmin.SchoolDashboard::class, Route.SchoolAdmin.SchoolDashboard.serializer())
-                    subclass(Route.SchoolAdmin.Academics::class, Route.SchoolAdmin.Academics.serializer())
-                    subclass(Route.SchoolAdmin.Students::class, Route.SchoolAdmin.Students.serializer())
-                    subclass(Route.SchoolAdmin.Parents::class, Route.SchoolAdmin.Parents.serializer())
-                    subclass(Route.SchoolAdmin.StaffHR::class, Route.SchoolAdmin.StaffHR.serializer())
-                    subclass(Route.SchoolAdmin.Finance::class, Route.SchoolAdmin.Finance.serializer())
-                    subclass(Route.SchoolAdmin.Logistics::class, Route.SchoolAdmin.Logistics.serializer())
-                    subclass(Route.SchoolAdmin.Communication::class, Route.SchoolAdmin.Communication.serializer())
-                    subclass(Route.SchoolAdmin.Settings::class, Route.SchoolAdmin.Settings.serializer())
+                    subclass(
+                        Route.SchoolAdmin.SchoolDashboard::class,
+                        Route.SchoolAdmin.SchoolDashboard.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Academics::class,
+                        Route.SchoolAdmin.Academics.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Students::class,
+                        Route.SchoolAdmin.Students.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Parents::class,
+                        Route.SchoolAdmin.Parents.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.StaffHR::class,
+                        Route.SchoolAdmin.StaffHR.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Finance::class,
+                        Route.SchoolAdmin.Finance.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Logistics::class,
+                        Route.SchoolAdmin.Logistics.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Communication::class,
+                        Route.SchoolAdmin.Communication.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Settings::class,
+                        Route.SchoolAdmin.Settings.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.AddStudent::class,
+                        Route.SchoolAdmin.AddStudent.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Profile::class,
+                        Route.SchoolAdmin.Profile.serializer()
+                    )
                 }
             }
         },
@@ -73,7 +109,11 @@ fun SchoolAdminAppScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Kelasi School Admin", softWrap = false, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        text = "Kelasi School Admin",
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 },
                 navigationIcon = {
                     Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
@@ -82,7 +122,7 @@ fun SchoolAdminAppScreen(
 
                 },
                 actions = {
-                    IconButton(onClick = {  }) {
+                    IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Notifications",
@@ -91,7 +131,7 @@ fun SchoolAdminAppScreen(
                     }
                     Box {
 
-                        IconButton(onClick = {  }) {
+                        IconButton(onClick = { }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Help,
                                 contentDescription = "Notifications",
@@ -114,7 +154,27 @@ fun SchoolAdminAppScreen(
                             DropdownMenuItem(
                                 text = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
+                                        Icon(
+                                            Icons.Default.AccountCircle,
+                                            contentDescription = null
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Mon Profil")
+                                    }
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    schoolAdminBackStack.add(Route.SchoolAdmin.Profile)
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.ExitToApp,
+                                            contentDescription = null
+                                        )
                                         Spacer(Modifier.width(8.dp))
                                         Text("Déconnexion")
                                     }
@@ -132,6 +192,7 @@ fun SchoolAdminAppScreen(
         }
     ) { innerPadding ->
         NavigationSuiteScaffold(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
                 Route.SchoolAdmin.items.forEach { item ->
@@ -145,6 +206,7 @@ fun SchoolAdminAppScreen(
                         },
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) }
+
                     )
                 }
             },

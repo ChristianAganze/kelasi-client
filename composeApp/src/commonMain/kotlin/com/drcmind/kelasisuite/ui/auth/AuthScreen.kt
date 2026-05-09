@@ -1,16 +1,35 @@
 package com.drcmind.kelasisuite.ui.auth
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,9 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.window.core.layout.WindowSizeClass
-import com.drcmind.kelasisuite.domain.util.AdaptiveUtil
-import com.drcmind.kelasisuite.ui.components.AppColors
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -36,7 +52,8 @@ fun AuthScreen(
 ) {
 
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    val isExpanded =
+        adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(state.authState) {
@@ -174,7 +191,7 @@ fun VisualBrandingContent(
 fun AuthFormSection(
     state: AuthViewModelState,
     onRememberMeChange: (Boolean) -> Unit,
-    onLogin: (email : String, password : String) -> Unit,
+    onLogin: (email: String, password: String) -> Unit,
     modifier: Modifier = Modifier,
     isExpanded: Boolean = false
 ) {
@@ -182,16 +199,18 @@ fun AuthFormSection(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest,
+            .background(
+                MaterialTheme.colorScheme.surfaceContainerHighest,
                 RoundedCornerShape(
                     topStart = 32.dp,
                     bottomStart = 32.dp,
-                    topEnd = if(!isExpanded) 32.dp else 0.dp,
-                    bottomEnd = if(!isExpanded) 32.dp else 0.dp
-                ))
+                    topEnd = if (!isExpanded) 32.dp else 0.dp,
+                    bottomEnd = if (!isExpanded) 32.dp else 0.dp
+                )
+            )
             .padding(32.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Center
     ) {
 
         val emailState = rememberTextFieldState("")
@@ -207,7 +226,10 @@ fun AuthFormSection(
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.small),
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.shapes.small
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -243,18 +265,19 @@ fun AuthFormSection(
         // Email Input
 
         OutlinedTextField(
-            state = emailState ,
+            state = emailState,
             label = { Text("Adresse e-mail") },
             placeholder = { Text("nom@exemple.com") },
             leadingIcon = { Icon(Icons.Default.Mail, contentDescription = "Email") },
             isError = state.emailError != null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
         )
         if (state.emailError != null) {
             Text(
                 text = state.emailError,
                 fontSize = 12.sp,
-                color = AppColors.error,
+                color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -265,13 +288,15 @@ fun AuthFormSection(
             placeholder = { Text("••••••••") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
             isError = state.passwordError != null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
+
         )
 
         if (state.passwordError != null) {
             Text(
                 text = state.passwordError,
-                color = AppColors.error,
+                color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -311,27 +336,30 @@ fun AuthFormSection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(AppColors.errorBackground, RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(8.dp))
                     .padding(12.dp)
                     .padding(bottom = 16.dp)
             ) {
                 Text(
                     text = state.authState.message,
                     fontSize = 14.sp,
-                    color = AppColors.error
+                    color = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
         }
 
         // Login Button
-        Button(onClick = { onLogin(emailState.text.toString(), passwordState.text.toString()) }, modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = { onLogin(emailState.text.toString(), passwordState.text.toString()) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             if (state.authState is AuthState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    color = AppColors.Button.primaryText,
+                    color = MaterialTheme.colorScheme.onSurface,
                     strokeWidth = 2.dp
                 )
-            }else{
+            } else {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = "Se connecter")
             }

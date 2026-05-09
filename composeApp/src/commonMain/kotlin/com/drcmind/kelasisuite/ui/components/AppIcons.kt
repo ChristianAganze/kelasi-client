@@ -4,9 +4,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Chat
 import androidx.compose.material.icons.rounded.Dashboard
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Person2
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.School
 
@@ -18,6 +20,7 @@ object AppIcons {
         val financial = Icons.Rounded.Payments
         val communication = Icons.Rounded.Chat
         val person = Icons.Rounded.Person
+        val peoples = Icons.Rounded.Groups
         val personAdd = Icons.Rounded.PersonAdd
         val school = Icons.Rounded.School
         val payments = Icons.Rounded.Payments

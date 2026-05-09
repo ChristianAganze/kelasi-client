@@ -3,6 +3,7 @@ package com.drcmind.kelasisuite
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
+import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.domain.model.UserRole
 import com.drcmind.kelasisuite.navigation.Route
 import kotlinx.coroutines.Job
@@ -14,7 +15,10 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-class AppViewModel(private val settingsStorage: SettingsStorage) : ViewModel() {
+class AppViewModel(
+    private val settingsStorage: SettingsStorage,
+    private val authRepository: AuthRepository
+) : ViewModel() {
     private val _navigationRouteState = MutableStateFlow<Route>(Route.Loading)
     val navigationState = _navigationRouteState.asStateFlow()
 
@@ -40,6 +44,9 @@ class AppViewModel(private val settingsStorage: SettingsStorage) : ViewModel() {
                 if (settingsStorage.isTokenExpired()) {
                     handleTokenExpired()
                 } else {
+                    if (userInfo.userId == null || userInfo.schoolId == null) {
+                        authRepository.fetchAndSaveCurrentUser().collect {  }
+                    }
                     when (userInfo.role) {
                         UserRole.ROLE_SUPER_USER.name -> _navigationRouteState.value = Route.SystemAdmin
                         UserRole.ROLE_SCHOOL_ADMIN.name -> _navigationRouteState.value = Route.SchoolAdmin
