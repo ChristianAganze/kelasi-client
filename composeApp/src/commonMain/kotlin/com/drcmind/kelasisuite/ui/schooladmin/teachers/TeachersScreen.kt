@@ -42,7 +42,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun TeachersScreen(
     viewModel: TeachersViewModel = koinViewModel(),
     onNavigateToAddTeacher: () -> Unit,
-    onNavigateToTeacherDetail: (Long) -> Unit
+    onNavigateToTeacherDetail: (Long) -> Unit,
+    onEditTeacher: (Long) -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -144,7 +145,7 @@ fun TeachersScreen(
                 }
 
                 item {
-                    TeacherTableCard(uiState.teachers, onNavigateToTeacherDetail)
+                    TeacherTableCard(uiState.teachers, onNavigateToTeacherDetail, onEditTeacher)
                 }
 
                 item { Spacer(modifier = Modifier.height(32.dp)) }
@@ -201,7 +202,8 @@ fun StatCard(
 @Composable
 fun TeacherTableCard(
     teachers: List<TeacherItem>,
-    onNavigateToTeacherDetail: (Long) -> Unit
+    onNavigateToTeacherDetail: (Long) -> Unit,
+    onEditTeacher: (Long) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -254,9 +256,11 @@ fun TeacherTableCard(
                     Text("Aucun enseignant trouvé")
                 }
                 false -> teachers.forEach { teacher ->
-                    TeacherRow(teacher) {
-                        onNavigateToTeacherDetail(teacher.id.toLong())
-                    }
+                    TeacherRow(
+                        teacher,
+                        onClick = { onNavigateToTeacherDetail(teacher.id.toLong()) },
+//                        onEdit = { onEditTeacher(teacher.id.toLong()) }
+                    )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
@@ -269,7 +273,7 @@ fun TeacherTableCard(
 @Composable
 fun TeacherRow(
     teacher: TeacherItem,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier.clickable { onClick() }
@@ -321,6 +325,7 @@ fun TeacherRow(
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 Text("ACTIF", color = Color(0xFF10B981), style = MaterialTheme.typography.labelMedium)
             }
+
         }
     }
 }

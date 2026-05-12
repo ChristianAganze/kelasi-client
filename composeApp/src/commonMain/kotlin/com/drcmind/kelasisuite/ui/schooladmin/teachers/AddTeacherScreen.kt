@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -33,11 +34,19 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTeacherScreen(
+    teacherId: Long? = null,
     onBack: () -> Unit,
     onTeacherAdded: () -> Unit,
     viewModel: AddTeacherViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val isEditing = teacherId != null
+
+    LaunchedEffect(teacherId) {
+        if (teacherId != null) {
+            viewModel.loadTeacher(teacherId)
+        }
+    }
 
     if (state.isSuccess) {
         onTeacherAdded()
@@ -47,9 +56,9 @@ fun AddTeacherScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text(if (state.showUserList) "Sélection de l'utilisateur" else "Recrutement Enseignant") },
+                title = { Text(if (isEditing) "Modification Enseignant" else if (state.showUserList) "Sélection de l'utilisateur" else "Recrutement Enseignant") },
                 navigationIcon = {
-                    IconButton(onClick = if (state.showUserList) onBack else viewModel::onBackToUserList) {
+                    IconButton(onClick = if (!isEditing && !state.showUserList) viewModel::onBackToUserList else onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
                     }
                 },
@@ -79,8 +88,10 @@ fun AddTeacherScreen(
             } else {
                 TeacherFormSection(
                     state = state,
-                    onBack = viewModel::onBackToUserList,
-                    viewModel = viewModel
+                    teacherId = teacherId,
+                    onBack = if (isEditing) onBack else viewModel::onBackToUserList,
+                    viewModel = viewModel,
+                    isEditing = isEditing
                 )
             }
         }
@@ -206,25 +217,72 @@ private fun UserItemCard(user: UserDTO, onClick: () -> Unit) {
 @Composable
 private fun TeacherFormSection(
     state: AddTeacherState,
+    teacherId: Long?,
     onBack: () -> Unit,
-    viewModel: AddTeacherViewModel
+    viewModel: AddTeacherViewModel,
+    isEditing: Boolean
 ) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Column(modifier = Modifier.fillMaxWidth().maxSize(900.dp)) {
             Text(
-                "Étape 2 : Détails Professionnels",
+                if (isEditing) "Modifier les informations de l'enseignant" else "Étape 2 : Détails Professionnels",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "Veuillez compléter les informations académiques pour ${state.fullName}.",
+                if (isEditing) "Mettez à jour le profil de ${state.fullName}." else "Veuillez compléter les informations académiques pour ${state.fullName}.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        if (state.selectedUser != null || state.fullName.isNotBlank()) {
+            Card(
+                modifier = Modifier.fillMaxWidth().maxSize(1000.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                shape = MaterialTheme.shapes.extraLarge,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+            ) {
+                Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        modifier = Modifier.size(48.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                state.fullName.take(1),
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Utilisateur associé",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            state.fullName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    if (!isEditing) {
+                        TextButton(onClick = viewModel::onBackToUserList) {
+                            Text("Changer")
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth().maxSize(1000.dp),
@@ -370,7 +428,7 @@ private fun TeacherFormSection(
                         }
                         Spacer(Modifier.width(16.dp))
                         Button(
-                            onClick = viewModel::createTeacher,
+                            onClick = { viewModel.saveTeacher(teacherId) },
                             enabled = !state.isLoading,
                             shape = MaterialTheme.shapes.large,
                             modifier = Modifier.height(52.dp)
@@ -388,7 +446,10 @@ private fun TeacherFormSection(
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(Modifier.width(8.dp))
-                                Text("CONFIRMER LE RECRUTEMENT", fontWeight = FontWeight.Bold)
+                                Text(
+                                    if (isEditing) "METTRE À JOUR" else "CONFIRMER LE RECRUTEMENT",
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }

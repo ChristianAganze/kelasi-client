@@ -25,6 +25,19 @@ class TeachersRepositoryImpl(
         }
     }
 
+    override fun updateTeacher(
+        teacherId: Long,
+        updateRequest: TeacherProfileRequest
+    ): Flow<Resource<TeacherProfileDTO>> {
+        return flow {
+            emit(Resource.Loading())
+            val updateResponse = apiService.updateTeacher(teacherId, updateRequest)
+            emit(Resource.Success(updateResponse))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
     override fun getTeachers(schoolId: Long): Flow<Resource<List<TeacherProfileDTO>>> {
         return flow {
             emit(Resource.Loading())

@@ -84,6 +84,7 @@ class AddTeacherViewModel(
         _state.update {
             it.copy(
                 selectedUser = user,
+                userId = user.id,
                 fullName = "${user.firstName} ${user.lastName}",
                 showUserList = false
             )
@@ -91,7 +92,7 @@ class AddTeacherViewModel(
     }
 
     fun onBackToUserList() {
-        _state.update { it.copy(showUserList = true, selectedUser = null) }
+        _state.update { it.copy(showUserList = true, selectedUser = null, userId = null) }
     }
 
     fun onFullNameChange(value: String) = _state.update { it.copy(fullName = value) }
@@ -102,9 +103,36 @@ class AddTeacherViewModel(
     fun onHireDateChange(value: String) = _state.update { it.copy(hireDate = value) }
     fun onProvinceChange(value: String) = _state.update { it.copy(province = value) }
 
-    fun createTeacher() {
+    fun loadTeacher(teacherId: Long) {
+        teachersRepository.getTeacher(teacherId).onEach { resource ->
+            if (resource is Resource.Success) {
+                resource.data?.let { teacher ->
+                    _state.update {
+                        it.copy(
+                            selectedUser = allUsers.firstOrNull { user -> user.id == teacher.userId },
+                            userId = teacher.userId,
+                            fullName = teacher.fullName,
+                            qualifications = teacher.qualifications,
+                            payrollId = teacher.payrollId ?: "",
+                            city = teacher.address.cityTerritory,
+                            province = teacher.address.province,
+                            streetAddress = teacher.address.streetAndNumber ?: "",
+                            showUserList = false
+                        )
+                    }
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun saveTeacher(teacherId: Long? = null) {
         val currentState = _state.value
-        val userId = currentState.selectedUser?.id ?: return
+        val userId = currentState.userId
+
+        if (teacherId == null && userId == null) {
+            _state.update { it.copy(error = "Veuillez sélectionner un utilisateur à associer à l'enseignant") }
+            return
+        }
 
         // 1. Validation des champs
         if (currentState.fullName.isBlank() || currentState.qualifications.isBlank() || currentState.hireDate.isBlank()) {
@@ -122,7 +150,7 @@ class AddTeacherViewModel(
 
         // 3. Préparation de la requête
         val request = TeacherProfileRequest(
-            userId = userId,
+            userId = userId ?: 0,
             payrollId = currentState.payrollId,
             qualifications = currentState.qualifications,
             hireDate = validatedHireDate,
@@ -136,7 +164,13 @@ class AddTeacherViewModel(
         )
 
         // 4. Appel au repository
-        teachersRepository.createTeacher(request).onEach { resource ->
+        val flow = if (teacherId == null) {
+            teachersRepository.createTeacher(request)
+        } else {
+            teachersRepository.updateTeacher(teacherId, request)
+        }
+
+        flow.onEach { resource ->
             when (resource) {
                 is Resource.Loading -> {
                     _state.update { it.copy(isLoading = true, error = null) }
@@ -168,5 +202,6 @@ data class AddTeacherState(
     val searchQuery: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val userId: Long? = null
 )
