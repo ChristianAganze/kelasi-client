@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 
 class TeachersViewModel(
     private val teachersRepository: TeachersRepository,
@@ -20,12 +21,13 @@ class TeachersViewModel(
     private val _state = MutableStateFlow(TeachersUiState())
     val state: StateFlow<TeachersUiState> = _state.asStateFlow()
 
+    private var allTeachers: List<TeacherItem> = emptyList()
+
     init {
         loadTeachers()
     }
 
     fun loadTeachers() {
-//        val schoolId = settingsStorage.getUserInfo().schoolId ?: return
         val userInfo = settingsStorage.getUserInfo()
         val schoolId = userInfo.schoolId
 
@@ -40,12 +42,8 @@ class TeachersViewModel(
                 }
 
                 is Resource.Success -> {
-                    val teachers = resource.data?.map { it.toTeachersItem() } ?: emptyList()
-                    _state.value = _state.value.copy(
-                        isLoading = false,
-                        teachers = teachers,
-                        totalTeachers = teachers.size
-                    )
+                    allTeachers = resource.data?.map { it.toTeachersItem() } ?: emptyList()
+                    filterTeachers()
                 }
 
                 is Resource.Error -> {
@@ -55,6 +53,27 @@ class TeachersViewModel(
                 else -> Unit
             }
         }.launchIn(viewModelScope)
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _state.update { it.copy(searchQuery = query) }
+        filterTeachers()
+    }
+
+    private fun filterTeachers() {
+        val query = _state.value.searchQuery.lowercase()
+        val filtered = allTeachers.filter { teacher ->
+            teacher.fullName.lowercase().contains(query) ||
+                    (teacher.payrollId?.lowercase()?.contains(query) ?: false) ||
+                    teacher.qualifications.lowercase().contains(query)
+        }
+        _state.update {
+            it.copy(
+                isLoading = false,
+                teachers = filtered,
+                totalTeachers = allTeachers.size
+            )
+        }
     }
 
     private fun TeacherProfileDTO.toTeachersItem(): TeacherItem {
@@ -83,6 +102,7 @@ data class TeacherItem(
 
 data class TeachersUiState(
     val teachers: List<TeacherItem> = emptyList(),
-    val totalTeachers: Int = 1284,
+    val totalTeachers: Int = 0,
+    val searchQuery: String = "",
     val isLoading: Boolean = false
 )

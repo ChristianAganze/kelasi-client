@@ -3,34 +3,14 @@ package com.drcmind.kelasisuite.ui.schooladmin.students
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,7 +32,6 @@ fun StudentsScreen(
     onNavigateToStudentDetail: (Long) -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()
-
     Scaffold(
         containerColor = Color.Transparent,
     ) { padding ->
@@ -69,14 +48,14 @@ fun StudentsScreen(
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 item {
-
                     Column {
                         Spacer(modifier = Modifier.height(64.dp))
                         FlowRow(
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Column() {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "Gestion des Élèves",
                                     style = MaterialTheme.typography.displayLarge,
@@ -90,8 +69,13 @@ fun StudentsScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-
+                            IconButton(onClick = viewModel::loadStudents) {
+                                Icon(
+                                    AppIcons.refresh,
+                                    contentDescription = "Actualiser",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             ElevatedButton(
                                 colors = ButtonDefaults.buttonColors(),
                                 onClick = {
@@ -109,6 +93,29 @@ fun StudentsScreen(
                                 }
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        OutlinedTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = viewModel::onSearchQueryChange,
+                            modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp),
+                            placeholder = { Text("Rechercher un élève (Nom, Matricule, Classe)...") },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            trailingIcon = {
+                                if (uiState.searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                                        Icon(Icons.Default.Close, contentDescription = null)
+                                    }
+                                }
+                            },
+                            shape = MaterialTheme.shapes.extraLarge,
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                            )
+                        )
 
                     }
                 }
@@ -233,17 +240,13 @@ fun StudentTableCard(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             when (students.isEmpty()) {
                 true -> Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().padding(vertical = 40.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(Modifier.height(15.dp))
-
                     Icon(AppIcons.peoples, contentDescription = null, Modifier.size(100.dp))
                     Spacer(Modifier.height(10.dp))
                     Text("Aucun élève/étudiant trouvé")
-                    Spacer(Modifier.height(20.dp))
-
                 };
                 false -> students.forEach { student ->
                     StudentRow(student) {
@@ -278,8 +281,11 @@ fun StudentRow(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
                 Box(
                     Modifier.size(40.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                )
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(student.name.take(1), fontWeight = FontWeight.Bold)
+                }
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
@@ -288,7 +294,7 @@ fun StudentRow(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        student. dateOfBirth,
+                        student.dateOfBirth,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.outline
                     )

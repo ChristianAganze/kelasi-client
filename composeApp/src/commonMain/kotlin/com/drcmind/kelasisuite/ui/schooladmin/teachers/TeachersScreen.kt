@@ -15,21 +15,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,9 +66,10 @@ fun TeachersScreen(
                         Spacer(modifier = Modifier.height(64.dp))
                         FlowRow(
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Column {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "Gestion des Enseignants",
                                     style = MaterialTheme.typography.displayLarge,
@@ -88,24 +83,59 @@ fun TeachersScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            ElevatedButton(
-                                colors = ButtonDefaults.buttonColors(),
-                                onClick = {
-                                    onNavigateToAddTeacher()
-                                }
+                            
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
+                                IconButton(onClick = viewModel::loadTeachers) {
+                                    Icon(
+                                        AppIcons.refresh,
+                                        contentDescription = "Actualiser",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+
+                                ElevatedButton(
+                                    colors = ButtonDefaults.buttonColors(),
+                                    onClick = {
+                                        onNavigateToAddTeacher()
+                                    }
                                 ) {
-                                    Icon(Icons.Default.Add, contentDescription = null)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Ajouter un enseignant")
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Ajouter un enseignant")
+                                    }
                                 }
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        OutlinedTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = viewModel::onSearchQueryChange,
+                            modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp),
+                            placeholder = { Text("Rechercher un enseignant (Nom, ID Paie, Qualifications)...") },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            trailingIcon = {
+                                if (uiState.searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                                        Icon(Icons.Default.Close, contentDescription = null)
+                                    }
+                                }
+                            },
+                            shape = MaterialTheme.shapes.extraLarge,
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                            )
+                        )
                     }
                 }
 

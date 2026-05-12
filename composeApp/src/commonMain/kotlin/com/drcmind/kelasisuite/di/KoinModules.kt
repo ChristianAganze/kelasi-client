@@ -13,6 +13,8 @@ import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIServic
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.teachers.TeachersAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.teachers.TeachersAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIServiceImpl
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.profile.ProfileRepository
@@ -23,6 +25,8 @@ import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
 import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.users.UsersRepository
+import com.drcmind.kelasisuite.data.repository.users.UsersRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AddClassViewModel
@@ -69,6 +73,7 @@ val networkModule = module {
     single<SchoolsAPIService> { SchoolsAPIServiceImpl(get()) }
     single<ProfileAPIService> { ProfileAPIServiceImpl(get()) }
     single<TeachersAPIService> { TeachersAPIServiceImpl(get()) }
+    single<UsersAPIService> { UsersAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -84,6 +89,7 @@ val repositoryModule = module {
     single<SchoolRepository> { SchoolRepositoryImpl(get()) }
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     single<TeachersRepository> { TeachersRepositoryImpl(get()) }
+    single<UsersRepository> { UsersRepositoryImpl(get()) }
 }
 
 val viewModelModule = module {
