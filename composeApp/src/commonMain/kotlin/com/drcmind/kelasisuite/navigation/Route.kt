@@ -118,6 +118,9 @@ sealed interface Route : NavKey {
         data object AddStudent : Route
 
         @Serializable
+        data object AddTeacher : Route
+
+        @Serializable
         data class StudentDetail(val studentId: Long) : Route
 
         @Serializable

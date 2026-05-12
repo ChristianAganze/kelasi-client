@@ -17,6 +17,8 @@ import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.AddTeacherScreen
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeachersScreen
 
 @Composable
 fun SchoolAdminNavigation(
@@ -75,7 +77,6 @@ fun SchoolAdminNavigation(
 
             entry<Route.SchoolAdmin.Students> {
                 StudentsScreen(
-
                     onNavigateToAddStudent = {
                         schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent)
                     },
@@ -115,7 +116,30 @@ fun SchoolAdminNavigation(
                 Text("Parents")
             }
             entry<Route.SchoolAdmin.StaffHR> {
-                Text("Staffs & HR")
+                TeachersScreen(
+                    onNavigateToAddTeacher = {
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddTeacher)
+                    },
+                    onNavigateToTeacherDetail = {
+//                        id ->
+//                        schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
+                    },
+                )
+            }
+
+            entry<Route.SchoolAdmin.AddTeacher> {
+                AddTeacherScreen(
+                    onBack = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    },
+                    onTeacherAdded = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    }
+                )
             }
             entry<Route.SchoolAdmin.Finance> {
                 Text("Finance & Comptabilité")
