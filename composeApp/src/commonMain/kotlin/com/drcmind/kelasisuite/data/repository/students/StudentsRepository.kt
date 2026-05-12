@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface StudentsRepository {
     fun createStudent(createRequest: StudentCreationRequest): Flow<Resource<StudentDTO>>
+    fun updateStudent(studentId: Long, updateRequest: StudentCreationRequest): Flow<Resource<StudentDTO>>
     fun getStudents(schoolId: Long): Flow<Resource<List<StudentDTO>>>
     fun getStudent(studentId: Long): Flow<Resource<StudentDTO>>
 }

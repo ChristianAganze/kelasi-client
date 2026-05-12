@@ -31,7 +31,10 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentDetailScreen(
-    studentId: Long, onBack: () -> Unit, viewModel: StudentDetailViewModel = koinViewModel()
+    studentId: Long,
+    onBack: () -> Unit,
+    onEdit: (Long) -> Unit,
+    viewModel: StudentDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -76,7 +79,7 @@ fun StudentDetailScreen(
                         .padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     // 1. SECTION HEADER
-                    HeaderSection(student)
+                    HeaderSection(student, onEdit)
 
                     // 2. BENTO GRID (Informations Personnelles & Inscription)
                     Row(
@@ -158,7 +161,7 @@ fun StudentDetailScreen(
                         BentoCard(
                             title = "Performance",
                             icon = AppIcons.trending,
-                            containerColor =  if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary,
+                            containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(2f)
                         ) {
                             Row(verticalAlignment = Alignment.Bottom) {
@@ -188,7 +191,7 @@ fun StudentDetailScreen(
 }
 
 @Composable
-private fun HeaderSection(student: StudentDTO) {
+private fun HeaderSection(student: StudentDTO, onEdit: (Long) -> Unit) {
     Surface(
         color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary,
         shape = MaterialTheme.shapes.extraLarge,
@@ -240,7 +243,7 @@ private fun HeaderSection(student: StudentDTO) {
                 )
                 Text(
                     "ID: ${student.studentIdNumber}",
-                    color = MaterialTheme.colorScheme.outlineVariant,
+                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
 
@@ -248,7 +251,7 @@ private fun HeaderSection(student: StudentDTO) {
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
-                        onClick = {}, colors = ButtonDefaults.buttonColors(
+                        onClick = { onEdit(student.id) }, colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White, contentColor = Color.Black
                         ), shape = RoundedCornerShape(12.dp)
                     ) {

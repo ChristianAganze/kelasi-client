@@ -44,7 +44,26 @@ class AddStudentViewModel(
         _state.value = _state.value.copy(address = value)
     }
 
-    fun createStudent() {
+    fun loadStudent(studentId: Long) {
+        studentsRepository.getStudent(studentId).onEach { resource ->
+            if (resource is Resource.Success) {
+                resource.data?.let { student ->
+                    _state.value = _state.value.copy(
+                        lastName = student.lastName,
+                        firstName = student.firstName,
+                        dateOfBirth = student.dateOfBirth?.toString() ?: "",
+                        religion = student.religion ?: "",
+                        previousSchool = student.previousSchool,
+                        address = student.address ?: "",
+                        studentIdNumber = student.studentIdNumber,
+                        sernieNumber = student.sernieNumber ?: ""
+                    )
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun saveStudent(studentId: Long? = null) {
         val currentState = _state.value
 
         // Basic validation
@@ -71,10 +90,16 @@ class AddStudentViewModel(
             religion = currentState.religion.ifBlank { null },
             photoUrl = null,
             dateOfBirth = dob,
-            schoolId = 1 // TODO: Get actual schoolId and verify the SER number down and change it
+            schoolId = 1 // TODO: Get actual schoolId
         )
 
-        studentsRepository.createStudent(request).onEach { resource ->
+        val flow = if (studentId == null) {
+            studentsRepository.createStudent(request)
+        } else {
+            studentsRepository.updateStudent(studentId, request)
+        }
+
+        flow.onEach { resource ->
             when (resource) {
                 is Resource.Loading -> {
                     _state.value = _state.value.copy(isLoading = true, error = null)

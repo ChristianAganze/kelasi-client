@@ -21,6 +21,19 @@ class StudentsRepositoryImpl(
         }
     }
 
+    override fun updateStudent(
+        studentId: Long,
+        updateRequest: StudentCreationRequest
+    ): Flow<Resource<StudentDTO>> {
+        return flow {
+            emit(Resource.Loading())
+            val updateResponse = studentsAPIService.updateStudent(studentId, updateRequest)
+            emit(Resource.Success(updateResponse))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
     override fun getStudents(schoolId: Long): Flow<Resource<List<StudentDTO>>> {
         return flow {
             emit(Resource.Loading())

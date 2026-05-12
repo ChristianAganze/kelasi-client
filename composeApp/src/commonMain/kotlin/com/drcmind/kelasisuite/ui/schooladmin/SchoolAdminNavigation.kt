@@ -78,7 +78,7 @@ fun SchoolAdminNavigation(
             entry<Route.SchoolAdmin.Students> {
                 StudentsScreen(
                     onNavigateToAddStudent = {
-                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent)
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent())
                     },
                     onNavigateToStudentDetail = { id ->
                         schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
@@ -86,8 +86,9 @@ fun SchoolAdminNavigation(
                 )
             }
 
-            entry<Route.SchoolAdmin.AddStudent> {
+            entry<Route.SchoolAdmin.AddStudent> { key ->
                 AddStudentScreen(
+                    studentId = key.studentId,
                     onBack = {
                         if (schoolAdminBackStack.size > 1) {
                             schoolAdminBackStack.removeLast()
@@ -108,6 +109,9 @@ fun SchoolAdminNavigation(
                         if (schoolAdminBackStack.size > 1) {
                             schoolAdminBackStack.removeLast()
                         }
+                    },
+                    onEdit = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent(id))
                     }
                 )
             }
