@@ -18,6 +18,7 @@ import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsScreen
 import com.drcmind.kelasisuite.ui.schooladmin.teachers.AddTeacherScreen
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeacherDetailsScreen
 import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeachersScreen
 
 @Composable
@@ -124,10 +125,23 @@ fun SchoolAdminNavigation(
                     onNavigateToAddTeacher = {
                         schoolAdminBackStack.add(Route.SchoolAdmin.AddTeacher)
                     },
-                    onNavigateToTeacherDetail = {
-//                        id ->
-//                        schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
+                    onNavigateToTeacherDetail = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.TeacherDetail(id))
                     },
+                )
+            }
+
+            entry<Route.SchoolAdmin.TeacherDetail> { key ->
+                TeacherDetailsScreen(
+                    teacherId = key.teacherId,
+                    onBack = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    },
+                    onEdit = { id ->
+                        // Navigation vers la modification (à implémenter si besoin)
+                    }
                 )
             }
 

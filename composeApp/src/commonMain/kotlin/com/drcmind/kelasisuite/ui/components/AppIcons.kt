@@ -3,17 +3,20 @@ package com.drcmind.kelasisuite.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.Chat
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.HistoryEdu
 import androidx.compose.material.icons.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonAdd
+import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Verified
@@ -38,4 +41,6 @@ object AppIcons {
     val addPhoto =  Icons.Rounded.AddAPhoto
     val badge =  Icons.Rounded.Badge
     val refresh = Icons.Rounded.Refresh
+    val email = Icons.Rounded.Email
+    val phone = Icons.Rounded.Phone
 }
