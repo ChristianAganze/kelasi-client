@@ -17,6 +17,9 @@ import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.AddTeacherScreen
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeacherDetailsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeachersScreen
 
 @Composable
 fun SchoolAdminNavigation(
@@ -48,9 +51,8 @@ fun SchoolAdminNavigation(
 
             entry<Route.SchoolAdmin.Students> {
                 StudentsScreen(
-
                     onNavigateToAddStudent = {
-                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent)
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent())
                     },
                     onNavigateToStudentDetail = { id ->
                         schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
@@ -58,8 +60,9 @@ fun SchoolAdminNavigation(
                 )
             }
 
-            entry<Route.SchoolAdmin.AddStudent> {
+            entry<Route.SchoolAdmin.AddStudent> { key ->
                 AddStudentScreen(
+                    studentId = key.studentId,
                     onBack = {
                         if (schoolAdminBackStack.size > 1) {
                             schoolAdminBackStack.removeLast()
@@ -80,6 +83,9 @@ fun SchoolAdminNavigation(
                         if (schoolAdminBackStack.size > 1) {
                             schoolAdminBackStack.removeLast()
                         }
+                    },
+                    onEdit = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent(id))
                     }
                 )
             }
@@ -88,7 +94,47 @@ fun SchoolAdminNavigation(
                 Text("Parents")
             }
             entry<Route.SchoolAdmin.StaffHR> {
-                Text("Staffs & HR")
+                TeachersScreen(
+                    onNavigateToAddTeacher = {
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddTeacher(null))
+                    },
+                    onNavigateToTeacherDetail = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.TeacherDetail(id))
+                    },
+                    onEditTeacher = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddTeacher(id))
+                    }
+                )
+            }
+
+            entry<Route.SchoolAdmin.TeacherDetail> { key ->
+                TeacherDetailsScreen(
+                    teacherId = key.teacherId,
+                    onBack = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    },
+                    onEdit = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddTeacher(id))
+                    }
+                )
+            }
+
+            entry<Route.SchoolAdmin.AddTeacher> { key ->
+                AddTeacherScreen(
+                    teacherId = key.teacherId,
+                    onBack = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    },
+                    onTeacherAdded = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    }
+                )
             }
             entry<Route.SchoolAdmin.Finance> {
                 Text("Finance & Comptabilité")

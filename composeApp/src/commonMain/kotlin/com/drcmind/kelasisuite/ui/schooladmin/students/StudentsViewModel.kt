@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 
 class StudentsViewModel(
     private val studentsRepository: StudentsRepository,
@@ -18,6 +19,8 @@ class StudentsViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(StudentUiState())
     val state: StateFlow<StudentUiState> = _state.asStateFlow()
+
+    private var allStudents: List<StudentItem> = emptyList()
 
     init {
         loadStudents()
@@ -32,12 +35,8 @@ class StudentsViewModel(
                 }
 
                 is Resource.Success -> {
-                    val students = resource.data?.map { it.toStudentItem() } ?: emptyList()
-                    _state.value = _state.value.copy(
-                        isLoading = false,
-                        students = students,
-                        totalStudents = students.size
-                    )
+                    allStudents = resource.data?.map { it.toStudentItem() } ?: emptyList()
+                    filterStudents()
                 }
 
                 is Resource.Error -> {
@@ -47,6 +46,27 @@ class StudentsViewModel(
                 else -> Unit
             }
         }.launchIn(viewModelScope)
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _state.update { it.copy(searchQuery = query) }
+        filterStudents()
+    }
+
+    private fun filterStudents() {
+        val query = _state.value.searchQuery.lowercase()
+        val filtered = allStudents.filter { student ->
+            student.name.lowercase().contains(query) ||
+                    student.matricule.lowercase().contains(query) ||
+                    student.className.lowercase().contains(query)
+        }
+        _state.update {
+            it.copy(
+                isLoading = false,
+                students = filtered,
+                totalStudents = allStudents.size
+            )
+        }
     }
 
     private fun StudentDTO.toStudentItem(): StudentItem {
@@ -81,9 +101,10 @@ enum class StudentStatus { ACTIVE, PROBATION, INACTIVE }
 
 data class StudentUiState(
     val students: List<StudentItem> = emptyList(),
-    val totalStudents: Int = 1284,
-    val newStudents: Int = 156,
-    val pendingActionCount: Int = 24,
-    val graduateCount: Int = 412,
+    val totalStudents: Int = 0,
+    val newStudents: Int = 0,
+    val pendingActionCount: Int = 0,
+    val graduateCount: Int = 0,
+    val searchQuery: String = "",
     val isLoading: Boolean = false
 )

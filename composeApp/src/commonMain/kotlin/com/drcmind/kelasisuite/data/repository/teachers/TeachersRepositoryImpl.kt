@@ -1,53 +1,57 @@
-package com.drcmind.kelasisuite.data.repository.students
+package com.drcmind.kelasisuite.data.repository.teachers
 
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.teachers.TeachersAPIService
 import com.drcmind.kelasisuite.domain.dto.StudentCreationRequest
 import com.drcmind.kelasisuite.domain.dto.StudentDTO
+import com.drcmind.kelasisuite.domain.dto.TeacherProfileDTO
+import com.drcmind.kelasisuite.domain.dto.TeacherProfileRequest
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
-class StudentsRepositoryImpl(
-    private val studentsAPIService: StudentsAPIService
-) : StudentsRepository {
-    override fun createStudent(createRequest: StudentCreationRequest): Flow<Resource<StudentDTO>> {
+class TeachersRepositoryImpl(
+    private val apiService: TeachersAPIService
+) : TeachersRepository {
+
+    override fun createTeacher(createRequest: TeacherProfileRequest): Flow<Resource<TeacherProfileDTO>> {
         return flow {
             emit(Resource.Loading())
-            val creationResponse = studentsAPIService.createStudent(createRequest)
+            val creationResponse = apiService.createTeacher(createRequest)
             emit(Resource.Success(creationResponse))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
         }
     }
 
-    override fun updateStudent(
-        studentId: Long,
-        updateRequest: StudentCreationRequest
-    ): Flow<Resource<StudentDTO>> {
+    override fun updateTeacher(
+        teacherId: Long,
+        updateRequest: TeacherProfileRequest
+    ): Flow<Resource<TeacherProfileDTO>> {
         return flow {
             emit(Resource.Loading())
-            val updateResponse = studentsAPIService.updateStudent(studentId, updateRequest)
+            val updateResponse = apiService.updateTeacher(teacherId, updateRequest)
             emit(Resource.Success(updateResponse))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
         }
     }
 
-    override fun getStudents(schoolId: Long): Flow<Resource<List<StudentDTO>>> {
+    override fun getTeachers(schoolId: Long): Flow<Resource<List<TeacherProfileDTO>>> {
         return flow {
             emit(Resource.Loading())
-            val response = studentsAPIService.getStudents(schoolId)
+            val response = apiService.getTeachers(schoolId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
         }
     }
 
-    override fun getStudent(studentId: Long): Flow<Resource<StudentDTO>> {
+    override fun getTeacher(teacherId: Long): Flow<Resource<TeacherProfileDTO>> {
         return flow {
             emit(Resource.Loading())
-            val response = studentsAPIService.getStudent(studentId)
+            val response = apiService.getTeacher(teacherId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))

@@ -11,6 +11,10 @@ import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.teachers.TeachersAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.teachers.TeachersAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIServiceImpl
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.profile.ProfileRepository
@@ -19,6 +23,10 @@ import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
+import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.users.UsersRepository
+import com.drcmind.kelasisuite.data.repository.users.UsersRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.calendar_periods.CalendarPeriodsViewModel
@@ -29,6 +37,9 @@ import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.AddTeacherViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeacherDetailsViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeachersViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.*
 import io.ktor.client.plugins.*
@@ -59,6 +70,8 @@ val networkModule = module {
     single<StudentsAPIService> { StudentsAPIServiceImpl(get()) }
     single<SchoolsAPIService> { SchoolsAPIServiceImpl(get()) }
     single<ProfileAPIService> { ProfileAPIServiceImpl(get()) }
+    single<TeachersAPIService> { TeachersAPIServiceImpl(get()) }
+    single<UsersAPIService> { UsersAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -69,10 +82,12 @@ val localStorageModule = module {
 }
 
 val repositoryModule = module {
-    single<AuthRepository> { AuthRepositoryImpl(get(), get(),get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get(), get()) }
     single<StudentsRepository> { StudentsRepositoryImpl(get()) }
     single<SchoolRepository> { SchoolRepositoryImpl(get(), get()) } // Updated constructor
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
+    single<TeachersRepository> { TeachersRepositoryImpl(get()) }
+    single<UsersRepository> { UsersRepositoryImpl(get()) }
 }
 
 val viewModelModule = module {
@@ -85,6 +100,10 @@ val viewModelModule = module {
     viewModelOf(::AddClassViewModel)
     viewModelOf(::SchoolStructureViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::CalendarPeriodsViewModel)
+    viewModelOf(::TeachersViewModel)
+    viewModelOf(::AddTeacherViewModel)
+    viewModelOf(::TeacherDetailsViewModel)
     viewModelOf(::CalendarPeriodsViewModel)
 }
 

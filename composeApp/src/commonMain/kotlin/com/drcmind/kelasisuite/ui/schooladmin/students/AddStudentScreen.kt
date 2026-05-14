@@ -43,6 +43,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -58,11 +59,18 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddStudentScreen(
+    studentId: Long? = null,
     onBack: () -> Unit,
     onStudentAdded: () -> Unit,
     viewModel: AddStudentViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(studentId) {
+        if (studentId != null) {
+            viewModel.loadStudent(studentId)
+        }
+    }
 
     if (state.isSuccess) {
         onStudentAdded()
@@ -74,7 +82,7 @@ fun AddStudentScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Ajout d'un élève",
+                        if (studentId == null) "Ajout d'un élève" else "Modification de l'élève",
                         style = MaterialTheme.typography.titleLarge,
                     )
                 },
@@ -105,13 +113,14 @@ fun AddStudentScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Ajouter un Élève",
+                        if (studentId == null) "Ajouter un Élève" else "Modifier l'Élève",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        "Veuillez remplir les informations ci-dessous pour enregistrer officiellement le nouvel étudiant dans le système.",
+                        if (studentId == null) "Veuillez remplir les informations ci-dessous pour enregistrer officiellement le nouvel étudiant dans le système."
+                        else "Modifiez les informations ci-dessous pour mettre à jour le profil de l'étudiant.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -258,7 +267,7 @@ fun AddStudentScreen(
                             }
                             Spacer(Modifier.width(16.dp))
                             Button(
-                                onClick = viewModel::createStudent,
+                                onClick = { viewModel.saveStudent(studentId) },
                                 enabled = !state.isLoading,
                                 modifier = Modifier.height(52.dp).padding(horizontal = 16.dp),
                                 shape = MaterialTheme.shapes.large,
@@ -277,7 +286,7 @@ fun AddStudentScreen(
                                     )
                                     Spacer(Modifier.width(8.dp))
                                     Text(
-                                        "AJOUTER L'ÉLÈVE",
+                                        if (studentId == null) "AJOUTER L'ÉLÈVE" else "METTRE À JOUR",
                                         fontWeight = FontWeight.Black,
                                         fontSize = 12.sp
                                     )
