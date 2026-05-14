@@ -97,6 +97,9 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+        all {
+            languageSettings.enableLanguageFeature("ExplicitBackingFields")
+        }
     }
 }
 

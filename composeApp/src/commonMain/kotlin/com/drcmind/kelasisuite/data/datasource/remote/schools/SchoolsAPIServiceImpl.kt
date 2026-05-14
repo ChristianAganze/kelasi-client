@@ -1,9 +1,15 @@
 package com.drcmind.kelasisuite.data.datasource.remote.schools
 
+import com.drcmind.kelasisuite.domain.dto.AcademicYearDTO
 import com.drcmind.kelasisuite.domain.dto.CreateClassFromTemplateRequest
+import com.drcmind.kelasisuite.domain.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.domain.dto.EvaluationPeriodDTO
+import com.drcmind.kelasisuite.domain.dto.GradeLevelDTO
+import com.drcmind.kelasisuite.domain.dto.MajorDto
 import com.drcmind.kelasisuite.domain.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.domain.dto.SchoolDTO
 import com.drcmind.kelasisuite.domain.dto.SchoolSectionDTO
+import com.drcmind.kelasisuite.domain.dto.SectionDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -22,8 +28,44 @@ class SchoolsAPIServiceImpl(private val httpClient: HttpClient) : SchoolsAPIServ
         return httpClient.get("schools/$schoolId/school-sections").body()
     }
 
-    override suspend fun getClasses(schoolId: Long): List<SchoolClassDTO> {
+    override suspend fun getSectionBySchoolSectionAndSchool(
+        schoolSectionId: Long,
+        schoolId: Long
+    ): List<SectionDTO> {
+        return httpClient.get("schools/$schoolId/school-sections/$schoolSectionId/sections").body()
+    }
+
+    override suspend fun getOfferedMajorBySchoolAndBySection(
+        schoolId: Long,
+        sectionId: Long
+    ): List<MajorDto> {
+        return httpClient.get("schools/$schoolId/sections/$sectionId/majors").body()
+    }
+
+    override suspend fun getOfferedMajorsForSchool(schoolId: Long): List<MajorDto> {
+        return httpClient.get("schools/$schoolId/majors").body()
+    }
+
+    override suspend fun getGradeLevelsBySchoolAndByMajor(
+        schoolId: Long,
+        majorId: Long
+    ): List<GradeLevelDTO> {
+        return httpClient.get("schools/$schoolId/majors/$majorId/grade-levels").body()
+    }
+
+    override suspend fun getClassesForSchool(schoolId: Long): List<SchoolClassDTO> {
         return httpClient.get("schools/$schoolId/classes").body()
+    }
+
+    override suspend fun getClassesForSchoolAndMajor(schoolId: Long, majorId: Long): List<SchoolClassDTO> {
+        return httpClient.get("schools/$schoolId/majors/$majorId/classes").body()
+    }
+
+    override suspend fun getClassesBySchoolAndGradeLevel(
+        schoolId: Long,
+        gradeLevelId: Long
+    ): List<SchoolClassDTO> {
+        return httpClient.get("schools/$schoolId/grade-levels/$gradeLevelId/classes").body()
     }
 
     override suspend fun createClass(request: CreateClassFromTemplateRequest): SchoolClassDTO {
@@ -40,5 +82,13 @@ class SchoolsAPIServiceImpl(private val httpClient: HttpClient) : SchoolsAPIServ
 
     override suspend fun deleteClass(classId: Long) {
         httpClient.delete("schools/classes/$classId")
+    }
+
+    override suspend fun getAcademicYears(): List<AcademicYearDTO> {
+        return httpClient.get("templates/academic-years").body()
+    }
+
+    override suspend fun getEvaluationPeriodsBySchool(schoolId: Long): List<EvaluationPeriodBySchoolDTO> {
+        return httpClient.get("schools/$schoolId/evaluation-periods").body()
     }
 }

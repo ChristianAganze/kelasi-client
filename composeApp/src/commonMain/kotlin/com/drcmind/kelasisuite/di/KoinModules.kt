@@ -21,30 +21,27 @@ import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepositoryImpl
 import com.drcmind.kelasisuite.domain.util.BASE_URL
 import com.drcmind.kelasisuite.ui.auth.AuthViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AddClassViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.ClassesViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.academics.calendar_periods.CalendarPeriodsViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.AddClassViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.SchoolStructureViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsViewModel
 import com.russhwolf.settings.Settings
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.bearer
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
+import io.ktor.client.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
-import org.koin.dsl.module
-import io.ktor.serialization.kotlinx.json.*
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.dsl.module
 
 fun commonModule() = listOf(
     platformModule,
@@ -74,7 +71,7 @@ val localStorageModule = module {
 val repositoryModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get(),get()) }
     single<StudentsRepository> { StudentsRepositoryImpl(get()) }
-    single<SchoolRepository> { SchoolRepositoryImpl(get()) }
+    single<SchoolRepository> { SchoolRepositoryImpl(get(), get()) } // Updated constructor
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
 }
 
@@ -86,8 +83,9 @@ val viewModelModule = module {
     viewModelOf(::AddStudentViewModel)
     viewModelOf(::StudentDetailViewModel)
     viewModelOf(::AddClassViewModel)
-    viewModelOf(::ClassesViewModel)
+    viewModelOf(::SchoolStructureViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::CalendarPeriodsViewModel)
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {

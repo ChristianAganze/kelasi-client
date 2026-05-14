@@ -10,8 +10,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
-import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AcademicManagementScreen
-import com.drcmind.kelasisuite.ui.schooladmin.academicManagement.AddClassScreen
+import com.drcmind.kelasisuite.ui.schooladmin.academics.AcademicsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.AddClassScreen
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardScreen
 import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentScreen
@@ -35,38 +35,11 @@ fun SchoolAdminNavigation(
                 SchoolDashboardScreen()
             }
             entry<Route.SchoolAdmin.Academics> {
-                AcademicManagementScreen(
-                    onAddClass = {
-                        schoolAdminBackStack.add(Route.SchoolAdmin.AddClass())
-                    },
-                    onEditClass = { id ->
-                        schoolAdminBackStack.add(Route.SchoolAdmin.AddClass(id))
-                    },
-                    onSelectClass = { id ->
-                        schoolAdminBackStack.add(Route.SchoolAdmin.ClassDetail(id))
-                    }
-                )
+                AcademicsScreen()
             }
 
-            entry<Route.SchoolAdmin.AddClass> { key ->
-                AddClassScreen(
-                    classId = key.classId,
-                    onBack = {
-                        if (schoolAdminBackStack.size > 1) {
-                            schoolAdminBackStack.removeLast()
-                        }
-                    },
-                    onClassCreated = {
-                        if (schoolAdminBackStack.size > 1) {
-                            schoolAdminBackStack.removeLast()
-                        }
-                    }
-                )
-            }
-
-            entry<Route.SchoolAdmin.ClassDetail> { key ->
-                // Placeholder for ClassDetailScreen
-                Text("Détails de la classe ${key.classId}")
+            entry<Route.SchoolAdmin.Pedagogy> {
+                Text("Pédagogie")
             }
 
             entry<Route.SchoolAdmin.Profile> {

@@ -1,6 +1,8 @@
 package com.drcmind.kelasisuite.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Accessible
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -8,16 +10,21 @@ import androidx.compose.material.icons.automirrored.filled.Subject
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Architecture
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.ControlPointDuplicate
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GroupWork
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.ModelTraining
 import androidx.compose.material.icons.filled.Money
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Streetview
@@ -70,7 +77,6 @@ sealed interface Route : NavKey {
             override val label: String = "Schools"
         }
 
-
         @Serializable
         data object Templates : NavigationBarRoute {
             override val icon: ImageVector = Icons.Default.Architecture
@@ -106,6 +112,51 @@ sealed interface Route : NavKey {
         data object Academics : NavigationBarRoute {
             override val icon: ImageVector = Icons.AutoMirrored.Filled.LibraryBooks
             override val label: String = "Affaires scolaires"
+            @Serializable
+            data object CalendarPeriod : Route{
+                @Serializable
+                data object Main : Route
+                @Serializable
+                data object Supporting : Route
+            }
+            @Serializable
+            data object SchoolStructure : Route{
+                @Serializable
+                data object Structure : Route
+                @Serializable
+                data class AddClass(val classId: Long? = null) : Route
+
+                @Serializable
+                data class ClassDetail(val classId: Long) : Route
+            }
+            @Serializable
+            data object Assignment : Route
+            @Serializable
+            data object EvaluationGrading : Route
+            @Serializable
+            data object DeliberationsConduct : Route
+            @Serializable
+            data object ReportCards : Route
+
+            enum class TabDestination(
+                val route: Route,
+                val label: String,
+                val icon: ImageVector,
+                val contentDescription: String
+            ) {
+                CALENDAR_PERIOD(CalendarPeriod, "Calendrier et périodes", Icons.Default.CalendarMonth, "calendar"),
+                SCHOOL_STRUCTURE(SchoolStructure, "Structure de l'école", Icons.Default.AccountTree, "AccountTree"),
+                ASSIGNNMENT(Assignment, "Affectations cours", Icons.AutoMirrored.Filled.Assignment, "Assignment"),
+                EVALUATION_GRADING(EvaluationGrading, "Evaluation et cotes", Icons.Default.Numbers, "Evaluation"),
+                DELIBERATION_CONDUCT(DeliberationsConduct, "Délibérations & conduite", Icons.Default.ControlPointDuplicate, "Deliberation et conduite"),
+                REPORT_CARDS(ReportCards, "Bulletins", Icons.Default.Report, "Report")
+            }
+        }
+
+        @Serializable
+        data object Pedagogy : NavigationBarRoute {
+            override val icon: ImageVector = Icons.AutoMirrored.Filled.Accessible
+            override val label: String = "Pédagogie"
         }
 
         @Serializable
@@ -120,11 +171,7 @@ sealed interface Route : NavKey {
         @Serializable
         data class StudentDetail(val studentId: Long) : Route
 
-        @Serializable
-        data class AddClass(val classId: Long? = null) : Route
 
-        @Serializable
-        data class ClassDetail(val classId: Long) : Route
 
         @Serializable
         data object Profile : Route
@@ -167,7 +214,7 @@ sealed interface Route : NavKey {
         }
 
         val items = listOf(SchoolDashboard,
-            Academics, Students, Parents, StaffHR, Finance, Logistics, Communication, Settings,
+            Academics, Pedagogy, Students, Parents, StaffHR, Finance, Logistics, Communication, Settings,
         )
 
         val stateSaver = Saver<NavigationBarRoute, String>(
@@ -185,13 +232,6 @@ sealed interface Route : NavKey {
         data object Project : NavigationBarRoute {
             override val icon: ImageVector = Icons.Default.Home
             override val label: String = "Project"
-
-            @Serializable
-            data object ProjectList : Route
-
-            @Serializable
-            data class ProjectDetail(val id: Int) : Route
-
         }
 
         @Serializable

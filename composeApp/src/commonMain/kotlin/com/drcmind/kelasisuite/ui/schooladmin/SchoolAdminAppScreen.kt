@@ -43,8 +43,6 @@ fun SchoolAdminAppScreen(
         }
     }
 
-    val isCompact = layoutType == NavigationSuiteType.NavigationBar
-
     val schoolAdminBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {
@@ -56,6 +54,10 @@ fun SchoolAdminAppScreen(
                     subclass(
                         Route.SchoolAdmin.Academics::class,
                         Route.SchoolAdmin.Academics.serializer()
+                    )
+                    subclass(
+                        Route.SchoolAdmin.Pedagogy::class,
+                        Route.SchoolAdmin.Pedagogy.serializer()
                     )
                     subclass(
                         Route.SchoolAdmin.Students::class,
