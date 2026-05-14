@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,13 +35,7 @@ fun SchoolAdminAppScreen(
     onLogout: () -> Unit
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val layoutType = with(adaptiveInfo) {
-        if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            NavigationSuiteType.NavigationDrawer
-        } else {
-            NavigationSuiteType.WideNavigationRailExpanded
-        }
-    }
+    val layoutType = NavigationSuiteType.NavigationDrawer
 
     val schoolAdminBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {

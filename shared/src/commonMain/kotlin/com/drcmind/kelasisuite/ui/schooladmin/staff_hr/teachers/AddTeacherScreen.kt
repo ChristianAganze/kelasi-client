@@ -1,5 +1,8 @@
 package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
+<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
 
+========
+>>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -67,7 +70,23 @@ fun AddTeacherScreen(
                     IconButton(onClick = if (!isEditing && !state.showUserList) viewModel::onBackToUserList else onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
                     }
+<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
                 }
+========
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
+                    navigationIconContentColor =  MaterialTheme.colorScheme
+                        .onSurface,
+                    titleContentColor = MaterialTheme.colorScheme
+                        .onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme
+                        .onSurface,
+                )
+
+
+>>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
             )
         }
     ) { padding ->
@@ -148,7 +167,10 @@ private fun UserSelectionSection(
         Spacer(modifier = Modifier.height(24.dp))
 
         if (isLoading) {
+<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
 
+========
+>>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
             Box(
                 modifier = Modifier.fillMaxWidth().padding(40.dp),
                 contentAlignment = Alignment.Center
