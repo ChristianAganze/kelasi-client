@@ -100,6 +100,7 @@ val viewModelModule = module {
     viewModelOf(::AddClassViewModel)
     viewModelOf(::SchoolStructureViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::CalendarPeriodsViewModel)
     viewModelOf(::TeachersViewModel)
     viewModelOf(::AddTeacherViewModel)
     viewModelOf(::TeacherDetailsViewModel)
