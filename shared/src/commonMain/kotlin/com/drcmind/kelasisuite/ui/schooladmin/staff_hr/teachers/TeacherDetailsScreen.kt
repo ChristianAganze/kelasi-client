@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/TeacherDetailsScreen.kt
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+========
+import androidx.compose.foundation.layout.*
+>>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/TeacherDetailsScreen.kt
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -140,6 +144,16 @@ fun TeacherDetailsScreen(
                         }
                     }
                     Spacer(Modifier.height(32.dp))
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(vertical = 40.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(AppIcons.empty, contentDescription = null, Modifier.size(100.dp))
+                    Spacer(Modifier.height(10.dp))
+                    Text("Aucune selection")
                 }
             }
         }
