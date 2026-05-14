@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.ui.schooladmin.academicManagement
+package com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,7 +32,7 @@ class AddClassViewModel(
 
     fun loadClassDetails(classId: Long) {
         _state.value = _state.value.copy(isLoading = true)
-        schoolRepository.getClasses(schoolId).onEach { resource ->
+        schoolRepository.getClassesForSchool().onEach { resource ->
             if (resource is Resource.Success) {
                 val clazz = resource.data?.find { it.id == classId }
                 if (clazz != null) {
@@ -50,7 +50,7 @@ class AddClassViewModel(
     }
 
     private fun loadSections() {
-        schoolRepository.getSchoolSections(schoolId).onEach { resource ->
+        schoolRepository.getSchoolSections().onEach { resource ->
             when (resource) {
                 is Resource.Loading -> {
                     _state.value = _state.value.copy(isLoading = true)

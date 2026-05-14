@@ -13,23 +13,19 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class AuthRepositoryImpl(
-    private val authAPIService: AuthAPIService, private val settingStorage: SettingsStorage,
-    //THIS ONE HAS BEEN ADDED FOR STORING THE schoolId in cache
+    private val authAPIService: AuthAPIService,
+    private val settingStorage: SettingsStorage,
     private val profileApiService: ProfileAPIService
 ) : AuthRepository {
     override fun login(loginRequest: LoginRequest): Flow<Resource<LoginResponse>> {
         return flow {
             emit(Resource.Loading())
             val loginResponse = authAPIService.login(loginRequest)
-            
-            // Save initial info to allow getUserMe to use the token
             settingStorage.saveUserInfo(
                 token = loginResponse.token,
                 username = loginResponse.username,
                 role = loginResponse.roles.first(),
             )
-
-            // Proactively fetch and save full profile (IDs)
             try {
                 val userResponse = authAPIService.getUserMe()
                 val userInfoResponse = profileApiService.getUser (userResponse.id)
@@ -40,12 +36,9 @@ class AuthRepositoryImpl(
                     userId = userResponse.id,
                     schoolId = userInfoResponse.schoolId
                 )
-
             } catch (e: Exception) {
-                // If profile fetch fails, we still have basic info, but we should log it
                 println("AuthRepositoryImpl: Failed to fetch profile after login: ${e.message}")
             }
-
             emit(Resource.Success(loginResponse))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))

@@ -65,3 +65,56 @@ data class SchoolSectionDTO(
     val cycle: String,
     val schoolId: Long
 )
+
+@Serializable
+data class MajorDto(
+    val id: Long,
+    val name: String,
+    val sectionId : Long,
+    val sectionName : String
+)
+
+@Serializable
+data class SectionDTO(
+    val id: Long,
+    val name: String,
+    val schoolSectionId: Long?,
+    val schoolSectionName: String
+)
+
+@Serializable
+data class GradeLevelDTO(
+    val id: Long,
+    val name: String,
+    val majorId: Long,
+    val majorName: String,
+    val sectionId: Long,
+    val sectionName: String,
+    val schoolSection : Long,
+    val schoolSectionName : String
+)
+
+@Serializable
+data class AcademicYearDTO(
+    val id: Long,
+    val label: String,
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    val isActive: Boolean
+)
+
+@Serializable
+data class EvaluationPeriodBySchoolDTO(
+    val schoolSectionName : String,
+    val evaluationPeriods : List<EvaluationPeriodDTO>
+)
+
+
+@Serializable
+data class EvaluationPeriodDTO(
+    val id: Long? = null,
+    val label: String,
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
+    val schoolSectionName: String? = null
+)
