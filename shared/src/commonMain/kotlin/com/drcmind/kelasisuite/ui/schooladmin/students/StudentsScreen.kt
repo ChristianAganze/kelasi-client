@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -33,6 +34,55 @@ fun StudentsScreen(
 ) {
     val uiState by viewModel.listState.collectAsState()
     Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
+                    navigationIconContentColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme
+                        .onSurface,
+                    actionIconContentColor = Color.Transparent,
+                ),
+
+                title = {
+                    Column {
+                        Text(
+                            text = "Gestion des Élèves",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight =
+                                    FontWeight.Black
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Gérez la base de données académique et les profils de vos élèves/étudiants.",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = viewModel::loadStudents) {
+                        Icon(
+                            AppIcons.refresh,
+                            contentDescription = "Actualiser",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    ElevatedButton(
+                        colors = ButtonDefaults.buttonColors(),
+                        onClick = {
+                            onNavigateToAddStudent()
+                        }
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Ajouter un élève")
+                    }
+                }
+            )
+        },
         containerColor = Color.Transparent,
     ) { padding ->
         if (uiState.isLoading) {
@@ -47,88 +97,19 @@ fun StudentsScreen(
                     .padding(horizontal = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                item {
-                    Column {
-                        Spacer(modifier = Modifier.height(64.dp))
-                        FlowRow(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Gestion des Élèves",
-                                    style = MaterialTheme.typography.displayLarge,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    letterSpacing = (-0.5).sp
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Gérez la base de données académique et les profils de vos élèves/étudiants.",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            IconButton(onClick = viewModel::loadStudents) {
-                                Icon(
-                                    AppIcons.refresh,
-                                    contentDescription = "Actualiser",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            ElevatedButton(
-                                colors = ButtonDefaults.buttonColors(),
-                                onClick = {
-                                    onNavigateToAddStudent()
-                                }
-                            ) {
-
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(Icons.Default.Add, contentDescription = null)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Ajouter un élève")
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        OutlinedTextField(
-                            value = uiState.searchQuery,
-                            onValueChange = viewModel::onSearchQueryChange,
-                            modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp),
-                            placeholder = { Text("Rechercher un élève (Nom, Matricule, Classe)...") },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            trailingIcon = {
-                                if (uiState.searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                                        Icon(Icons.Default.Close, contentDescription = null)
-                                    }
-                                }
-                            },
-                            shape = MaterialTheme.shapes.extraLarge,
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
-                            )
-                        )
-
-                    }
-                }
 
                 item {
                     StatsGrid(uiState)
                 }
 
                 item {
-                    StudentTableCard(uiState.students, onNavigateToStudentDetail)
+                    StudentTableCard(
+                        uiState.students,
+                        onNavigateToStudentDetail,
+                        uiState.searchQuery,
+                        viewModel::onSearchQueryChange
+                    )
                 }
-
-
 
                 item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -165,7 +146,7 @@ fun StatCard(
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = MaterialTheme.shapes.extraLarge,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
@@ -192,15 +173,45 @@ fun StatCard(
 @Composable
 fun StudentTableCard(
     students: List<StudentItem>,
-    onNavigateToStudentDetail: (Long) -> Unit
+    onNavigateToStudentDetail: (Long) -> Unit,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column {
+
+
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp),
+                placeholder = { Text("Rechercher un élève (Nom, Matricule, Classe)...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchQueryChange("") }) {
+                            Icon(Icons.Default.Close, contentDescription = null)
+                        }
+                    }
+                },
+
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ),
+                singleLine = true,
+            )
+
+
             // Simulation du header de table
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
@@ -210,13 +221,13 @@ fun StudentTableCard(
                     "NOMS",
                     modifier = Modifier.weight(2f),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
                     "MATRICULE",
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center
 
                 )
@@ -224,7 +235,7 @@ fun StudentTableCard(
                     "ADDRESSE",
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center
 
                 )
@@ -232,7 +243,7 @@ fun StudentTableCard(
                     "STATUT",
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center
 
                 )
