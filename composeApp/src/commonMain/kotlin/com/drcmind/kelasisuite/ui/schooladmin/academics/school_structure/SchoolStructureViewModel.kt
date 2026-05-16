@@ -49,7 +49,6 @@ class SchoolStructureViewModel(
                     if (data != null) {
                         println("SUCCESS: Received ${data.size} school sections. Data: $data")
                         val newRootNodes = data.map { it.toSchoolTreeNode() }
-                        // MODIFIED: Use composite key for existing nodes
                         val existingNodeKeys = nodes.map { "${it.id}-${it.type}" }.toSet()
                         val nodesToAdd = newRootNodes.filter { "${it.id}-${it.type}" !in existingNodeKeys }
                         if (nodesToAdd.isNotEmpty()) {

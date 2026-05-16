@@ -127,7 +127,12 @@ sealed interface Route : NavKey {
                 data class AddClass(val classId: Long? = null) : Route
 
                 @Serializable
-                data class ClassDetail(val classId: Long) : Route
+                data class ClassDetail(val classId: Long) : Route{
+                    @Serializable
+                    data object Main : Route
+                    @Serializable
+                    data object Supporting : Route
+                }
             }
             @Serializable
             data object Assignment : Route

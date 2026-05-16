@@ -1,6 +1,5 @@
 package com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -16,7 +15,6 @@ fun SchoolStructureNavigation(
     modifier: Modifier = Modifier,
     schoolStructureBackStack: NavBackStack<NavKey>
 ){
-
     NavDisplay(
         modifier = modifier,
         backStack = schoolStructureBackStack,
@@ -27,15 +25,7 @@ fun SchoolStructureNavigation(
         entryProvider = entryProvider {
             entry<Route.SchoolAdmin.Academics.SchoolStructure.Structure> { key ->
                 StructureScreen(
-                    onAddClass = {
-                        schoolStructureBackStack.add(Route.SchoolAdmin.Academics.SchoolStructure .AddClass())
-                    },
-                    onEditClass = { id ->
-                        schoolStructureBackStack.add(Route.SchoolAdmin.Academics.SchoolStructure.AddClass(id))
-                    },
-                    onSelectClass = { id ->
-                        schoolStructureBackStack.add(Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail(id))
-                    }
+                    schoolStructureBackStack = schoolStructureBackStack
                 )
             }
             entry<Route.SchoolAdmin.Academics.SchoolStructure.AddClass> { key ->
@@ -55,10 +45,15 @@ fun SchoolStructureNavigation(
             }
 
             entry<Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail> { key ->
-                // Placeholder for ClassDetailScreen
-                Text("Détails de la classe ${key.classId}")
+                ClassDetailsScreen(
+                    classId = key.classId,
+                    onBack = {
+                        if (schoolStructureBackStack.size > 1) {
+                            schoolStructureBackStack.removeLast()
+                        }
+                    }
+                )
             }
-
         }
     )
 

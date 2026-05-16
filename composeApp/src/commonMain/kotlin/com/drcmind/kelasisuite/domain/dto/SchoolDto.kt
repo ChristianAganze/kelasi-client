@@ -61,6 +61,7 @@ data class SchoolClassDTO(
 @Serializable
 data class SchoolSectionDTO(
     val id: Long,
+    val templateId : Long,
     val name: String,
     val cycle: String,
     val schoolId: Long
