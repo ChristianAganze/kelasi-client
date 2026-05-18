@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -130,14 +131,20 @@ fun TeacherTableCard(
     onEditTeacher: (Long) -> Unit
 ) {
 
-    Column {
+    Column(
+        Modifier.clip(
+            MaterialTheme.shapes.extraLarge
+        ).background(MaterialTheme.colorScheme.surface)
+    ) {
 
 
-        OutlinedTextField(
+        TextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
-            modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp),
-            placeholder = { Text("Rechercher un enseignant (Nom, ID)...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 600.dp),
+            placeholder = { Text("Rechercher un enseignant (Nom, ID Paie, Qualifications)...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
@@ -147,9 +154,16 @@ fun TeacherTableCard(
                 }
             },
             singleLine = true,
-            shape = MaterialTheme.shapes.extraLarge
+            // Configuration pour supprimer la ligne et le contour
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,    // Supprime la ligne sous le champ (focus)
+                unfocusedIndicatorColor = Color.Transparent,  // Supprime la ligne sous le champ
+                disabledIndicatorColor = Color.Transparent,
+            )
         )
-
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -200,7 +214,7 @@ fun TeacherTableCard(
                     onClick = { onNavigateToTeacherDetail(teacher.id.toLong()) },
 //                        onEdit = { onEditTeacher(teacher.id.toLong()) }
                 )
-                HorizontalDivider(
+                if (teachers.last() != teacher) HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
