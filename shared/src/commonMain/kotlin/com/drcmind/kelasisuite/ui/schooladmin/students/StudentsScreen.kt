@@ -31,7 +31,7 @@ fun StudentsScreen(
     onNavigateToAddStudent: () -> Unit,
     onNavigateToStudentDetail: (Long) -> Unit
 ) {
-    val uiState by viewModel.state.collectAsState()
+    val uiState by viewModel.listState.collectAsState()
     Scaffold(
         containerColor = Color.Transparent,
     ) { padding ->
