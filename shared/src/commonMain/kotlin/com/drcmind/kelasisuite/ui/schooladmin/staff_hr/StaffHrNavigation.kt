@@ -1,0 +1,33 @@
+package com.drcmind.kelasisuite.ui.schooladmin.staff_hr
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.drcmind.kelasisuite.navigation.Route
+import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeachersScreen
+
+@Composable
+fun StaffHrNavigation(
+    modifier: Modifier = Modifier,
+    staffHrBackStack: NavBackStack<NavKey>
+){
+    NavDisplay(
+        modifier = modifier,
+        backStack = staffHrBackStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Route.SchoolAdmin.StaffHR.Teachers> {
+                TeachersScreen()
+            }
+        }
+    )
+}
+

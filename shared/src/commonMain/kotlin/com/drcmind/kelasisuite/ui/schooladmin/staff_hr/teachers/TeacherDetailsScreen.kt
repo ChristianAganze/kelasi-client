@@ -1,6 +1,6 @@
-package com.drcmind.kelasisuite.ui.schooladmin.teachers
+package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
 
-import androidx.compose.foundation.BorderStroke
+import  androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -31,12 +31,12 @@ fun TeacherDetailsScreen(
     teacherId: Long,
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
-    viewModel: TeacherDetailsViewModel = koinViewModel()
+    viewModel: TeachersViewModel = koinViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.detailState.collectAsState()
 
     LaunchedEffect(teacherId) {
-        viewModel.loadTeacher(teacherId)
+        viewModel.loadTeacherDetail(teacherId)
     }
 
     Scaffold(

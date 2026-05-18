@@ -33,12 +33,8 @@ import com.drcmind.kelasisuite.ui.schooladmin.academics.calendar_periods.Calenda
 import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.SchoolStructureViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeachersViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.teachers.AddTeacherViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeacherDetailsViewModel
-import com.drcmind.kelasisuite.ui.schooladmin.teachers.TeachersViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.*
 import io.ktor.client.plugins.*
@@ -47,7 +43,7 @@ import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
@@ -94,14 +90,10 @@ val viewModelModule = module {
     viewModelOf(::AuthViewModel)
     viewModelOf(::SchoolDashboardViewModel)
     viewModelOf(::StudentsViewModel)
-    viewModelOf(::AddStudentViewModel)
-    viewModelOf(::StudentDetailViewModel)
     viewModelOf(::SchoolStructureViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::CalendarPeriodsViewModel)
     viewModelOf(::TeachersViewModel)
-    viewModelOf(::AddTeacherViewModel)
-    viewModelOf(::TeacherDetailsViewModel)
     viewModelOf(::CalendarPeriodsViewModel)
 }
 

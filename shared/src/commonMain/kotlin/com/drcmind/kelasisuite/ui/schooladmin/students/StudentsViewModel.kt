@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
+import com.drcmind.kelasisuite.domain.dto.StudentCreationRequest
 import com.drcmind.kelasisuite.domain.dto.StudentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,13 +13,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.LocalDate
+import kotlin.time.Clock
 
 class StudentsViewModel(
     private val studentsRepository: StudentsRepository,
     private val settingsStorage: SettingsStorage
 ) : ViewModel() {
+
+    private val _listState = MutableStateFlow(StudentUiState())
+    val listState: StateFlow<StudentUiState> = _listState.asStateFlow()
     private val _state = MutableStateFlow(StudentUiState())
     val state: StateFlow<StudentUiState> = _state.asStateFlow()
+
+    // --- Student Detail State ---
+    private val _detailState = MutableStateFlow(StudentDetailState())
+    val detailState: StateFlow<StudentDetailState> = _detailState.asStateFlow()
+
+    // --- Add/Edit Student State ---
+    private val _formState = MutableStateFlow(AddStudentState())
+    val formState: StateFlow<AddStudentState> = _formState.asStateFlow()
 
     private var allStudents: List<StudentItem> = emptyList()
 
@@ -30,37 +44,31 @@ class StudentsViewModel(
         val schoolId = settingsStorage.getUserInfo().schoolId ?: return
         studentsRepository.getStudents(schoolId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> {
-                    _state.value = _state.value.copy(isLoading = true)
-                }
+                is Resource.Loading -> _listState.update { it.copy(isLoading = true) }
 
                 is Resource.Success -> {
                     allStudents = resource.data?.map { it.toStudentItem() } ?: emptyList()
                     filterStudents()
                 }
 
-                is Resource.Error -> {
-                    _state.value = _state.value.copy(isLoading = false)
-                }
-
-                else -> Unit
+                is Resource.Error -> _listState.update { it.copy(isLoading = false) }
             }
         }.launchIn(viewModelScope)
     }
 
     fun onSearchQueryChange(query: String) {
-        _state.update { it.copy(searchQuery = query) }
+        _listState.update { it.copy(searchQuery = query) }
         filterStudents()
     }
 
     private fun filterStudents() {
-        val query = _state.value.searchQuery.lowercase()
+        val query = _listState.value.searchQuery.lowercase()
         val filtered = allStudents.filter { student ->
             student.name.lowercase().contains(query) ||
                     student.matricule.lowercase().contains(query) ||
                     student.className.lowercase().contains(query)
         }
-        _state.update {
+        _listState.update {
             it.copy(
                 isLoading = false,
                 students = filtered,
@@ -69,21 +77,111 @@ class StudentsViewModel(
         }
     }
 
-    private fun StudentDTO.toStudentItem(): StudentItem {
-        return StudentItem(
-            id = id.toString(),
-            name = fullName,
-            matricule = studentIdNumber,
-            className = currentEnrollment?.className ?: "Non assigné",
-            adress = address
-                ?: "N/A", // Reusing GPA field as address for the table as per current UI
-            status = status,
-            dateOfBirth = dateOfBirth.toString()
-        )
+    private fun StudentDTO.toStudentItem() = StudentItem(
+        id = id.toString(),
+        name = fullName,
+        matricule = studentIdNumber,
+        className = currentEnrollment?.className ?: "Non assigné",
+        adress = address ?: "N/A",
+        status = status,
+        dateOfBirth = dateOfBirth.toString()
+    )
+
+    // --- Detail Logic ---
+    fun loadStudentDetail(studentId: Long) {
+        studentsRepository.getStudent(studentId).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _detailState.update { it.copy(isLoading = true, error = null) }
+                is Resource.Success -> _detailState.update { it.copy(isLoading = false, student = resource.data) }
+                is Resource.Error -> _detailState.update { it.copy(isLoading = false, error = resource.message) }
+                else -> Unit
+            }
+        }.launchIn(viewModelScope)
     }
 
-    fun onAddStudent() { /* Logique d'ajout */
-    }
+    fun onAddStudent() { /* Logique d'ajout */}
+        // --- Form Logic (Add/Edit) ---
+        fun onLastNameChange(value: String) = _formState.update { it.copy(lastName = value) }
+        fun onFirstNameChange(value: String) = _formState.update { it.copy(firstName = value) }
+        fun onDateOfBirthChange(value: String) = _formState.update { it.copy(dateOfBirth = value) }
+        fun onReligionChange(value: String) = _formState.update { it.copy(religion = value) }
+        fun onPreviousSchoolChange(value: String) = _formState.update { it.copy(previousSchool = value) }
+        fun onAddressChange(value: String) = _formState.update { it.copy(address = value) }
+
+        fun prepareFormForEdit(studentId: Long) {
+            studentsRepository.getStudent(studentId).onEach { resource ->
+                if (resource is Resource.Success) {
+                    resource.data?.let { student ->
+                        _formState.update {
+                            it.copy(
+                                lastName = student.lastName,
+                                firstName = student.firstName,
+                                dateOfBirth = student.dateOfBirth?.toString() ?: "",
+                                religion = student.religion ?: "",
+                                previousSchool = student.previousSchool,
+                                address = student.address ?: "",
+                                studentIdNumber = student.studentIdNumber,
+                                sernieNumber = student.sernieNumber ?: "",
+                                isSuccess = false,
+                                error = null
+                            )
+                        }
+                    }
+                }
+            }.launchIn(viewModelScope)
+        }
+
+        fun resetForm() {
+            _formState.value = AddStudentState()
+        }
+
+        fun saveStudent(studentId: Long? = null) {
+            val currentState = _formState.value
+
+            if (currentState.lastName.isBlank() || currentState.firstName.isBlank() || currentState.dateOfBirth.isBlank() || currentState.address.isBlank()) {
+                _formState.update { it.copy(error = "Le nom, prénom, date de naissance et adresse sont obligatoires") }
+                return
+            }
+
+            val dob = try {
+                if (currentState.dateOfBirth.isNotBlank()) LocalDate.parse(currentState.dateOfBirth) else null
+            } catch (e: Exception) {
+                _formState.update { it.copy(error = "Format de date invalide (AAAA-MM-JJ)") }
+                return
+            }
+
+            val schoolId = settingsStorage.getUserInfo().schoolId ?: 1
+
+            val request = StudentCreationRequest(
+                studentIdNumber = currentState.studentIdNumber,
+                sernieNumber = currentState.sernieNumber.ifBlank { null },
+                lastName = currentState.lastName,
+                firstName = currentState.firstName,
+                address = currentState.address.ifBlank { null },
+                previousSchool = currentState.previousSchool,
+                religion = currentState.religion.ifBlank { null },
+                photoUrl = null,
+                dateOfBirth = dob,
+                schoolId = schoolId
+            )
+
+            val flow = if (studentId == null) {
+                studentsRepository.createStudent(request)
+            } else {
+                studentsRepository.updateStudent(studentId, request)
+            }
+
+            flow.onEach { resource ->
+                when (resource) {
+                    is Resource.Loading -> _formState.update { it.copy(isLoading = true, error = null) }
+                    is Resource.Success -> _formState.update { it.copy(isLoading = false, isSuccess = true) }
+                    is Resource.Error -> _formState.update { it.copy(isLoading = false, error = resource.message) }
+                    else -> Unit
+                }
+            }.launchIn(viewModelScope)
+        }
+
+
 }
 
 
@@ -107,4 +205,24 @@ data class StudentUiState(
     val graduateCount: Int = 0,
     val searchQuery: String = "",
     val isLoading: Boolean = false
+)
+
+data class StudentDetailState(
+    val student: StudentDTO? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
+data class AddStudentState(
+    val lastName: String = "",
+    val firstName: String = "",
+    val dateOfBirth: String = "",
+    val religion: String = "",
+    val previousSchool: String = "",
+    val address: String = "",
+    val studentIdNumber: String = "STU-${(100..999).random()}-${Clock.System.now().toEpochMilliseconds()}",
+    val sernieNumber: String = "SER-${(100..999).random()}-${Clock.System.now().toEpochMilliseconds()}",
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isSuccess: Boolean = false
 )

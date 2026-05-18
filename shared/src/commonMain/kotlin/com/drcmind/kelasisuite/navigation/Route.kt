@@ -1,18 +1,46 @@
 package com.drcmind.kelasisuite.navigation
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.Subject
+import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.Apartment
+import androidx.compose.material.icons.filled.Architecture
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.ControlPointDuplicate
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.GroupWork
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LibraryBooks
+import androidx.compose.material.icons.filled.ModelTraining
+import androidx.compose.material.icons.filled.Money
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.PeopleAlt
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Streetview
+import androidx.compose.material.icons.filled.Subject
+import androidx.compose.material.icons.filled.Warehouse
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
+import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.CalendarPeriod
+import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.DeliberationsConduct
+import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.EvaluationGrading
+import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.ReportCards
+import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.SchoolStructure
 import kotlinx.serialization.Serializable
 
 
-sealed interface NavigationBarRoute : Route, NavKey {
+sealed interface NavigationBarRoute : Route {
     val icon: ImageVector
     val label: String
 }
@@ -65,30 +93,12 @@ sealed interface Route : NavKey {
             override val label: String = "Settings"
         }
 
-        val items : List<NavigationBarRoute> = listOf(Dashboard,Curriculum, Subjects, Schools, Templates,  Settings)
+        val items = listOf(Dashboard,Curriculum, Subjects, Schools, Templates,  Settings)
 
         val stateSaver = Saver<NavigationBarRoute, String>(
-            save = {
-                when (it) {
-                    Dashboard -> "Dashboard"
-                    Curriculum -> "Curriculum"
-                    Subjects -> "Subjects"
-                    Schools -> "Schools"
-                    Templates -> "Templates"
-                    Settings -> "Settings"
-                    else -> ""
-                }
-            },
+            save = { it::class.qualifiedName ?: "" },
             restore = { qualifiedClass ->
-                when (qualifiedClass) {
-                    "Dashboard" -> Dashboard
-                    "Curriculum" -> Curriculum
-                    "Subjects" -> Subjects
-                    "Schools" -> Schools
-                    "Templates" -> Templates
-                    "Settings" -> Settings
-                    else -> Dashboard
-                }
+                items.firstOrNull { it::class.qualifiedName == qualifiedClass } ?: Dashboard
             }
         )
     }
@@ -178,6 +188,9 @@ sealed interface Route : NavKey {
         data class TeacherDetail(val teacherId: Long) : Route
 
         @Serializable
+        data class AddClass(val classId: Long? = null) : Route
+
+        @Serializable
         data class ClassDetail(val classId: Long) : Route
 
 
@@ -190,11 +203,34 @@ sealed interface Route : NavKey {
             override val label: String = "Parents"
         }
 
-
         @Serializable
         data object StaffHR : NavigationBarRoute {
             override val icon: ImageVector = Icons.Default.GroupWork
             override val label: String = "Staffs & HR"
+
+            @Serializable
+            data object Teachers : Route{
+                @Serializable
+                data object ListDetails : Route{
+                    @Serializable
+                    data object List : Route
+                    @Serializable
+                    data class Profile(val teacherId : Long) : Route
+                }
+                @Serializable
+                data class ProfileDetails(val teacherId : Long) : Route
+                @Serializable
+                data class AddUpdate(val teacherId : Long?) : Route
+            }
+
+            enum class TabDestination(
+                val route: Route,
+                val label: String,
+                val icon: ImageVector,
+                val contentDescription: String
+            ) {
+                TEACHERS(Teachers, "Enseignants", Icons.Default.PeopleAlt, "Teachers"),
+            }
         }
 
         @Serializable
@@ -221,40 +257,14 @@ sealed interface Route : NavKey {
             override val label: String = "Paramètres"
         }
 
-        val items : List<NavigationBarRoute> = listOf(SchoolDashboard,
+        val items = listOf(SchoolDashboard,
             Academics, Pedagogy, Students, Parents, StaffHR, Finance, Logistics, Communication, Settings,
         )
 
         val stateSaver = Saver<NavigationBarRoute, String>(
-            save = {
-                when (it) {
-                    SchoolDashboard -> "SchoolDashboard"
-                    Academics -> "Academics"
-                    Pedagogy -> "Pedagogy"
-                    Students -> "Students"
-                    Parents -> "Parents"
-                    StaffHR -> "StaffHR"
-                    Finance -> "Finance"
-                    Logistics -> "Logistics"
-                    Communication -> "Communication"
-                    Settings -> "Settings"
-                    else -> ""
-                }
-            },
+            save = { it::class.qualifiedName ?: "" },
             restore = { qualifiedClass ->
-                when (qualifiedClass) {
-                    "SchoolDashboard" -> SchoolDashboard
-                    "Academics" -> Academics
-                    "Pedagogy" -> Pedagogy
-                    "Students" -> Students
-                    "Parents" -> Parents
-                    "StaffHR" -> StaffHR
-                    "Finance" -> Finance
-                    "Logistics" -> Logistics
-                    "Communication" -> Communication
-                    "Settings" -> Settings
-                    else -> SchoolDashboard
-                }
+                items.firstOrNull { it::class.qualifiedName == qualifiedClass } ?: SchoolDashboard
             }
         )
 

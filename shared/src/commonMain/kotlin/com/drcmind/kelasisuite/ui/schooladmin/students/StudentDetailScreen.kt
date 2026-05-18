@@ -29,12 +29,12 @@ fun StudentDetailScreen(
     studentId: Long,
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
-    viewModel: StudentDetailViewModel = koinViewModel()
+    viewModel: StudentsViewModel = koinViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.detailState.collectAsState()
 
     LaunchedEffect(studentId) {
-        viewModel.loadStudent(studentId)
+        viewModel.loadStudentDetail(studentId)
     }
 
     Scaffold(

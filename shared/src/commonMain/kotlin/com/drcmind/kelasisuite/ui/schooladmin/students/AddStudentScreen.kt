@@ -63,13 +63,15 @@ fun AddStudentScreen(
     studentId: Long? = null,
     onBack: () -> Unit,
     onStudentAdded: () -> Unit,
-    viewModel: AddStudentViewModel = koinViewModel()
+    viewModel: StudentsViewModel = koinViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.formState.collectAsState()
 
     LaunchedEffect(studentId) {
         if (studentId != null) {
-            viewModel.loadStudent(studentId)
+            viewModel.prepareFormForEdit(studentId)
+        } else {
+            viewModel.resetForm()
         }
     }
 
