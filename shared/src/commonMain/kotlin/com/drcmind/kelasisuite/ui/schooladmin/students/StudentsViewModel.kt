@@ -49,6 +49,7 @@ class StudentsViewModel(
                 is Resource.Success -> {
                     allStudents = resource.data?.map { it.toStudentItem() } ?: emptyList()
                     filterStudents()
+                    println("AAAAAAAAAAAA ${allStudents.size}")
                 }
 
                 is Resource.Error -> _listState.update { it.copy(isLoading = false) }

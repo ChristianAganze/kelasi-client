@@ -12,14 +12,13 @@ import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.schooladmin.academics.AcademicsScreen
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardScreen
+import com.drcmind.kelasisuite.ui.schooladmin.parents.ParentsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.PedagogyScreen
 import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileScreen
 import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.StaffHrScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailScreen
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsScreen
-import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.AddTeacherScreen
-import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeacherDetailsScreen
-import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeachersScreen
 
 @Composable
 fun SchoolAdminNavigation(
@@ -42,7 +41,7 @@ fun SchoolAdminNavigation(
             }
 
             entry<Route.SchoolAdmin.Pedagogy> {
-                Text("Pédagogie")
+                PedagogyScreen()
             }
 
             entry<Route.SchoolAdmin.Profile> {
@@ -91,7 +90,7 @@ fun SchoolAdminNavigation(
             }
 
             entry<Route.SchoolAdmin.Parents> {
-                Text("Parents")
+                ParentsScreen()
             }
             entry<Route.SchoolAdmin.StaffHR> {
                 StaffHrScreen()
