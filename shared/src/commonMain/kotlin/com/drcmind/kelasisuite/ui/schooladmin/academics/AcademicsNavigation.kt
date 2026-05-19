@@ -36,10 +36,7 @@ fun AcademicsNavigation(
             }
 
             entry<Route.SchoolAdmin.Academics.Enrollment> {
-                Column {
-                    Text("Affectation des Cours : Assigner quel professeur enseigne quel cours dans quelle classe (avec vérification de la charge horaire maximale)")
-                    Text("Titulariat : Assigner les professeurs titulaires pour chaque classe.")
-                }
+                CourseAffectation()
             }
 
             entry<Route.SchoolAdmin.Academics.EvaluationGrading> {

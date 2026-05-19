@@ -7,10 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,8 +16,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.domain.dto.StudentDTO
+import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
+import com.drcmind.kelasisuite.domain.dto.*
+import com.drcmind.kelasisuite.domain.util.Resource
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +68,7 @@ fun StudentDetailScreen(
                 )
             } else if (state.student != null) {
                 val student = state.student!!
+                var showEnrollDialog by remember { mutableStateOf(false) }
 
                 Column(
                     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -116,7 +117,7 @@ fun StudentDetailScreen(
                                     Icon(AppIcons.school, null, modifier = Modifier.padding(12.dp))
                                 }
                                 Spacer(Modifier.width(16.dp))
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         student.currentEnrollment?.className ?: "Non assigné",
                                         style = MaterialTheme.typography.titleLarge,
@@ -132,6 +133,9 @@ fun StudentDetailScreen(
                                             "--", style = MaterialTheme.typography.labelSmall
                                         )
                                     }
+                                }
+                                IconButton(onClick = { showEnrollDialog = true }) {
+                                    Icon(AppIcons.edit, null, tint = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }
@@ -184,6 +188,7 @@ fun StudentDetailScreen(
         }
     }
 }
+
 
 @Composable
 private fun HeaderSection(student: StudentDTO, onEdit: (Long) -> Unit) {

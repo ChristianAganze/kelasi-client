@@ -42,7 +42,7 @@ fun StaffHrScreen() {
         mutableStateOf(Route.SchoolAdmin.StaffHR.TabDestination.TEACHERS.ordinal)
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(modifier = Modifier.fillMaxSize()) {
         PrimaryTabRow(selectedTabIndex = selectedDestination, containerColor = Color.Transparent) {
             Route.SchoolAdmin.StaffHR.TabDestination.entries.forEachIndexed { index, destination ->
                 Tab(

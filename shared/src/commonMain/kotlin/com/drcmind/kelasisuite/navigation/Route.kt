@@ -1,4 +1,5 @@
 package com.drcmind.kelasisuite.navigation
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.Assignment
@@ -84,7 +85,7 @@ sealed interface Route : NavKey {
             override val label: String = "Settings"
         }
 
-        val items = listOf(Dashboard,Curriculum, Subjects, Schools, Templates,  Settings)
+        val items = listOf(Dashboard, Curriculum, Subjects, Schools, Templates, Settings)
 
         val stateSaver = Saver<NavigationBarRoute, String>(
             save = { it::class.qualifiedName ?: "" },
@@ -107,34 +108,42 @@ sealed interface Route : NavKey {
         data object Academics : NavigationBarRoute {
             override val icon: ImageVector = Icons.AutoMirrored.Filled.LibraryBooks
             override val label: String = "Affaires scolaires"
+
             @Serializable
-            data object CalendarPeriod : Route{
+            data object CalendarPeriod : Route {
                 @Serializable
                 data object Main : Route
+
                 @Serializable
                 data object Supporting : Route
             }
+
             @Serializable
-            data object SchoolStructure : Route{
+            data object SchoolStructure : Route {
                 @Serializable
                 data object Structure : Route
+
                 @Serializable
                 data class AddClass(val classId: Long? = null) : Route
 
                 @Serializable
-                data class ClassDetail(val classId: Long) : Route{
+                data class ClassDetail(val classId: Long, val className: String) : Route {
                     @Serializable
                     data object Main : Route
+
                     @Serializable
                     data object Supporting : Route
                 }
             }
+
             @Serializable
             data object Enrollment : Route
             @Serializable
             data object EvaluationGrading : Route
+
             @Serializable
             data object DeliberationsConduct : Route
+
             @Serializable
             data object ReportCards : Route
 
@@ -215,18 +224,21 @@ sealed interface Route : NavKey {
             override val label: String = "Staffs & HR"
 
             @Serializable
-            data object Teachers : Route{
+            data object Teachers : Route {
                 @Serializable
-                data object ListDetails : Route{
+                data object ListDetails : Route {
                     @Serializable
                     data object List : Route
+
                     @Serializable
-                    data class Profile(val teacherId : Long) : Route
+                    data class Profile(val teacherId: Long) : Route
                 }
+
                 @Serializable
-                data class ProfileDetails(val teacherId : Long) : Route
+                data class ProfileDetails(val teacherId: Long) : Route
+
                 @Serializable
-                data class AddUpdate(val teacherId : Long?) : Route
+                data class AddUpdate(val teacherId: Long?) : Route
             }
 
             enum class TabDestination(
@@ -263,8 +275,17 @@ sealed interface Route : NavKey {
             override val label: String = "Paramètres"
         }
 
-        val items = listOf(SchoolDashboard,
-            Academics, Pedagogy, Students, Parents, StaffHR, Finance, Logistics, Communication, Settings,
+        val items = listOf(
+            SchoolDashboard,
+            Academics,
+            Pedagogy,
+            Students,
+            Parents,
+            StaffHR,
+            Finance,
+            Logistics,
+            Communication,
+            Settings,
         )
 
         val stateSaver = Saver<NavigationBarRoute, String>(

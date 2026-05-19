@@ -134,7 +134,7 @@ fun AddStudentScreen(
 
             Card(
                 modifier = Modifier.fillMaxSize(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = MaterialTheme.shapes.extraLarge,
             ) {
                 Row(

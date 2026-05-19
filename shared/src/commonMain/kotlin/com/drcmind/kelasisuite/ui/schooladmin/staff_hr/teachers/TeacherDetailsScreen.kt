@@ -1,16 +1,46 @@
 package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
 
-import  androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/TeacherDetailsScreen.kt
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+========
 import androidx.compose.foundation.layout.*
+>>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/TeacherDetailsScreen.kt
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,26 +71,11 @@ fun TeacherDetailsScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Profil de l'enseignant",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
 
-                )
-        }
-    ) { padding ->
+        ) { padding ->
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(padding)
         ) {
             if (state.isLoading) {
@@ -109,6 +124,16 @@ fun TeacherDetailsScreen(
                     }
                     Spacer(Modifier.height(32.dp))
                 }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(vertical = 40.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(AppIcons.empty, contentDescription = null, Modifier.size(100.dp))
+                    Spacer(Modifier.height(10.dp))
+                    Text("Aucune selection")
+                }
             }
         }
     }
@@ -116,94 +141,80 @@ fun TeacherDetailsScreen(
 
 @Composable
 private fun TeacherHeaderCard(teacher: TeacherProfileDTO, onEdit: (Long) -> Unit) {
-    Card(
+
+
+    Surface(
+        color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary,
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .background(MaterialTheme.colorScheme.onSurface)
-            )
-
-            FlowRow(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
-                    .offset(y = (-40).dp),
-                itemVerticalAlignment = Alignment.Bottom
+        Row(
+            modifier = Modifier.padding(32.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Image Placeholder
+            Surface(
+                modifier = Modifier.size(120.dp),
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
             ) {
-                Box(contentAlignment = Alignment.BottomEnd) {
-                    Surface(
-                        modifier = Modifier.size(140.dp),
-                        shape = MaterialTheme.shapes.large,
-                        color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(4.dp, MaterialTheme.colorScheme.surface),
-                        shadowElevation = 8.dp
+                Icon(
+                    AppIcons.person,
+                    null,
+                    tint = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(32.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.15f),
+                    shape = CircleShape
+                ) {
+                    Row(
+                        Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                AppIcons.person,
-                                contentDescription = null,
-                                modifier = Modifier.size(80.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-
-                }
-
-                Spacer(modifier = Modifier.width(24.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    FlowRow(itemVerticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(6.dp).background(Color.Green, CircleShape))
+                        Spacer(Modifier.width(8.dp))
                         Text(
-                            teacher.fullName,
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Black
+                            "ACTIF",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(Modifier.width(12.dp))
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = CircleShape
-                        ) {
-                            Text(
-                                "ACTIF",
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
                     }
-                    Text(
-                        "ID: ${teacher.userId}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    teacher.fullName,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Black,
+                )
+                Text(
+                    "ID: ${teacher.userId}",
+                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(Modifier.height(16.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
-                        onClick = { onEdit(teacher.id) },
-                        shape = MaterialTheme.shapes.medium
+                        onClick = { onEdit(teacher.id) }, colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White, contentColor = Color.Black
+                        ), shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(AppIcons.edit, null, modifier = Modifier.size(18.dp))
+                        Icon(AppIcons.edit, null, Modifier.size(16.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Modifier", style = MaterialTheme.typography.labelLarge)
+                        Text("Modifier", fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
     }
+
 }
 
 @Composable

@@ -124,7 +124,7 @@ fun TeachersScreen(
         containerColor = Color.Transparent,
     ) { padding ->
         TeachersNavigation(
-            modifier = Modifier.padding(padding),
+            modifier = Modifier.padding(padding).padding(start = 16.dp),
             teachersBackStack = teachersBackStack
         )
     }

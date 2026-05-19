@@ -22,7 +22,6 @@ import kotlinx.serialization.modules.polymorphic
 
 @Composable
 fun AcademicsScreen() {
-
     val academicsBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {

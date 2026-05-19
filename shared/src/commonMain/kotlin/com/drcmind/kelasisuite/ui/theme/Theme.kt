@@ -61,7 +61,7 @@ private val darkScheme = darkColorScheme(
 
 @Composable
 fun KelasiSuiteTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = !isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) darkScheme else lightScheme
