@@ -13,6 +13,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.schooladmin.academics.calendar_periods.CalendarPeriodsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.academics.course_affectation.CourseAffectation
 import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.SchoolStructureScreen
 
 @Composable
@@ -36,10 +37,7 @@ fun AcademicsNavigation(
             }
 
             entry<Route.SchoolAdmin.Academics.Assignment> {
-                Column {
-                    Text("Affectation des Cours : Assigner quel professeur enseigne quel cours dans quelle classe (avec vérification de la charge horaire maximale)")
-                    Text("Titulariat : Assigner les professeurs titulaires pour chaque classe.")
-                }
+                CourseAffectation()
             }
 
             entry<Route.SchoolAdmin.Academics.EvaluationGrading> {

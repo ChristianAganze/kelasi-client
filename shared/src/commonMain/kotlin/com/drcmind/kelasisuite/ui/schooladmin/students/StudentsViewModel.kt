@@ -4,15 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
-import com.drcmind.kelasisuite.domain.dto.StudentCreationRequest
-import com.drcmind.kelasisuite.domain.dto.StudentDTO
+import com.drcmind.kelasisuite.domain.dto.*
 import com.drcmind.kelasisuite.domain.util.Resource
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
 
@@ -94,6 +88,36 @@ class StudentsViewModel(
                 is Resource.Loading -> _detailState.update { it.copy(isLoading = true, error = null) }
                 is Resource.Success -> _detailState.update { it.copy(isLoading = false, student = resource.data) }
                 is Resource.Error -> _detailState.update { it.copy(isLoading = false, error = resource.message) }
+                else -> Unit
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun enrollStudent(studentId: Long, classId: Long, academicYearId: Long) {
+        val request = EnrollmentRequest(studentId, classId, academicYearId)
+        studentsRepository.enrollStudent(request).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _detailState.update { it.copy(isLoadingEnrollment = true, enrollmentError = null) }
+                is Resource.Success -> {
+                    _detailState.update { it.copy(isLoadingEnrollment = false, student = resource.data) }
+                    loadStudents() // Refresh list
+                }
+                is Resource.Error -> _detailState.update { it.copy(isLoadingEnrollment = false, enrollmentError = resource.message) }
+                else -> Unit
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun updateEnrollment(enrollmentId: Long, newClassId: Long) {
+        val request = UpdateEnrollmentRequest(newClassId)
+        studentsRepository.updateEnrollment(enrollmentId, request).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _detailState.update { it.copy(isLoadingEnrollment = true, enrollmentError = null) }
+                is Resource.Success -> {
+                    _detailState.update { it.copy(isLoadingEnrollment = false, student = resource.data) }
+                    loadStudents() // Refresh list
+                }
+                is Resource.Error -> _detailState.update { it.copy(isLoadingEnrollment = false, enrollmentError = resource.message) }
                 else -> Unit
             }
         }.launchIn(viewModelScope)
@@ -210,7 +234,9 @@ data class StudentUiState(
 data class StudentDetailState(
     val student: StudentDTO? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isLoadingEnrollment: Boolean = false,
+    val enrollmentError: String? = null
 )
 
 data class AddStudentState(

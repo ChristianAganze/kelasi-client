@@ -93,7 +93,8 @@ fun StructureScreen(
                                 onNavigateToClassDetails = {
                                     schoolStructureBackStack.add(
                                         Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail(
-                                            visibleNode.node.originalId
+                                            visibleNode.node.originalId,
+                                            visibleNode.node.title
                                         )
                                     )
                                 }

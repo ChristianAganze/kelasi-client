@@ -46,3 +46,15 @@ data class EnrollmentSummaryDTO(
     val academicYear: String
 )
 
+@Serializable
+data class UpdateEnrollmentRequest(
+    val newClassId: Long
+)
+
+
+@Serializable
+data class EnrollmentRequest(
+    val studentId: Long,
+    val classId: Long,
+    val academicYearId: Long
+)

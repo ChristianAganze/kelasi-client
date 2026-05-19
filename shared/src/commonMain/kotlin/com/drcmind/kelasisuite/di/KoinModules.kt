@@ -78,7 +78,7 @@ val localStorageModule = module {
 
 val repositoryModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get(), get()) }
-    single<StudentsRepository> { StudentsRepositoryImpl(get()) }
+    single<StudentsRepository> { StudentsRepositoryImpl(get(), get()) }
     single<SchoolRepository> { SchoolRepositoryImpl(get(), get()) } // Updated constructor
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     single<TeachersRepository> { TeachersRepositoryImpl(get()) }
@@ -90,7 +90,7 @@ val viewModelModule = module {
     viewModelOf(::AuthViewModel)
     viewModelOf(::SchoolDashboardViewModel)
     viewModelOf(::StudentsViewModel)
-    viewModelOf(::SchoolStructureViewModel)
+    single { SchoolStructureViewModel(get(), get(), get()) }
     viewModelOf(::ProfileViewModel)
     viewModelOf(::CalendarPeriodsViewModel)
     viewModelOf(::TeachersViewModel)

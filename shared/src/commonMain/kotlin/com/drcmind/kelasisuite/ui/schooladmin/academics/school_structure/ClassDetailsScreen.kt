@@ -16,16 +16,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Surface
@@ -41,6 +52,8 @@ import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,22 +66,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.drcmind.kelasisuite.domain.dto.StudentDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ClassDetailsScreen(
     classId: Long,
+    className: String,
+    viewModel: SchoolStructureViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
+    var showEnrollDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -79,7 +100,7 @@ fun ClassDetailsScreen(
                 title = {
                     Column {
                         Text(
-                            text = "3e année Scientifique B",
+                            text = className,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -97,11 +118,31 @@ fun ClassDetailsScreen(
                     IconButton(onClick = {}) {
                         Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More menu")
                     }
+                    ElevatedButton(
+                        colors = ButtonDefaults.buttonColors(),
+                        onClick = {
+                            showEnrollDialog = true
+                        }
+                    ) {
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Enroller un élève")
+                        }
+                    }
                 },
             )
-        }
-    ) { padding ->
+        },
 
+
+        ) { padding ->
+        LaunchedEffect(Unit) {
+            viewModel.loadClassStudents(classId)
+        }
         Column(modifier = Modifier.padding(padding)) {
             val backStack = rememberNavBackStack(
                 configuration = SavedStateConfiguration {
@@ -171,7 +212,7 @@ fun ClassDetailsScreen(
 
                             when (selectedDestination) {
                                 0 -> {
-                                    StudentsList()
+                                    StudentsList(viewModel, classId)
                                 }
 
                                 1 -> { /* Performance placeholder */
@@ -210,11 +251,26 @@ fun ClassDetailsScreen(
                 }
             )
         }
+
+
+        if (showEnrollDialog) {
+            GlobalEnrollmentDialog(
+                viewModel = viewModel,
+                classId = classId,
+                onDismiss = { showEnrollDialog = false }
+            )
+        }
     }
 }
 
 @Composable
-fun StudentsList() {
+fun StudentsList(
+    viewModel: SchoolStructureViewModel,
+    classId: Long
+) {
+    val students by viewModel.clasStudents.collectAsState()
+    val isLoading by viewModel.isLoadingClassStudents.collectAsState()
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -222,7 +278,7 @@ fun StudentsList() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${sampleStudents.size} ÉLÈVES INSCRITS".uppercase(),
+                text = "${students.size} ÉLÈVES INSCRITS".uppercase(),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.outline,
@@ -246,13 +302,35 @@ fun StudentsList() {
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Column {
-                sampleStudents.forEachIndexed { index, student ->
-                    StudentRowItem(student)
-                    if (index < sampleStudents.size - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                when {
+                    isLoading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(48.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    students.isEmpty() -> {
+                        Text(
+                            text = "Aucun étudiant inscrit",
+                            modifier = Modifier.padding(24.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.outline
                         )
+                    }
+
+                    else -> students.forEachIndexed { index, student ->
+                        StudentRowItem(student)
+                        if (index < students.size - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                        }
                     }
                 }
             }
@@ -260,14 +338,13 @@ fun StudentsList() {
     }
 }
 
-
 @Composable
-fun StudentRowItem(student: Student) {
+fun StudentRowItem(student: StudentDTO) {
     ListItem(
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         headlineContent = {
             Text(
-                student.name,
+                student.fullName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -275,7 +352,7 @@ fun StudentRowItem(student: Student) {
         },
         supportingContent = {
             Text(
-                "ID: ${student.id}",
+                "ID: ${student.studentIdNumber}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -288,7 +365,7 @@ fun StudentRowItem(student: Student) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = student.name.take(1),
+                    text = student.fullName.take(1),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -296,7 +373,17 @@ fun StudentRowItem(student: Student) {
             }
         },
         trailingContent = {
-            val statusColor = if (student.isActive) Color(0xFF10B981) else Color(0xFFF59E0B)
+            val statusColor = when (student.status) {
+                com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus.ACTIVE -> Color(
+                    0xFF10B981
+                )
+
+                com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus.PROBATION -> Color(
+                    0xFFF59E0B
+                )
+
+                com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus.INACTIVE -> MaterialTheme.colorScheme.outline
+            }
             Surface(
                 color = statusColor.copy(alpha = 0.1f),
                 shape = CircleShape,
@@ -310,7 +397,7 @@ fun StudentRowItem(student: Student) {
                     Box(Modifier.size(6.dp).background(statusColor, CircleShape))
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = if (student.isActive) "ACTIF" else "PROBATION",
+                        text = student.status.name,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = statusColor
@@ -420,10 +507,186 @@ fun TeacherMiniCard() {
     }
 }
 
-data class Student(val id: String, val name: String, val isActive: Boolean)
 
-val sampleStudents = listOf(
-    Student("#2024-001", "Alice Mbuyi", true),
-    Student("#2024-002", "Marc Kalonji", false),
-    Student("#2024-003", "Sophie Bakala", true)
-)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GlobalEnrollmentDialog(
+    viewModel: SchoolStructureViewModel,
+    onDismiss: () -> Unit,
+    classId: Long?
+) {
+    val classes by viewModel.classes.collectAsState()
+    val academicYears by viewModel.academicYears.collectAsState()
+    val students by viewModel.students.collectAsState()
+    val isLoadingEnrollment by viewModel.isLoadingEnrollment.collectAsState()
+
+    var studentSearchQuery by remember { mutableStateOf("") }
+    var selectedStudentId by remember { mutableStateOf<Long?>(null) }
+    var selectedClassId by remember { mutableStateOf(classId) }
+    var selectedAcademicYearId by remember { mutableStateOf<Long?>(null) }
+
+    val filteredStudents = remember(studentSearchQuery, students) {
+        if (studentSearchQuery.isEmpty()) emptyList()
+        else students.filter {
+            it.fullName.contains(studentSearchQuery, ignoreCase = true) ||
+                    it.studentIdNumber.contains(studentSearchQuery, ignoreCase = true)
+        }
+    }
+
+    LaunchedEffect(academicYears) {
+        if (selectedAcademicYearId == null) {
+            selectedAcademicYearId =
+                academicYears.find { it.isActive }?.id ?: academicYears.firstOrNull()?.id
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Inscription d'un élève") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                // Student Selection with Suggestions
+                var studentExpanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = studentExpanded,
+                    onExpandedChange = { studentExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = studentSearchQuery,
+                        onValueChange = {
+                            studentSearchQuery = it
+                            selectedStudentId = null
+                            studentExpanded = true
+                        },
+                        label = { Text("Élève (Nom ou Matricule)") },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        shape = MaterialTheme.shapes.large,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(studentExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
+                    if (filteredStudents.isNotEmpty()) {
+                        ExposedDropdownMenu(
+                            expanded = studentExpanded,
+                            onDismissRequest = { studentExpanded = false }
+                        ) {
+                            filteredStudents.forEach { student ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Column {
+                                            Text(student.fullName)
+                                            Text(
+                                                student.studentIdNumber,
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        selectedStudentId = student.id
+                                        studentSearchQuery = student.fullName
+                                        studentExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Class Selection
+                var classExpanded by remember { mutableStateOf(false) }
+                if (selectedClassId == null) {
+                    ExposedDropdownMenuBox(
+                        expanded = classExpanded,
+                        onExpandedChange = { classExpanded = it }
+                    ) {
+                        OutlinedTextField(
+                            value = classes.find { it.id == selectedClassId }?.name
+                                ?: "Sélectionner une classe",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Classe") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(classExpanded) },
+                            modifier = Modifier.fillMaxWidth().menuAnchor(),
+                            shape = MaterialTheme.shapes.large,
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = classExpanded,
+                            onDismissRequest = { classExpanded = false }
+                        ) {
+                            classes.forEach { schoolClass ->
+                                DropdownMenuItem(
+                                    text = { Text(schoolClass.name) },
+                                    onClick = {
+                                        selectedClassId = schoolClass.id
+                                        classExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Academic Year Selection
+                var yearExpanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = yearExpanded,
+                    onExpandedChange = { yearExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = academicYears.find { it.id == selectedAcademicYearId }?.label
+                            ?: "Sélectionner une année",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Année Académique") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(yearExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        shape = MaterialTheme.shapes.large,
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = yearExpanded,
+                        onDismissRequest = { yearExpanded = false }
+                    ) {
+                        academicYears.forEach { year ->
+                            DropdownMenuItem(
+                                text = { Text(year.label) },
+                                onClick = {
+                                    selectedAcademicYearId = year.id
+                                    yearExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = selectedStudentId != null && selectedClassId != null && selectedAcademicYearId != null && !isLoadingEnrollment,
+                onClick = {
+                    viewModel.enrollStudent(
+                        selectedStudentId!!,
+                        selectedClassId!!,
+                        selectedAcademicYearId!!
+                    )
+                    viewModel.loadClassStudents(selectedClassId!!)
+                    onDismiss()
+                }
+            ) {
+                if (isLoadingEnrollment) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Inscrire")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        }
+    )
+}
+
+

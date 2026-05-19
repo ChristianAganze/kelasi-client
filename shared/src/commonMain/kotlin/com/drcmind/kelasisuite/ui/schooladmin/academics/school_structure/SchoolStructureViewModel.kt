@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
+import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.domain.dto.*
 import com.drcmind.kelasisuite.domain.model.SchoolTreeNode
 import com.drcmind.kelasisuite.domain.util.NodeType
@@ -15,16 +17,119 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class SchoolStructureViewModel(
-    private val schoolRepository: SchoolRepository
-) : ViewModel()
-{
+    private val schoolRepository: SchoolRepository,
+    private val studentsRepository: StudentsRepository,
+    private val settingsStorage: SettingsStorage
+) : ViewModel() {
     private val _state = MutableStateFlow(ClassesState())
     val state: StateFlow<ClassesState> = _state.asStateFlow()
+
+    private val _classes = MutableStateFlow<List<SchoolClassDTO>>(emptyList())
+    val classes: StateFlow<List<SchoolClassDTO>> = _classes.asStateFlow()
+
+    private val _academicYears = MutableStateFlow<List<AcademicYearDTO>>(emptyList())
+    val academicYears: StateFlow<List<AcademicYearDTO>> = _academicYears.asStateFlow()
+
+    private val _students = MutableStateFlow<List<StudentDTO>>(emptyList())
+    val students: StateFlow<List<StudentDTO>> = _students.asStateFlow()
+
+    private val _clasStudents = MutableStateFlow<List<StudentDTO>>(emptyList())
+    val clasStudents: StateFlow<List<StudentDTO>> = _clasStudents.asStateFlow()
+
+    private val _isLoadingClassStudents = MutableStateFlow(false)
+    val isLoadingClassStudents = _isLoadingClassStudents.asStateFlow()
+
+    private val _enrolledStudents = MutableStateFlow<List<StudentDTO>>(emptyList())
+    val enrolledStudents: StateFlow<List<StudentDTO>> = _enrolledStudents.asStateFlow()
+
+    private val _isLoadingEnrolledStudents = MutableStateFlow(false)
+    val isLoadingEnrolledStudents = _isLoadingEnrolledStudents.asStateFlow()
+
+    private val _isLoadingEnrollment = MutableStateFlow(false)
+    val isLoadingEnrollment = _isLoadingEnrollment.asStateFlow()
 
     var nodes = mutableStateListOf<SchoolTreeNode>()
 
     init {
-         loadRoots()
+        loadRoots()
+        loadClasses()
+        loadAcademicYears()
+        loadStudents()
+    }
+
+    private fun loadClasses() {
+        schoolRepository.getClassesForSchool().onEach { resource ->
+            if (resource is Resource.Success) {
+                _classes.value = resource.data ?: emptyList()
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun loadAcademicYears() {
+        schoolRepository.getAcademicYears().onEach { resource ->
+            if (resource is Resource.Success) {
+                _academicYears.value = resource.data ?: emptyList()
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun loadClassStudents(classId: Long) {
+        studentsRepository.getStudentsForClass(classId).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _isLoadingClassStudents.value = true
+                is Resource.Success -> {
+                    _clasStudents.value = resource.data ?: emptyList()
+                    _isLoadingClassStudents.value = false
+                }
+
+                is Resource.Error -> _isLoadingClassStudents.value = false
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun loadEnrolledStudents() {
+        val schoolId = settingsStorage.getUserInfo().schoolId
+        if (schoolId == null) {
+            _enrolledStudents.value = emptyList()
+            return
+        }
+        studentsRepository.getEnrolledStudents(schoolId).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _isLoadingEnrolledStudents.value = true
+                is Resource.Success -> {
+                    _enrolledStudents.value = resource.data ?: emptyList()
+                    _isLoadingEnrolledStudents.value = false
+                }
+
+                is Resource.Error -> _isLoadingEnrolledStudents.value = false
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun loadStudents() {
+        val schoolId = settingsStorage.getUserInfo().schoolId ?: return
+        studentsRepository.getStudents(schoolId).onEach { resource ->
+            if (resource is Resource.Success) {
+                _students.value = resource.data ?: emptyList()
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun enrollStudent(studentId: Long, classId: Long, academicYearId: Long) {
+        val request = EnrollmentRequest(studentId, classId, academicYearId)
+        studentsRepository.enrollStudent(request).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _isLoadingEnrollment.value = true
+                is Resource.Success -> {
+                    _isLoadingEnrollment.value = false
+                    loadStudents() // Refresh to update status if needed
+                    loadEnrolledStudents()
+                }
+
+                is Resource.Error -> _isLoadingEnrollment.value = false
+                else -> Unit
+            }
+        }.launchIn(viewModelScope)
     }
 
     val visibleNodes: State<List<VisibleNode>> = derivedStateOf {
@@ -45,7 +150,8 @@ class SchoolStructureViewModel(
                         println("SUCCESS: Received ${data.size} school sections. Data: $data")
                         val newRootNodes = data.map { it.toSchoolTreeNode() }
                         val existingNodeKeys = nodes.map { "${it.id}-${it.type}" }.toSet()
-                        val nodesToAdd = newRootNodes.filter { "${it.id}-${it.type}" !in existingNodeKeys }
+                        val nodesToAdd =
+                            newRootNodes.filter { "${it.id}-${it.type}" !in existingNodeKeys }
                         if (nodesToAdd.isNotEmpty()) {
                             nodes.addAll(nodesToAdd)
                             println("Nodes list size after addAll: ${nodes.size}")
@@ -58,9 +164,11 @@ class SchoolStructureViewModel(
                         println("SUCCESS: Received null data for school sections.")
                     }
                 }
+
                 is Resource.Error -> {
                     println("error ${schoolSection.message}")
                 }
+
                 else -> {}
             }
         }.launchIn(viewModelScope)
@@ -100,159 +208,192 @@ class SchoolStructureViewModel(
             if (!node.childrenLoaded) {
                 when (node.type) {
                     NodeType.CYCLE -> {
-                        schoolRepository.getSectionBySchoolSectionAndSchool(node.originalId).onEach { section ->
-                            when (section) {
-                                is Resource.Loading -> {
-                                    println("LOADING children for ${node.title} (type: ${node.type})")
-                                }
-                                is Resource.Success -> {
-                                    println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${section.data?.size ?: 0} items.")
-                                    val newChildren = section.data?.map { it.toSchoolTreeNode() } ?: emptyList()
-                                    println("expand (CYCLE): newChildren for ${node.title}: $newChildren")
-                                    // MODIFIED: Use composite key for existing nodes
-                                    val existingNodeKeys = nodes.map { "${it.id}-${it.type}" }.toSet()
-                                    println("expand (CYCLE): existingNodeKeys: $existingNodeKeys") // Log the new set
-                                    val childrenToAdd = newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                    println("expand (CYCLE): childrenToAdd for ${node.title}: $childrenToAdd")
-                                    if (childrenToAdd.isNotEmpty()) {
-                                        nodes.addAll(childrenToAdd)
-                                        println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                        schoolRepository.getSectionBySchoolSectionAndSchool(node.originalId)
+                            .onEach { section ->
+                                when (section) {
+                                    is Resource.Loading -> {
+                                        println("LOADING children for ${node.title} (type: ${node.type})")
                                     }
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(
-                                            expanded = true,
-                                            loading = false,
-                                            childrenLoaded = true,
-                                        )
+
+                                    is Resource.Success -> {
+                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${section.data?.size ?: 0} items.")
+                                        val newChildren =
+                                            section.data?.map { it.toSchoolTreeNode() }
+                                                ?: emptyList()
+                                        println("expand (CYCLE): newChildren for ${node.title}: $newChildren")
+                                        // MODIFIED: Use composite key for existing nodes
+                                        val existingNodeKeys =
+                                            nodes.map { "${it.id}-${it.type}" }.toSet()
+                                        println("expand (CYCLE): existingNodeKeys: $existingNodeKeys") // Log the new set
+                                        val childrenToAdd =
+                                            newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
+                                        println("expand (CYCLE): childrenToAdd for ${node.title}: $childrenToAdd")
+                                        if (childrenToAdd.isNotEmpty()) {
+                                            nodes.addAll(childrenToAdd)
+                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                                        }
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(
+                                                expanded = true,
+                                                loading = false,
+                                                childrenLoaded = true,
+                                            )
+                                        }
+                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
                                     }
-                                    println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
-                                }
-                                is Resource.Error -> {
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(loading = false)
+
+                                    is Resource.Error -> {
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(loading = false)
+                                        }
+                                        println("ERROR fetching children for ${node.title}. Message: ${section.message}. Set loading=false.")
                                     }
-                                    println("ERROR fetching children for ${node.title}. Message: ${section.message}. Set loading=false.")
+
+                                    else -> {}
                                 }
-                                else -> {}
-                            }
-                        }.launchIn(viewModelScope)
+                            }.launchIn(viewModelScope)
                     }
+
                     NodeType.SECTION -> {
-                        schoolRepository.getOfferedMajorsForSchoolAndSection( node.originalId).onEach { major ->
-                            when (major) {
-                                is Resource.Loading -> {
-                                    println("LOADING children for ${node.title} (type: ${node.type})")
-                                }
-                                is Resource.Success -> {
-                                    println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${major.data?.size ?: 0} items.")
-                                    val newChildren = major.data?.map { it.toSchoolTreeNode() } ?: emptyList()
-                                    println("expand (SECTION): newChildren for ${node.title}: $newChildren")
-                                    // MODIFIED: Use composite key for existing nodes
-                                    val existingNodeKeys = nodes.map { "${it.id}-${it.type}" }.toSet()
-                                    println("expand (SECTION): existingNodeKeys: $existingNodeKeys") // Log the new set
-                                    val childrenToAdd = newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                    println("expand (SECTION): childrenToAdd for ${node.title}: $childrenToAdd")
-                                    if (childrenToAdd.isNotEmpty()) {
-                                        nodes.addAll(childrenToAdd)
-                                        println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                        schoolRepository.getOfferedMajorsForSchoolAndSection(node.originalId)
+                            .onEach { major ->
+                                when (major) {
+                                    is Resource.Loading -> {
+                                        println("LOADING children for ${node.title} (type: ${node.type})")
                                     }
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(
-                                            expanded = true,
-                                            loading = false,
-                                            childrenLoaded = true
-                                        )
+
+                                    is Resource.Success -> {
+                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${major.data?.size ?: 0} items.")
+                                        val newChildren =
+                                            major.data?.map { it.toSchoolTreeNode() } ?: emptyList()
+                                        println("expand (SECTION): newChildren for ${node.title}: $newChildren")
+                                        // MODIFIED: Use composite key for existing nodes
+                                        val existingNodeKeys =
+                                            nodes.map { "${it.id}-${it.type}" }.toSet()
+                                        println("expand (SECTION): existingNodeKeys: $existingNodeKeys") // Log the new set
+                                        val childrenToAdd =
+                                            newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
+                                        println("expand (SECTION): childrenToAdd for ${node.title}: $childrenToAdd")
+                                        if (childrenToAdd.isNotEmpty()) {
+                                            nodes.addAll(childrenToAdd)
+                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                                        }
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(
+                                                expanded = true,
+                                                loading = false,
+                                                childrenLoaded = true
+                                            )
+                                        }
+                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
                                     }
-                                    println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
-                                }
-                                is Resource.Error -> {
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(loading = false)
+
+                                    is Resource.Error -> {
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(loading = false)
+                                        }
+                                        println("ERROR fetching children for ${node.title}. Message: ${major.message}. Set loading=false.")
                                     }
-                                    println("ERROR fetching children for ${node.title}. Message: ${major.message}. Set loading=false.")
+
+                                    else -> {}
                                 }
-                                else -> {}
-                            }
-                        }.launchIn(viewModelScope)
+                            }.launchIn(viewModelScope)
                     }
+
                     NodeType.MAJOR -> {
-                        schoolRepository.getGradeLevelsBySchoolAndByMajor( node.originalId).onEach { gradeLevel ->
-                            when (gradeLevel) {
-                                is Resource.Loading -> {
-                                    println("LOADING children for ${node.title} (type: ${node.type})")
-                                }
-                                is Resource.Success -> {
-                                    println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${gradeLevel.data?.size ?: 0} items.")
-                                    val newChildren = gradeLevel.data?.map { it.toSchoolTreeNode() } ?: emptyList()
-                                    println("expand (MAJOR): newChildren for ${node.title}: $newChildren")
-                                    // MODIFIED: Use composite key for existing nodes
-                                    val existingNodeKeys = nodes.map { "${it.id}-${it.type}" }.toSet()
-                                    println("expand (MAJOR): existingNodeKeys: $existingNodeKeys") // Log the new set
-                                    val childrenToAdd = newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                    println("expand (MAJOR): childrenToAdd for ${node.title}: $childrenToAdd")
-                                    if (childrenToAdd.isNotEmpty()) {
-                                        nodes.addAll(childrenToAdd)
-                                        println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                        schoolRepository.getGradeLevelsBySchoolAndByMajor(node.originalId)
+                            .onEach { gradeLevel ->
+                                when (gradeLevel) {
+                                    is Resource.Loading -> {
+                                        println("LOADING children for ${node.title} (type: ${node.type})")
                                     }
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(
-                                            expanded = true,
-                                            loading = false,
-                                            childrenLoaded = true
-                                        )
-                                    }
-                                    println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
-                                }
-                                is Resource.Error -> {
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(loading = false)
-                                    }
-                                    println("ERROR fetching children for ${node.title}. Message: ${gradeLevel.message}. Set loading=false.")
-                                }
-                                else -> {}
-                            }
 
-                        }.launchIn(viewModelScope)
+                                    is Resource.Success -> {
+                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${gradeLevel.data?.size ?: 0} items.")
+                                        val newChildren =
+                                            gradeLevel.data?.map { it.toSchoolTreeNode() }
+                                                ?: emptyList()
+                                        println("expand (MAJOR): newChildren for ${node.title}: $newChildren")
+                                        // MODIFIED: Use composite key for existing nodes
+                                        val existingNodeKeys =
+                                            nodes.map { "${it.id}-${it.type}" }.toSet()
+                                        println("expand (MAJOR): existingNodeKeys: $existingNodeKeys") // Log the new set
+                                        val childrenToAdd =
+                                            newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
+                                        println("expand (MAJOR): childrenToAdd for ${node.title}: $childrenToAdd")
+                                        if (childrenToAdd.isNotEmpty()) {
+                                            nodes.addAll(childrenToAdd)
+                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                                        }
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(
+                                                expanded = true,
+                                                loading = false,
+                                                childrenLoaded = true
+                                            )
+                                        }
+                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
+                                    }
+
+                                    is Resource.Error -> {
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(loading = false)
+                                        }
+                                        println("ERROR fetching children for ${node.title}. Message: ${gradeLevel.message}. Set loading=false.")
+                                    }
+
+                                    else -> {}
+                                }
+
+                            }.launchIn(viewModelScope)
                     }
+
                     NodeType.GRADE_LEVEL -> {
-                        schoolRepository.getClassesBySchoolAndGradeLevel( node.originalId).onEach { schoolClass ->
-                            when (schoolClass) {
-                                is Resource.Loading -> {
-                                    println("LOADING children for ${node.title} (type: ${node.type})")
-                                }
-                                is Resource.Success -> {
-                                    println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${schoolClass.data?.size ?: 0} items.")
-                                    val newChildren = schoolClass.data?.map { it.toSchoolTreeNode() } ?: emptyList()
-                                    println("expand (GRADE_LEVEL): newChildren for ${node.title}: $newChildren")
-                                    // MODIFIED: Use composite key for existing nodes
-                                    val existingNodeKeys = nodes.map { "${it.id}-${it.type}" }.toSet()
-                                    println("expand (GRADE_LEVEL): existingNodeKeys: $existingNodeKeys") // Log the new set
-                                    val childrenToAdd = newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                    println("expand (GRADE_LEVEL): childrenToAdd for ${node.title}: $childrenToAdd")
-                                    if (childrenToAdd.isNotEmpty()) {
-                                        nodes.addAll(childrenToAdd)
-                                        println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                        schoolRepository.getClassesBySchoolAndGradeLevel(node.originalId)
+                            .onEach { schoolClass ->
+                                when (schoolClass) {
+                                    is Resource.Loading -> {
+                                        println("LOADING children for ${node.title} (type: ${node.type})")
                                     }
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(
-                                            expanded = true,
-                                            loading = false,
-                                            childrenLoaded = true
-                                        )
+
+                                    is Resource.Success -> {
+                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${schoolClass.data?.size ?: 0} items.")
+                                        val newChildren =
+                                            schoolClass.data?.map { it.toSchoolTreeNode() }
+                                                ?: emptyList()
+                                        println("expand (GRADE_LEVEL): newChildren for ${node.title}: $newChildren")
+                                        // MODIFIED: Use composite key for existing nodes
+                                        val existingNodeKeys =
+                                            nodes.map { "${it.id}-${it.type}" }.toSet()
+                                        println("expand (GRADE_LEVEL): existingNodeKeys: $existingNodeKeys") // Log the new set
+                                        val childrenToAdd =
+                                            newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
+                                        println("expand (GRADE_LEVEL): childrenToAdd for ${node.title}: $childrenToAdd")
+                                        if (childrenToAdd.isNotEmpty()) {
+                                            nodes.addAll(childrenToAdd)
+                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
+                                        }
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(
+                                                expanded = true,
+                                                loading = false,
+                                                childrenLoaded = true
+                                            )
+                                        }
+                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
                                     }
-                                    println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
-                                }
-                                is Resource.Error -> {
-                                    updateNode(node.originalId, node.type) {
-                                        it.copy(loading = false)
+
+                                    is Resource.Error -> {
+                                        updateNode(node.originalId, node.type) {
+                                            it.copy(loading = false)
+                                        }
+                                        println("ERROR fetching children for ${node.title}. Message: ${schoolClass.message}. Set loading=false.")
                                     }
-                                    println("ERROR fetching children for ${node.title}. Message: ${schoolClass.message}. Set loading=false.")
+
+                                    else -> {}
                                 }
 
-                                else -> {}
-                            }
-
-                        }.launchIn(viewModelScope)
+                            }.launchIn(viewModelScope)
                     }
 
                     else -> {
@@ -304,9 +445,11 @@ class SchoolStructureViewModel(
             NodeAction.ADD_CLASS -> {
                 println("Add class to ${node.title}")
             }
+
             NodeAction.DELETE_CLASS -> {
                 println("Delete class from ${node.title}")
             }
+
             NodeAction.INFO_CYCLE -> TODO()
             NodeAction.INFO_SECTION -> TODO()
             NodeAction.INFO_MAJOR -> TODO()
@@ -316,14 +459,15 @@ class SchoolStructureViewModel(
         }
     }
 }
+
 data class ClassesState(
     val isLoading: Boolean = false,
     val isDeleting: Boolean = false,
     val errorMessage: String? = null,
-    val totalCycles : Int = 2,
-    val totalSections : Int = 2,
-    val totalGradeLevels : Int = 8,
-    val totalClasses : Int = 12,
+    val totalCycles: Int = 2,
+    val totalSections: Int = 2,
+    val totalGradeLevels: Int = 8,
+    val totalClasses: Int = 12,
 )
 
 fun SchoolSectionDTO.toSchoolTreeNode() = SchoolTreeNode(
@@ -357,7 +501,7 @@ fun GradeLevelDTO.toSchoolTreeNode() = SchoolTreeNode(
     parentId = "${NodeType.MAJOR}-${this.majorId}",
 )
 
-fun SchoolClassDTO.toSchoolTreeNode() : SchoolTreeNode = SchoolTreeNode(
+fun SchoolClassDTO.toSchoolTreeNode(): SchoolTreeNode = SchoolTreeNode(
     originalId = this.id,
     title = this.name,
     type = NodeType.CLASSROOM,
