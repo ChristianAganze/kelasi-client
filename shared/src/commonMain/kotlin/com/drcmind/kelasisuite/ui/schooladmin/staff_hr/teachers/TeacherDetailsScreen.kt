@@ -111,7 +111,7 @@ fun TeacherDetailsScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     TeacherHeaderCard(teacher, onEdit)

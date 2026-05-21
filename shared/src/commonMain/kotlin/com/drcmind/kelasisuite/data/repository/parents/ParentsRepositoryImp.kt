@@ -81,7 +81,7 @@ class ParentsRepositoryImp(
     override fun getParentsBySchool(): Flow<Resource<List<ParentDto>>> {
         return flow {
             emit(Resource.Loading())
-            val schoolId = settingsStorage.getSchool()?.id
+            val schoolId = settingsStorage.getUserInfo().schoolId
             val result = parentAPIService.getParentsBySchool(schoolId!!)
             emit(Resource.Success(result))
         }.catch {

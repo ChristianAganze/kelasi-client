@@ -1,82 +1,56 @@
 package com.drcmind.kelasisuite.ui.schooladmin.parents
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.drcmind.kelasisuite.domain.dto.ParentDto
+import com.drcmind.kelasisuite.domain.dto.*
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
-import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeacherDetailsScreen
-import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeacherItem
-import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeacherRow
-import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeacherTableCard
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3AdaptiveApi::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun ParentsScreen(
     viewModel: ParentsViewModel = koinViewModel()
-){
+) {
     val uiState by viewModel.uiState.collectAsState()
+    var showAddParentDialog by remember { mutableStateOf(false) }
+    var parentToEdit by remember { mutableStateOf<ParentDto?>(null) }
+
     val backStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {
@@ -113,51 +87,71 @@ fun ParentsScreen(
             entry<Route.SchoolAdmin.Parents.List>(
                 metadata = ListDetailSceneStrategy.listPane()
             ) {
+                Scaffold(
+                    containerColor = Color.Transparent,
+                    topBar = {
+                        TopAppBar(
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent,
+                                scrolledContainerColor = Color.Transparent,
+                                navigationIconContentColor = Color.Transparent,
+                                titleContentColor = MaterialTheme.colorScheme
+                                    .onSurface,
+                                actionIconContentColor = Color.Transparent,
+                            ),
 
-                if (uiState.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = {
-                                    OutlinedTextField(
-                                        value = uiState.searchQuery,
-                                        onValueChange = viewModel::onSearchQueryChange,
-                                        modifier = Modifier.fillMaxWidth().padding(16.dp).widthIn(max = 400.dp),
-                                        placeholder = { Text("Rechercher un parent (Nom, ID)...", maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                                        trailingIcon = {
-                                            if (uiState.searchQuery.isNotEmpty()) {
-                                                IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                                                    Icon(Icons.Default.Close, contentDescription = null)
-                                                }
-                                            }
-                                        },
-                                        singleLine = true,
-                                        shape = MaterialTheme.shapes.extraLarge,
-                                    )
-                                },
-                                actions = {
-                                    OutlinedIconButton(onClick = {}){
-                                        Icon(Icons.Default.Add, contentDescription = "Add Parent")
-                                    }
-                                    OutlinedIconButton(onClick = {}){
-                                        Icon(Icons.Default.MoreVert, contentDescription = "More menu")
-                                    }
-                                }
-                            )
-                        }
-                    ){
-                        ParentTable(
-                            uiState.list, {
-                                backStack.add(
-                                    Route.SchoolAdmin.StaffHR.Teachers.ListDetails.Profile(
-                                        it
+                            title = {
+                                Text(
+                                    text = "Gestion des parents",
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight =
+                                            FontWeight.Black
                                     )
                                 )
+
+                            },
+                            actions = {
+                                IconButton(onClick = viewModel::loadSchoolParent) {
+                                    Icon(
+                                        AppIcons.refresh,
+                                        contentDescription = "Actualiser",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                ElevatedButton(
+                                    colors = ButtonDefaults.buttonColors(),
+                                    onClick = {
+                                        parentToEdit = null
+                                        showAddParentDialog = true
+                                    }
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = null)
+
+                                }
+                            }
+                        )
+                    },
+
+                    ) {
+
+                    if (uiState.isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize().padding(it),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        ParentTable(
+                            viewModel = viewModel,
+                            modifier = Modifier.padding(it).padding(horizontal = 16.dp),
+                            parents = uiState.list,
+                            onNavigateToParentProfile = { id ->
+                                backStack.add(Route.SchoolAdmin.Parents.Profile(id))
+                            },
+                            onEditParent = { parent ->
+                                parentToEdit = parent
+                                showAddParentDialog = true
                             }
                         )
                     }
@@ -166,32 +160,85 @@ fun ParentsScreen(
             entry<Route.SchoolAdmin.Parents.Profile>(
                 metadata = ListDetailSceneStrategy.detailPane()
             ) {
-                Scaffold(
-                    topBar = {
-                        LargeFlexibleTopAppBar(
-                            title = {
-                                Text("Profil du parent")
-                            }
-                        )
-                    }
-                ){
-                    Column(modifier = Modifier.fillMaxSize().padding(it)) {
-                        Text("Détails")
-                    }
-                }
+                ParentDetailPane(
+                    parentId = it.parentId,
+                    viewModel = viewModel,
+                    onBack = { backStack.removeLastOrNull() }
+                )
             }
         }
     )
+
+    val users by viewModel.users.collectAsState()
+    val students by viewModel.students.collectAsState()
+    val academicYears by viewModel.academicYears.collectAsState()
+
+    if (showAddParentDialog) {
+        ParentFormDialog(
+            parent = parentToEdit,
+            users = users,
+            onDismiss = { showAddParentDialog = false },
+            onConfirm = { userId, address, occupation ->
+                if (parentToEdit == null) {
+                    viewModel.createParent(userId, address, occupation) {
+                        showAddParentDialog = false
+                    }
+                } else {
+                    viewModel.updateParent(parentToEdit!!.id!!, userId, address, occupation) {
+                        showAddParentDialog = false
+                    }
+                }
+            }
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParentTable(
+    modifier: Modifier = Modifier,
     parents: List<ParentDto>,
     onNavigateToParentProfile: (Long) -> Unit,
+    viewModel: ParentsViewModel, onEditParent: (ParentDto) -> Unit,
 ) {
-
-    Column(modifier = Modifier.fillMaxSize().padding(32.dp)) {
+    val uiState by viewModel.uiState.collectAsState()
+    Column(
+        modifier = modifier.fillMaxWidth().clip(
+            MaterialTheme.shapes.extraLarge
+        ).background(MaterialTheme.colorScheme.surface).border(
+            shape = MaterialTheme.shapes.extraLarge,
+            border =
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        )
+    ) {
+        TextField(
+            value = uiState.searchQuery,
+            onValueChange = viewModel::onSearchQueryChange,
+            modifier = Modifier.fillMaxWidth().padding(16.dp).widthIn(max = 400.dp),
+            placeholder = {
+                Text(
+                    "Rechercher un parent (Nom, ID)...",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            trailingIcon = {
+                if (uiState.searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                        Icon(Icons.Default.Close, contentDescription = null)
+                    }
+                }
+            },
+            singleLine = true,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,    // Supprime la ligne sous le champ (focus)
+                unfocusedIndicatorColor = Color.Transparent,  // Supprime la ligne sous le champ
+                disabledIndicatorColor = Color.Transparent,
+            )
+        )
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -199,25 +246,19 @@ fun ParentTable(
             Text(
                 "Noms",
                 modifier = Modifier.weight(2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                "Adresse",
+                "Occupation",
                 modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center
             )
             Text(
-                "Etudiants liés",
+                "Étudiants liés",
                 modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center
@@ -225,36 +266,38 @@ fun ParentTable(
             Text(
                 "Actions",
                 modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center
             )
         }
 
-        when (parents.isEmpty()) {
-            true -> Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp),
+        if (parents.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(AppIcons.peoples, contentDescription = null, Modifier.size(100.dp))
+                Icon(
+                    AppIcons.peoples,
+                    contentDescription = null,
+                    Modifier.size(100.dp),
+                    tint = MaterialTheme.colorScheme.outlineVariant
+                )
                 Spacer(Modifier.height(10.dp))
-                Text("Aucun parent trouvé")
+                Text("Aucun parent trouvé", color = MaterialTheme.colorScheme.outline)
             }
-
-            false -> parents.forEach { parent ->
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ParentRow(
-                    parent,
-                    onClick = { onNavigateToParentProfile(parent.id!! ) },
-//                  onEdit = { onEditTeacher(teacher.id.toLong()) }
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
+        } else {
+            LazyColumn {
+                items(parents.size) { index ->
+                    val parent = parents[index]
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    ParentRow(
+                        parent = parent,
+                        onClick = { onNavigateToParentProfile(parent.id!!) },
+                        onEdit = { onEditParent(parent) }
+                    )
+                }
             }
         }
     }
@@ -264,60 +307,518 @@ fun ParentTable(
 fun ParentRow(
     parent: ParentDto,
     onClick: () -> Unit,
+    onEdit: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.clickable { onClick() }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
-                Box(
-                    Modifier.size(40.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(parent.fullName .take(1), fontWeight = FontWeight.Bold)
-                }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(
-                        parent.fullName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        parent.occupation.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
+            Box(
+                Modifier.size(40.dp)
+                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    parent.fullName.take(1),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             }
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(
+                    parent.fullName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    parent.address ?: "Pas d'adresse",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
 
-            Text(
-                parent.occupation.toString(),
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-                maxLines = 1
-            )
+        Text(
+            parent.occupation ?: "N/A",
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
 
-            if(parent.linkages.isEmpty()){
-                Text("Non lié")
-            }else{
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy((-12).dp)
-                ){
-                    parent.linkages.forEach { linkage ->
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            if (parent.linkages.isEmpty()) {
+                Text(
+                    "Aucun",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy((-12).dp)) {
+                    parent.linkages.take(3).forEach { linkage ->
                         CircularProfile(linkage.student.fullName.take(1))
+                    }
+                    if (parent.linkages.size > 3) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, Color.White, CircleShape)
+                        ) {
+                            Text(
+                                "+${parent.linkages.size - 3}",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
                     }
                 }
             }
+        }
 
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.Center) {
+            IconButton(onClick = onEdit) {
+                Icon(
+                    AppIcons.edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
+}
+
+@Composable
+fun ParentDetailPane(
+    parentId: Long,
+    viewModel: ParentsViewModel,
+    onBack: () -> Unit
+) {
+    val detailState by viewModel.detailState.collectAsState()
+    var showLinkDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var linkageToUnlink by remember { mutableStateOf<ParentStudentLinkageDto?>(null) }
+
+    LaunchedEffect(parentId) {
+        viewModel.loadParentDetail(parentId)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Détails du parent") },
+                actions = {
+                    ElevatedButton(
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        onClick = {
+                            showDeleteConfirmation = true
+                        }
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null)
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        if (detailState.isLoading) {
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (detailState.parent != null) {
+            val parent = detailState.parent!!
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                // Info Card
+                Card(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            Modifier.size(80.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.primaryContainer,
+                                    CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                parent.fullName.take(1),
+                                style = MaterialTheme.typography.displayMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                        Spacer(Modifier.width(24.dp))
+                        Column {
+                            Text(
+                                parent.fullName,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                parent.occupation ?: "Pas d'occupation",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            Text(
+                                parent.address ?: "Pas d'adresse",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                }
+
+                // Linkages Section
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Étudiants liés",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Button(onClick = { showLinkDialog = true }) {
+                        Icon(Icons.Default.Link, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Lier un étudiant")
+                    }
+                }
+
+                if (parent.linkages.isEmpty()) {
+                    Box(
+                        Modifier.fillMaxWidth().height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Aucun étudiant lié", color = MaterialTheme.colorScheme.outline)
+                    }
+                } else {
+                    parent.linkages.forEach { linkage ->
+                        LinkageRow(
+                            linkage,
+                            onUnlink = { 
+                                linkageToUnlink = linkage
+                            })
+                    }
+                }
+            }
+        }
+    }
+
+    val students by viewModel.students.collectAsState()
+    val academicYears by viewModel.academicYears.collectAsState()
+
+    if (showLinkDialog) {
+        LinkStudentDialog(
+            students = students,
+            academicYears = academicYears,
+            onDismiss = { showLinkDialog = false },
+            onConfirm = { studentId, yearId, relType, isPayer ->
+                viewModel.linkStudent(parentId, studentId, yearId, relType, isPayer)
+                showLinkDialog = false
+            }
+        )
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Supprimer le parent") },
+            text = { Text("Êtes-vous sûr de vouloir supprimer ce parent ? Cette action est irréversible.") },
+            confirmButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    onClick = {
+                        viewModel.deleteParent(parentId) { onBack() }
+                        showDeleteConfirmation = false
+                    }
+                ) {
+                    Text("Supprimer")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("Annuler")
+                }
+            }
+        )
+    }
+
+    if (linkageToUnlink != null) {
+        AlertDialog(
+            onDismissRequest = { linkageToUnlink = null },
+            title = { Text("Délier l'étudiant") },
+            text = { Text("Voulez-vous vraiment délier l'étudiant ${linkageToUnlink?.student?.fullName} de ce parent ?") },
+            confirmButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    onClick = {
+                        viewModel.unlinkStudent(parentId, linkageToUnlink!!.id!!)
+                        linkageToUnlink = null
+                    }
+                ) {
+                    Text("Délier")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { linkageToUnlink = null }) {
+                    Text("Annuler")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun LinkageRow(linkage: ParentStudentLinkageDto, onUnlink: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                Modifier.size(40.dp)
+                    .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(linkage.student.fullName.take(1), fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                Text(linkage.student.fullName, fontWeight = FontWeight.Bold)
+                Text(
+                    "${linkage.relationshipType} • ${if (linkage.isPrimaryPayer) "Payeur principal" else "Non payeur"}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            IconButton(onClick = onUnlink) {
+                Icon(
+                    Icons.Default.LinkOff,
+                    contentDescription = "Unlink",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ParentFormDialog(
+    parent: ParentDto?,
+    users: List<UserDTO>,
+    onDismiss: () -> Unit,
+    onConfirm: (Long, String, String) -> Unit
+) {
+    var selectedUserId by remember { mutableStateOf(parent?.userId) }
+    var address by remember { mutableStateOf(parent?.address ?: "") }
+    var occupation by remember { mutableStateOf(parent?.occupation ?: "") }
+    var userExpanded by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (parent == null) "Ajouter un parent" else "Modifier un parent") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ExposedDropdownMenuBox(
+                    expanded = userExpanded,
+                    onExpandedChange = { userExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = users.find { it.id == selectedUserId }
+                            ?.let { "${it.firstName} ${it.lastName}" }
+                            ?: "Sélectionner un utilisateur",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Utilisateur") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(userExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        shape = MaterialTheme.shapes.large
+                    )
+                    ExposedDropdownMenu(
+                        expanded = userExpanded,
+                        onDismissRequest = { userExpanded = false }
+                    ) {
+                        users.forEach { user ->
+                            DropdownMenuItem(
+                                text = { Text("${user.firstName} ${user.lastName}") },
+                                onClick = {
+                                    selectedUserId = user.id
+                                    userExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = { Text("Adresse") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large
+                )
+                OutlinedTextField(
+                    value = occupation,
+                    onValueChange = { occupation = it },
+                    label = { Text("Occupation") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = selectedUserId != null && address.isNotBlank() && occupation.isNotBlank(),
+                onClick = { onConfirm(selectedUserId!!, address, occupation) }
+            ) {
+                Text("Confirmer")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LinkStudentDialog(
+    students: List<StudentDTO>,
+    academicYears: List<AcademicYearDTO>,
+    onDismiss: () -> Unit,
+    onConfirm: (Long, Long, String, Boolean) -> Unit
+) {
+    var selectedStudentId by remember { mutableStateOf<Long?>(null) }
+    var selectedYearId by remember { mutableStateOf<Long?>(academicYears.find { it.isActive }?.id) }
+    var relationshipType by remember { mutableStateOf("") }
+    var isPrimaryPayer by remember { mutableStateOf(false) }
+
+    var studentExpanded by remember { mutableStateOf(false) }
+    var yearExpanded by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Lier un étudiant") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ExposedDropdownMenuBox(
+                    expanded = studentExpanded,
+                    onExpandedChange = { studentExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = students.find { it.id == selectedStudentId }?.fullName
+                            ?: "Sélectionner un étudiant",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Étudiant") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(studentExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        shape = MaterialTheme.shapes.large
+                    )
+                    ExposedDropdownMenu(
+                        expanded = studentExpanded,
+                        onDismissRequest = { studentExpanded = false }
+                    ) {
+                        students.forEach { student ->
+                            DropdownMenuItem(
+                                text = { Text(student.fullName) },
+                                onClick = {
+                                    selectedStudentId = student.id
+                                    studentExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                ExposedDropdownMenuBox(
+                    expanded = yearExpanded,
+                    onExpandedChange = { yearExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = academicYears.find { it.id == selectedYearId }?.label
+                            ?: "Sélectionner une année",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Année Académique") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(yearExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        shape = MaterialTheme.shapes.large
+                    )
+                    ExposedDropdownMenu(
+                        expanded = yearExpanded,
+                        onDismissRequest = { yearExpanded = false }
+                    ) {
+                        academicYears.forEach { year ->
+                            DropdownMenuItem(
+                                text = { Text(year.label) },
+                                onClick = {
+                                    selectedYearId = year.id
+                                    yearExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = relationshipType,
+                    onValueChange = { relationshipType = it },
+                    label = { Text("Type de relation (ex: Père, Mère)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large
+                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = isPrimaryPayer, onCheckedChange = { isPrimaryPayer = it })
+                    Text("Payeur principal")
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = selectedStudentId != null && selectedYearId != null && relationshipType.isNotBlank(),
+                onClick = {
+                    onConfirm(
+                        selectedStudentId!!,
+                        selectedYearId!!,
+                        relationshipType,
+                        isPrimaryPayer
+                    )
+                }
+            ) {
+                Text("Confirmer")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        }
+    )
 }
 
 @Composable
@@ -327,15 +828,16 @@ fun CircularProfile(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(48.dp)
+            .size(32.dp)
             .clip(CircleShape)
-            .background(Color.Gray)
-            .border(2.dp, Color.White, CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .border(1.dp, Color.White, CircleShape)
     ) {
         Text(
             text = text,
-            color = Color.White,
-            fontWeight = FontWeight.Bold
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelSmall
         )
     }
 }
