@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -73,6 +74,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.drcmind.kelasisuite.domain.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.domain.dto.StudentDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
@@ -89,6 +91,7 @@ fun ClassDetailsScreen(
     onBack: () -> Unit
 ) {
     var showEnrollDialog by remember { mutableStateOf(false) }
+    var showAssignTeacherDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -114,17 +117,17 @@ fun ClassDetailsScreen(
                         )
                     }
                 },
-                actions = {
+                    actions = {
                     IconButton(onClick = {}) {
                         Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More menu")
                     }
+
                     ElevatedButton(
                         colors = ButtonDefaults.buttonColors(),
                         onClick = {
                             showEnrollDialog = true
                         }
                     ) {
-
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
@@ -142,6 +145,9 @@ fun ClassDetailsScreen(
         ) { padding ->
         LaunchedEffect(Unit) {
             viewModel.loadClassStudents(classId)
+            viewModel.loadEnrolledStudents()
+            viewModel.loadTeachers()
+            viewModel.loadHomeroomTeacher(classId)
         }
         Column(modifier = Modifier.padding(padding)) {
             val backStack = rememberNavBackStack(
@@ -239,12 +245,15 @@ fun ClassDetailsScreen(
                                 letterSpacing = 1.sp
                             )
                             Spacer(modifier = Modifier.height(24.dp))
+                            val homeroomAssignment by viewModel.homeroomAssignment.collectAsState()
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 DailyPlanningCard()
-                                TeacherMiniCard()
+                                TeacherMiniCard(homeroomAssignment) {
+                                    showAssignTeacherDialog = true
+                                }
                             }
                         }
                     }
@@ -260,7 +269,90 @@ fun ClassDetailsScreen(
                 onDismiss = { showEnrollDialog = false }
             )
         }
+
+        if (showAssignTeacherDialog) {
+            HomeroomTeacherAssignmentDialog(
+                viewModel = viewModel,
+                classId = classId,
+                onDismiss = { showAssignTeacherDialog = false }
+            )
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeroomTeacherAssignmentDialog(
+    viewModel: SchoolStructureViewModel,
+    classId: Long,
+    onDismiss: () -> Unit
+) {
+    val teachers by viewModel.teachers.collectAsState()
+    val homeroomAssignment by viewModel.homeroomAssignment.collectAsState()
+    val isAssigning by viewModel.isAssigningHomeroomTeacher.collectAsState()
+
+    var selectedTeacherId by remember { mutableStateOf<Long?>(homeroomAssignment?.teacherProfileId) }
+    var teacherExpanded by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Affecter un titulaire") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ExposedDropdownMenuBox(
+                    expanded = teacherExpanded,
+                    onExpandedChange = { teacherExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = teachers.find { it.id == selectedTeacherId }?.fullName
+                            ?: "Sélectionner un professeur",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Professeur") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(teacherExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        shape = MaterialTheme.shapes.large,
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = teacherExpanded,
+                        onDismissRequest = { teacherExpanded = false }
+                    ) {
+                        teachers.forEach { teacher ->
+                            DropdownMenuItem(
+                                text = { Text(teacher.fullName) },
+                                onClick = {
+                                    selectedTeacherId = teacher.id
+                                    teacherExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = selectedTeacherId != null && !isAssigning,
+                onClick = {
+                    viewModel.assignHomeroomTeacher(selectedTeacherId!!, classId)
+                    onDismiss()
+                }
+            ) {
+                if (isAssigning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Affecter")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        }
+    )
 }
 
 @Composable
@@ -465,7 +557,10 @@ fun DailyPlanningCard() {
 }
 
 @Composable
-fun TeacherMiniCard() {
+fun TeacherMiniCard(
+    homeroomAssignment: HomeroomAssignmentDTO?,
+    onAssignClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -473,35 +568,43 @@ fun TeacherMiniCard() {
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
-            modifier = Modifier.padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    AppIcons.person,
-                    null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(24.dp)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        AppIcons.person,
+                        null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        homeroomAssignment?.teacherName ?: "Aucun titulaire assigné",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        "Titulaire de la classe",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    "Prof. Jean Dupont",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    "Titulaire de la classe",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
+            TextButton(onClick = onAssignClick) {
+                Text(if (homeroomAssignment != null) "Modifier" else "Affecter")
             }
         }
     }
@@ -518,6 +621,7 @@ fun GlobalEnrollmentDialog(
     val classes by viewModel.classes.collectAsState()
     val academicYears by viewModel.academicYears.collectAsState()
     val students by viewModel.students.collectAsState()
+    val enrrolledStudents by viewModel.enrolledStudents.collectAsState()
     val isLoadingEnrollment by viewModel.isLoadingEnrollment.collectAsState()
 
     var studentSearchQuery by remember { mutableStateOf("") }
@@ -525,9 +629,11 @@ fun GlobalEnrollmentDialog(
     var selectedClassId by remember { mutableStateOf(classId) }
     var selectedAcademicYearId by remember { mutableStateOf<Long?>(null) }
 
-    val filteredStudents = remember(studentSearchQuery, students) {
+    val filteredStudents = remember(studentSearchQuery, students, enrrolledStudents) {
         if (studentSearchQuery.isEmpty()) emptyList()
-        else students.filter {
+        else students.filterNot { student ->
+            student.currentEnrollment != null || enrrolledStudents.any { enrolled -> enrolled.studentIdNumber == student.studentIdNumber }
+        }.filter {
             it.fullName.contains(studentSearchQuery, ignoreCase = true) ||
                     it.studentIdNumber.contains(studentSearchQuery, ignoreCase = true)
         }

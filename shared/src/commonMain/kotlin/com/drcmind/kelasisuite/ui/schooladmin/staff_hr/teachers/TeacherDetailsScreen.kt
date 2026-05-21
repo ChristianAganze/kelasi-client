@@ -179,7 +179,7 @@ private fun TeacherHeaderCard(teacher: TeacherProfileDTO, onEdit: (Long) -> Unit
                     fontWeight = FontWeight.Black,
                 )
                 Text(
-                    "ID: ${teacher.userId}",
+                    "ID de référence utilisateur: ${teacher.userId}",
                     color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )

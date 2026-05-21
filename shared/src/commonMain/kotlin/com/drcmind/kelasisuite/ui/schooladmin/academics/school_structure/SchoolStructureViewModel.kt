@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
+import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
 import com.drcmind.kelasisuite.domain.dto.*
 import com.drcmind.kelasisuite.domain.model.SchoolTreeNode
 import com.drcmind.kelasisuite.domain.util.NodeType
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 class SchoolStructureViewModel(
     private val schoolRepository: SchoolRepository,
     private val studentsRepository: StudentsRepository,
-    private val settingsStorage: SettingsStorage
+    private val settingsStorage: SettingsStorage,
+    private val teachersRepository: TeachersRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(ClassesState())
     val state: StateFlow<ClassesState> = _state.asStateFlow()
@@ -32,6 +34,18 @@ class SchoolStructureViewModel(
 
     private val _students = MutableStateFlow<List<StudentDTO>>(emptyList())
     val students: StateFlow<List<StudentDTO>> = _students.asStateFlow()
+
+    private val _teachers = MutableStateFlow<List<TeacherProfileDTO>>(emptyList())
+    val teachers: StateFlow<List<TeacherProfileDTO>> = _teachers.asStateFlow()
+
+    private val _homeroomAssignment = MutableStateFlow<HomeroomAssignmentDTO?>(null)
+    val homeroomAssignment: StateFlow<HomeroomAssignmentDTO?> = _homeroomAssignment.asStateFlow()
+
+    private val _isLoadingHomeroomTeacher = MutableStateFlow(false)
+    val isLoadingHomeroomTeacher = _isLoadingHomeroomTeacher.asStateFlow()
+
+    private val _isAssigningHomeroomTeacher = MutableStateFlow(false)
+    val isAssigningHomeroomTeacher = _isAssigningHomeroomTeacher.asStateFlow()
 
     private val _clasStudents = MutableStateFlow<List<StudentDTO>>(emptyList())
     val clasStudents: StateFlow<List<StudentDTO>> = _clasStudents.asStateFlow()
@@ -55,6 +69,7 @@ class SchoolStructureViewModel(
         loadClasses()
         loadAcademicYears()
         loadStudents()
+        loadTeachers()
     }
 
     private fun loadClasses() {
@@ -111,6 +126,52 @@ class SchoolStructureViewModel(
         studentsRepository.getStudents(schoolId).onEach { resource ->
             if (resource is Resource.Success) {
                 _students.value = resource.data ?: emptyList()
+            }
+        }.launchIn(viewModelScope)
+    }
+
+
+
+    fun loadTeachers() {
+        val schoolId = settingsStorage.getUserInfo().schoolId ?: return
+        teachersRepository.getTeachers(schoolId).onEach { resource ->
+            if (resource is Resource.Success) {
+                _teachers.value = resource.data ?: emptyList()
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun loadHomeroomTeacher(classId: Long) {
+        _isLoadingHomeroomTeacher.value = true
+        teachersRepository.getHomeroomTeacherForClass(classId).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _isLoadingHomeroomTeacher.value = true
+                is Resource.Success -> {
+                    _homeroomAssignment.value = resource.data
+                    _isLoadingHomeroomTeacher.value = false
+                }
+
+                is Resource.Error -> {
+                    _homeroomAssignment.value = null
+                    _isLoadingHomeroomTeacher.value = false
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun assignHomeroomTeacher(teacherProfileId: Long, classId: Long) {
+        _isAssigningHomeroomTeacher.value = true
+        val request = HomeroomAssignmentRequest(teacherProfileId, classId)
+        teachersRepository.assignHomeroomTeacher( request).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> _isAssigningHomeroomTeacher.value = true
+                is Resource.Success -> {
+                    _homeroomAssignment.value = resource.data
+                    _isAssigningHomeroomTeacher.value = false
+                    loadHomeroomTeacher(classId)
+                }
+
+                is Resource.Error -> _isAssigningHomeroomTeacher.value = false
             }
         }.launchIn(viewModelScope)
     }

@@ -36,7 +36,7 @@ fun AcademicsNavigation(
                 SchoolStructureScreen()
             }
 
-            entry<Route.SchoolAdmin.Academics.Assignment> {
+            entry<Route.SchoolAdmin.Academics.Enrollment> {
                 CourseAffectation()
             }
 

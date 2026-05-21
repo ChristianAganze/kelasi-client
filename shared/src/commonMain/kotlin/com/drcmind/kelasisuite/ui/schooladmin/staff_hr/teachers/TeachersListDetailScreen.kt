@@ -136,7 +136,11 @@ fun TeacherTableCard(
     Column(
         Modifier.clip(
             MaterialTheme.shapes.extraLarge
-        ).background(MaterialTheme.colorScheme.surface)
+        ).background(MaterialTheme.colorScheme.surface).border(
+            shape = MaterialTheme.shapes.extraLarge,
+            border =
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        )
     ) {
 
 
@@ -231,9 +235,7 @@ fun TeacherRow(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.clickable { onClick() }.border(
-            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        )
+        modifier = Modifier.clickable { onClick() }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(24.dp),

@@ -12,14 +12,18 @@ import com.drcmind.kelasisuite.domain.dto.SchoolDTO
 import com.drcmind.kelasisuite.domain.model.JwtPayload
 import com.drcmind.kelasisuite.domain.model.UserInfo
 import com.russhwolf.settings.Settings
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
+import kotlin.Long
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Clock
 import kotlin.time.Instant
 
 class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
-    override fun saveUserInfo(token: String, username: String, role : String, userId: Long?, schoolId: Long?) {
+    override fun saveUserInfo(
+        token: String, username: String, role: String, userId: Long?, schoolId: Long?
+    ) {
         println("SettingsStorageImpl: Saving userinfo - Token: [HIDDEN], Username: $username, Role: $role, UserId: $userId, SchoolId: $schoolId")
         settings.putString(KEY_TOKEN, token)
         settings.putString(KEY_USERNAME, username)
@@ -101,8 +105,7 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
 
             // Fix padding if needed
             val padded = payloadBase64.padEnd(
-                payloadBase64.length + (4 - payloadBase64.length % 4) % 4,
-                '='
+                payloadBase64.length + (4 - payloadBase64.length % 4) % 4, '='
             )
 
             val decodedBytes = Base64.UrlSafe.decode(padded)
@@ -157,18 +160,27 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
 
     override fun getActiveAcademicYear(): AcademicYearDTO? {
         return try {
-            val academicYearJson = settings.getStringOrNull(KEY_ACTIVE_ACADEMIC_YEAR)
-            if (academicYearJson != null) {
-                val academicYearJson = Json.decodeFromString<AcademicYearDTO>(academicYearJson)
-                println("SettingsStorageImpl: Retrieved academicYearDTO locally")
-                academicYearJson
-            } else {
-                println("SettingsStorageImpl: No Academic Year found locally.")
-                null
-            }
+            val academicYearJson = AcademicYearDTO(
+                id = 1L,
+                label ="TestSchool",
+                startDate = LocalDate.parse("2003-10-12"),
+                endDate = LocalDate.parse("2033-10-12"),
+                isActive = true
+            )
+            academicYearJson
+            /* val academicYearJson = settings.getStringOrNull(KEY_ACTIVE_ACADEMIC_YEAR)
+                if (academicYearJson != null) {
+                    val academicYearJson = Json.decodeFromString<AcademicYearDTO>(academicYearJson)
+                    println("SettingsStorageImpl: Retrieved academicYearDTO locally")
+                    academicYearJson
+                } else {
+                    println("SettingsStorageImpl: No Academic Year found locally.")
+                    null
+                }
+                */
         } catch (e: Exception) {
             println("SettingsStorageImpl: Error retrieving Academic Year: ${e.message}")
             null
-        }
+        } as AcademicYearDTO?
     }
 }

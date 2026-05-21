@@ -24,3 +24,18 @@ data class TeacherProfileDTO(
     val qualifications: String,
 )
 
+@Serializable
+data class HomeroomAssignmentDTO(
+    val id: Long,
+    val teacherProfileId: Long,
+    val teacherName: String,
+    val classId: Long,
+    val className: String,
+    val academicYearLabel: String
+)
+
+@Serializable
+data class HomeroomAssignmentRequest(
+    val teacherProfileId: Long,
+    val classId: Long
+)

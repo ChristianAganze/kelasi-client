@@ -72,7 +72,7 @@ val networkModule = module {
     single<ProfileAPIService> { ProfileAPIServiceImpl(get()) }
     single<TeachersAPIService> { TeachersAPIServiceImpl(get()) }
     single<UsersAPIService> { UsersAPIServiceImpl(get()) }
-    single <ParentAPIService>{ ParentAPIServiceImpl(get()) }
+    single<ParentAPIService> { ParentAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -87,9 +87,14 @@ val repositoryModule = module {
     single<StudentsRepository> { StudentsRepositoryImpl(get(), get()) }
     single<SchoolRepository> { SchoolRepositoryImpl(get(), get()) } // Updated constructor
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
-    single<TeachersRepository> { TeachersRepositoryImpl(get()) }
+    single<TeachersRepository> {
+        TeachersRepositoryImpl(
+            get(),
+            get(),
+        )
+    }
     single<UsersRepository> { UsersRepositoryImpl(get()) }
-    single <ParentsRepository>{ ParentsRepositoryImp(get(), get()) }
+    single<ParentsRepository> { ParentsRepositoryImp(get(), get()) }
 }
 
 val viewModelModule = module {
@@ -97,7 +102,7 @@ val viewModelModule = module {
     viewModelOf(::AuthViewModel)
     viewModelOf(::SchoolDashboardViewModel)
     viewModelOf(::StudentsViewModel)
-    single { SchoolStructureViewModel(get(), get(), get()) }
+    viewModelOf(::SchoolStructureViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::CalendarPeriodsViewModel)
     viewModelOf(::TeachersViewModel)
