@@ -47,7 +47,7 @@ fun NavigationRoot(
     LaunchedEffect(navigationState){
         if (navigationState == Route.Loading) return@LaunchedEffect
 
-        val targetRoute = navigationState as Route
+        val targetRoute = navigationState
 
         if (rootBackStack.isNotEmpty()) {
             rootBackStack.set(0, targetRoute)

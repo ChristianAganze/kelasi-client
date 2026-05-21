@@ -47,14 +47,50 @@ data class EnrollmentSummaryDTO(
 )
 
 @Serializable
-data class UpdateEnrollmentRequest(
-    val newClassId: Long
-)
-
-
-@Serializable
 data class EnrollmentRequest(
     val studentId: Long,
     val classId: Long,
     val academicYearId: Long
 )
+
+@Serializable
+data class UpdateEnrollmentRequest(
+    val newClassId: Long
+)
+@Serializable
+data class CreateParentRequest(
+    val userId : Long,
+    val address : String,
+    val occupation : String
+)
+
+@Serializable
+data class ParentStudentLinkageRequest(
+    val parentId: Long,
+    val studentId: Long,
+    val academicYearId: Long,
+    val schoolId: Long,
+    val isPrimaryPayer: Boolean = false,
+    val relationshipType: String
+)
+
+@Serializable
+data class ParentDto(
+    val id: Long?,
+    val userId: Long?,
+    val fullName: String,
+    val address: String?,
+    val occupation: String?,
+    val linkages: List<ParentStudentLinkageDto>,
+)
+@Serializable
+data class ParentStudentLinkageDto(
+    val id: Long?,
+    val student: StudentDTO,
+    val academicYearId: Long?,
+    val schoolId: Long?,
+    val isPrimaryPayer: Boolean,
+    val relationshipType: String
+)
+
+

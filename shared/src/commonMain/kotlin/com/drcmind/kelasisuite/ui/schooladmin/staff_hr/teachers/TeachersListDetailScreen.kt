@@ -1,7 +1,9 @@
 package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -229,7 +231,9 @@ fun TeacherRow(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.clickable { onClick() }
+        modifier = Modifier.clickable { onClick() }.border(
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(24.dp),

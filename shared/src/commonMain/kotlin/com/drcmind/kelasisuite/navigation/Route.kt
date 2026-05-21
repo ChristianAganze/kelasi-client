@@ -1,25 +1,21 @@
 package com.drcmind.kelasisuite.navigation
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.filled.Subject
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Architecture
-import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ControlPointDuplicate
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GroupWork
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LibraryBooks
-import androidx.compose.material.icons.filled.ModelTraining
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.PeopleAlt
@@ -27,17 +23,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Streetview
-import androidx.compose.material.icons.filled.Subject
 import androidx.compose.material.icons.filled.Warehouse
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
-import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.CalendarPeriod
-import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.DeliberationsConduct
-import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.EvaluationGrading
-import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.ReportCards
-import com.drcmind.kelasisuite.navigation.Route.SchoolAdmin.Academics.SchoolStructure
 import kotlinx.serialization.Serializable
 
 
@@ -94,7 +84,7 @@ sealed interface Route : NavKey {
             override val label: String = "Settings"
         }
 
-        val items = listOf(Dashboard, Curriculum, Subjects, Schools, Templates, Settings)
+        val items = listOf(Dashboard,Curriculum, Subjects, Schools, Templates,  Settings)
 
         val stateSaver = Saver<NavigationBarRoute, String>(
             save = { it::class.qualifiedName ?: "" },
@@ -117,21 +107,17 @@ sealed interface Route : NavKey {
         data object Academics : NavigationBarRoute {
             override val icon: ImageVector = Icons.AutoMirrored.Filled.LibraryBooks
             override val label: String = "Affaires scolaires"
-
             @Serializable
-            data object CalendarPeriod : Route {
+            data object CalendarPeriod : Route{
                 @Serializable
                 data object Main : Route
-
                 @Serializable
                 data object Supporting : Route
             }
-
             @Serializable
-            data object SchoolStructure : Route {
+            data object SchoolStructure : Route{
                 @Serializable
                 data object Structure : Route
-
                 @Serializable
                 data class AddClass(val classId: Long? = null) : Route
 
@@ -139,21 +125,18 @@ sealed interface Route : NavKey {
                 data class ClassDetail(val classId: Long, val className: String) : Route {
                     @Serializable
                     data object Main : Route
-
                     @Serializable
                     data object Supporting : Route
                 }
             }
-
             @Serializable
             data object Assignment : Route
-
+            @Serializable
+            data object Enrollment : Route
             @Serializable
             data object EvaluationGrading : Route
-
             @Serializable
             data object DeliberationsConduct : Route
-
             @Serializable
             data object ReportCards : Route
 
@@ -163,36 +146,11 @@ sealed interface Route : NavKey {
                 val icon: ImageVector,
                 val contentDescription: String
             ) {
-                CALENDAR_PERIOD(
-                    CalendarPeriod,
-                    "Calendrier et périodes",
-                    Icons.Default.CalendarMonth,
-                    "calendar"
-                ),
-                SCHOOL_STRUCTURE(
-                    SchoolStructure,
-                    "Structure de l'école",
-                    Icons.Default.AccountTree,
-                    "AccountTree"
-                ),
-                ASSIGNNMENT(
-                    Assignment,
-                    "Affectations cours",
-                    Icons.AutoMirrored.Filled.Assignment,
-                    "Assignment"
-                ),
-                EVALUATION_GRADING(
-                    EvaluationGrading,
-                    "Evaluation et cotes",
-                    Icons.Default.Numbers,
-                    "Evaluation"
-                ),
-                DELIBERATION_CONDUCT(
-                    DeliberationsConduct,
-                    "Délibérations & conduite",
-                    Icons.Default.ControlPointDuplicate,
-                    "Deliberation et conduite"
-                ),
+                CALENDAR_PERIOD(CalendarPeriod, "Calendrier et périodes", Icons.Default.CalendarMonth, "calendar"),
+                SCHOOL_STRUCTURE(SchoolStructure, "Structure de l'école", Icons.Default.AccountTree, "AccountTree"),
+                ENROLLMENT(Enrollment, "Scolarité", Icons.AutoMirrored.Filled.Assignment, "Enrollment"),
+                EVALUATION_GRADING(EvaluationGrading, "Evaluation et cotes", Icons.Default.Numbers, "Evaluation"),
+                DELIBERATION_CONDUCT(DeliberationsConduct, "Délibérations & conduite", Icons.Default.ControlPointDuplicate, "Deliberation et conduite"),
                 REPORT_CARDS(ReportCards, "Bulletins", Icons.Default.Report, "Report")
             }
         }
@@ -201,6 +159,28 @@ sealed interface Route : NavKey {
         data object Pedagogy : NavigationBarRoute {
             override val icon: ImageVector = Icons.AutoMirrored.Filled.Accessible
             override val label: String = "Pédagogie"
+
+            @Serializable data object Scheduling : Route
+            @Serializable data object ProgramRadar : Route
+            @Serializable data object Assignment : Route
+            @Serializable data object Preparation : Route
+            @Serializable data object ClassLog : Route
+            @Serializable data object Inspections : Route
+
+            enum class TabDestination(
+                val route: Route,
+                val label: String,
+                val icon: ImageVector,
+                val contentDescription: String
+            ) {
+                SCHEDULING(Scheduling, "Horaires des cours", Icons.Default.CalendarMonth, "calendar"),
+                PROGRAM_RADAR(ProgramRadar, "Radar Anti-Retard", Icons.Default.Check, "AccountTree"),
+                ASSIGNMENT(Pedagogy.Assignment, "Affectations & Titulariat", Icons.AutoMirrored.Filled.Assignment, "Assignment"),
+                PREPARATION(Preparation, "Préparations", Icons.Default.WorkspacePremium, "Evaluation"),
+                CLASSLOG(ClassLog, "Journaux de Classe",
+                    Icons.AutoMirrored.Filled.Notes, "Deliberation et conduite"),
+                INSPECTIONS(Inspections, "Inspections", Icons.Default.Analytics, "Report")
+            }
         }
 
         @Serializable
@@ -220,22 +200,15 @@ sealed interface Route : NavKey {
 
 
         @Serializable
-        data class TeacherDetail(val teacherId: Long) : Route
-
-        @Serializable
-        data class AddClass(val classId: Long? = null) : Route
-
-        @Serializable
-        data class ClassDetail(val classId: Long) : Route
-
-
-        @Serializable
         data object Profile : Route
 
         @Serializable
         data object Parents : NavigationBarRoute {
             override val icon: ImageVector = Icons.Default.PeopleAlt
             override val label: String = "Parents"
+
+            @Serializable data object List : Route
+            @Serializable data class Profile(val parentId : Long) : Route
         }
 
         @Serializable
@@ -244,21 +217,18 @@ sealed interface Route : NavKey {
             override val label: String = "Staffs & HR"
 
             @Serializable
-            data object Teachers : Route {
+            data object Teachers : Route{
                 @Serializable
-                data object ListDetails : Route {
+                data object ListDetails : Route{
                     @Serializable
                     data object List : Route
-
                     @Serializable
-                    data class Profile(val teacherId: Long) : Route
+                    data class Profile(val teacherId : Long) : Route
                 }
-
                 @Serializable
-                data class ProfileDetails(val teacherId: Long) : Route
-
+                data class ProfileDetails(val teacherId : Long) : Route
                 @Serializable
-                data class AddUpdate(val teacherId: Long?) : Route
+                data class AddUpdate(val teacherId : Long?) : Route
             }
 
             enum class TabDestination(
@@ -295,17 +265,8 @@ sealed interface Route : NavKey {
             override val label: String = "Paramètres"
         }
 
-        val items = listOf(
-            SchoolDashboard,
-            Academics,
-            Pedagogy,
-            Students,
-            Parents,
-            StaffHR,
-            Finance,
-            Logistics,
-            Communication,
-            Settings,
+        val items = listOf(SchoolDashboard,
+            Academics, Pedagogy, Students, Parents, StaffHR, Finance, Logistics, Communication, Settings,
         )
 
         val stateSaver = Saver<NavigationBarRoute, String>(

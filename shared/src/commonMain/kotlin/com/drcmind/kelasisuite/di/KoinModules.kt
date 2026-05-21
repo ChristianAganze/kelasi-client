@@ -5,6 +5,8 @@ import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
 import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.parents.ParentAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.parents.ParentAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.profile.ProfileAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.profile.ProfileAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIService
@@ -17,6 +19,8 @@ import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIServiceImpl
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.parents.ParentsRepository
+import com.drcmind.kelasisuite.data.repository.parents.ParentsRepositoryImp
 import com.drcmind.kelasisuite.data.repository.profile.ProfileRepository
 import com.drcmind.kelasisuite.data.repository.profile.ProfileRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
@@ -32,6 +36,7 @@ import com.drcmind.kelasisuite.ui.auth.AuthViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.calendar_periods.CalendarPeriodsViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.SchoolStructureViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.parents.ParentsViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeachersViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsViewModel
@@ -67,6 +72,7 @@ val networkModule = module {
     single<ProfileAPIService> { ProfileAPIServiceImpl(get()) }
     single<TeachersAPIService> { TeachersAPIServiceImpl(get()) }
     single<UsersAPIService> { UsersAPIServiceImpl(get()) }
+    single <ParentAPIService>{ ParentAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -83,6 +89,7 @@ val repositoryModule = module {
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     single<TeachersRepository> { TeachersRepositoryImpl(get()) }
     single<UsersRepository> { UsersRepositoryImpl(get()) }
+    single <ParentsRepository>{ ParentsRepositoryImp(get(), get()) }
 }
 
 val viewModelModule = module {
@@ -95,6 +102,7 @@ val viewModelModule = module {
     viewModelOf(::CalendarPeriodsViewModel)
     viewModelOf(::TeachersViewModel)
     viewModelOf(::CalendarPeriodsViewModel)
+    viewModelOf(::ParentsViewModel)
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {

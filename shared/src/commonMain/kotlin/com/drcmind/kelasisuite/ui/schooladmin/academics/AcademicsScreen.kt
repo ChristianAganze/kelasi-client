@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.academics
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -35,8 +36,8 @@ fun AcademicsScreen() {
                         Route.SchoolAdmin.Academics.SchoolStructure.serializer()
                     )
                     subclass(
-                        Route.SchoolAdmin.Academics.Assignment::class,
-                        Route.SchoolAdmin.Academics.Assignment.serializer()
+                        Route.SchoolAdmin.Academics.Enrollment::class,
+                        Route.SchoolAdmin.Academics.Enrollment.serializer()
                     )
                     subclass(
                         Route.SchoolAdmin.Academics.EvaluationGrading::class,
@@ -61,7 +62,7 @@ fun AcademicsScreen() {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        PrimaryTabRow(selectedTabIndex = selectedDestination) {
+        PrimaryScrollableTabRow(selectedTabIndex = selectedDestination) {
             Route.SchoolAdmin.Academics.TabDestination.entries.forEachIndexed { index, destination ->
                 Tab(
                     selected = selectedDestination == index,
@@ -81,5 +82,4 @@ fun AcademicsScreen() {
         }
         AcademicsNavigation(academicsBackStack = academicsBackStack)
     }
-
 }

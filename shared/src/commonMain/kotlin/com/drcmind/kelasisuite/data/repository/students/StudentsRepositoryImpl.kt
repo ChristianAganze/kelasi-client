@@ -48,7 +48,8 @@ class StudentsRepositoryImpl(
     override fun getEnrolledStudents(schoolId: Long): Flow<Resource<List<StudentDTO>>> {
         return flow {
             emit(Resource.Loading())
-            val academicYearId = settingsStorage.getActiveAcademicYear()?.id
+            val academicYearId = 1L
+            //    val academicYearId = settingsStorage.getActiveAcademicYear()?.id
             if (academicYearId == null) {
                 emit(Resource.Error(message = "Aucune année académique active disponible."))
                 return@flow
@@ -63,7 +64,8 @@ class StudentsRepositoryImpl(
     override fun getStudentsForClass(classId: Long): Flow<Resource<List<StudentDTO>>> {
         return flow {
             emit(Resource.Loading())
-            val academicYearId = settingsStorage.getActiveAcademicYear()?.id
+           val academicYearId = 1L
+        //    val academicYearId = settingsStorage.getActiveAcademicYear()?.id
             if (academicYearId == null) {
                 emit(Resource.Error(message = "Aucune année académique active disponible."))
                 return@flow

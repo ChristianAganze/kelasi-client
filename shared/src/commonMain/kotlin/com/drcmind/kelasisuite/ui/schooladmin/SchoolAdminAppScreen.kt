@@ -1,5 +1,6 @@
 package com.drcmind.kelasisuite.ui.schooladmin
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -8,7 +9,10 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteColors
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
@@ -36,7 +40,7 @@ fun SchoolAdminAppScreen(
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            NavigationSuiteType.NavigationDrawer
+            NavigationSuiteType.WideNavigationRailExpanded
         } else {
             NavigationSuiteType.WideNavigationRailExpanded
         }
@@ -109,6 +113,7 @@ fun SchoolAdminAppScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)),
                 title = {
                     Text(
                         text = "Kelasi School Admin",
@@ -193,6 +198,11 @@ fun SchoolAdminAppScreen(
         }
     ) { innerPadding ->
         NavigationSuiteScaffold(
+            navigationSuiteColors = NavigationSuiteDefaults.colors(
+                wideNavigationRailColors = WideNavigationRailDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                )
+            ),
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
@@ -206,12 +216,13 @@ fun SchoolAdminAppScreen(
                             }
                         },
                         icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) }
+                        label = { Text(item.label) },
+                        modifier = Modifier.padding(start = 4.dp, end = 16.dp)
 
                     )
                 }
             },
-            layoutType = layoutType
+            layoutType = layoutType,
         ) {
             SchoolAdminNavigation(schoolAdminBackStack = schoolAdminBackStack)
         }
