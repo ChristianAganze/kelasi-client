@@ -37,7 +37,14 @@ fun SchoolAdminNavigation(
                 SchoolDashboardScreen()
             }
             entry<Route.SchoolAdmin.Academics> {
-                AcademicsScreen()
+                AcademicsScreen(
+                    onNavigateToStudentDetail = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
+                    },
+                    onNavigateToTeacherDetail = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.TeacherDetail(id))
+                    }
+                )
             }
 
             entry<Route.SchoolAdmin.Pedagogy> {
@@ -85,6 +92,21 @@ fun SchoolAdminNavigation(
                     },
                     onEdit = { id ->
                         schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent(id))
+                    }
+                )
+            }
+
+            entry<Route.SchoolAdmin.TeacherDetail> { key ->
+                com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers.TeacherDetailsScreen(
+                    teacherId = key.teacherId,
+                    onBack = {
+                        if (schoolAdminBackStack.size > 1) {
+                            schoolAdminBackStack.removeLast()
+                        }
+                    },
+                    showTopAppBar = true,
+                    onEdit = { id ->
+                        schoolAdminBackStack.add(Route.SchoolAdmin.AddTeacher(id))
                     }
                 )
             }

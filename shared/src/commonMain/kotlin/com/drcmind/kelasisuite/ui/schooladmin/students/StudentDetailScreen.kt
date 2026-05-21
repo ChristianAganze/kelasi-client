@@ -38,6 +38,7 @@ fun StudentDetailScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {
@@ -50,13 +51,13 @@ fun StudentDetailScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }, colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = Color.Transparent
                 )
             )
         }) { padding ->
         Box(
             modifier = Modifier.fillMaxSize().padding(padding)
-                .background(MaterialTheme.colorScheme.background)
+
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

@@ -14,7 +14,9 @@ import org.koin.core.component.getScopeName
 @Composable
 fun SchoolStructureNavigation(
     modifier: Modifier = Modifier,
-    schoolStructureBackStack: NavBackStack<NavKey>
+    schoolStructureBackStack: NavBackStack<NavKey>,
+    onNavigateToStudentDetail: (Long) -> Unit = {},
+    onNavigateToTeacherDetail: (Long) -> Unit = {}
 ){
     NavDisplay(
         modifier = modifier,
@@ -37,7 +39,9 @@ fun SchoolStructureNavigation(
                         if (schoolStructureBackStack.size > 1) {
                             schoolStructureBackStack.removeLast()
                         }
-                    }
+                    },
+                    onNavigateToStudentDetail = onNavigateToStudentDetail,
+                    onNavigateToTeacherDetail = onNavigateToTeacherDetail
                 )
             }
         }

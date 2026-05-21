@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -78,6 +80,7 @@ import com.drcmind.kelasisuite.domain.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.domain.dto.StudentDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
@@ -88,7 +91,9 @@ fun ClassDetailsScreen(
     classId: Long,
     className: String,
     viewModel: SchoolStructureViewModel = koinViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToStudentDetail: (Long) -> Unit = {},
+    onNavigateToTeacherDetail: (Long) -> Unit = {}
 ) {
     var showEnrollDialog by remember { mutableStateOf(false) }
     var showAssignTeacherDialog by remember { mutableStateOf(false) }
@@ -117,7 +122,7 @@ fun ClassDetailsScreen(
                         )
                     }
                 },
-                    actions = {
+                actions = {
                     IconButton(onClick = {}) {
                         Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More menu")
                     }
@@ -218,10 +223,7 @@ fun ClassDetailsScreen(
 
                             when (selectedDestination) {
                                 0 -> {
-                                    StudentsList(viewModel, classId)
-                                }
-
-                                1 -> { /* Performance placeholder */
+                                    StudentsList(viewModel, classId, onNavigateToStudentDetail)
                                 }
 
                                 2 -> { /* Settings placeholder */
@@ -251,34 +253,40 @@ fun ClassDetailsScreen(
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 DailyPlanningCard()
-                                TeacherMiniCard(homeroomAssignment) {
-                                    showAssignTeacherDialog = true
-                                }
+                                TeacherMiniCard(
+                                    homeroomAssignment,
+                                    onAssignClick = { showAssignTeacherDialog = true },
+                                    onTeacherClick = {
+                                        homeroomAssignment?.teacherProfileId?.let(
+                                            onNavigateToTeacherDetail
+                                        )
+                                    }
+                                )
                             }
                         }
                     }
                 }
             )
         }
+    }
 
+    if (showEnrollDialog) {
+        GlobalEnrollmentDialog(
+            viewModel = viewModel,
+            classId = classId,
+            onDismiss = { showEnrollDialog = false }
+        )
+    }
 
-        if (showEnrollDialog) {
-            GlobalEnrollmentDialog(
-                viewModel = viewModel,
-                classId = classId,
-                onDismiss = { showEnrollDialog = false }
-            )
-        }
-
-        if (showAssignTeacherDialog) {
-            HomeroomTeacherAssignmentDialog(
-                viewModel = viewModel,
-                classId = classId,
-                onDismiss = { showAssignTeacherDialog = false }
-            )
-        }
+    if (showAssignTeacherDialog) {
+        HomeroomTeacherAssignmentDialog(
+            viewModel = viewModel,
+            classId = classId,
+            onDismiss = { showAssignTeacherDialog = false }
+        )
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -358,7 +366,8 @@ fun HomeroomTeacherAssignmentDialog(
 @Composable
 fun StudentsList(
     viewModel: SchoolStructureViewModel,
-    classId: Long
+    classId: Long,
+    onNavigateToStudentDetail: (Long) -> Unit = {}
 ) {
     val students by viewModel.clasStudents.collectAsState()
     val isLoading by viewModel.isLoadingClassStudents.collectAsState()
@@ -416,7 +425,7 @@ fun StudentsList(
                     }
 
                     else -> students.forEachIndexed { index, student ->
-                        StudentRowItem(student)
+                        StudentRowItem(student, onNavigateToStudentDetail)
                         if (index < students.size - 1) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -431,8 +440,9 @@ fun StudentsList(
 }
 
 @Composable
-fun StudentRowItem(student: StudentDTO) {
+fun StudentRowItem(student: StudentDTO, onClick: (Long) -> Unit) {
     ListItem(
+        modifier = Modifier.clickable { onClick(student.id) },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         headlineContent = {
             Text(
@@ -466,15 +476,15 @@ fun StudentRowItem(student: StudentDTO) {
         },
         trailingContent = {
             val statusColor = when (student.status) {
-                com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus.ACTIVE -> Color(
+                StudentStatus.ACTIVE -> Color(
                     0xFF10B981
                 )
 
-                com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus.PROBATION -> Color(
+                StudentStatus.PROBATION -> Color(
                     0xFFF59E0B
                 )
 
-                com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus.INACTIVE -> MaterialTheme.colorScheme.outline
+                StudentStatus.INACTIVE -> MaterialTheme.colorScheme.outline
             }
             Surface(
                 color = statusColor.copy(alpha = 0.1f),
@@ -559,7 +569,8 @@ fun DailyPlanningCard() {
 @Composable
 fun TeacherMiniCard(
     homeroomAssignment: HomeroomAssignmentDTO?,
-    onAssignClick: () -> Unit
+    onAssignClick: () -> Unit,
+    onTeacherClick: (Long) -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -568,9 +579,11 @@ fun TeacherMiniCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
-            modifier = Modifier
+            modifier = Modifier.clickable {
+                homeroomAssignment?.teacherProfileId?.let(onTeacherClick)
+            }
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(24.dp) ,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

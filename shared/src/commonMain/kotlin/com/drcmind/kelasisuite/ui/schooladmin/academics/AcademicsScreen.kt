@@ -21,7 +21,10 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
 @Composable
-fun AcademicsScreen() {
+fun AcademicsScreen(
+    onNavigateToStudentDetail: (Long) -> Unit = {},
+    onNavigateToTeacherDetail: (Long) -> Unit = {}
+) {
 
     val academicsBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
@@ -80,6 +83,10 @@ fun AcademicsScreen() {
                 )
             }
         }
-        AcademicsNavigation(academicsBackStack = academicsBackStack)
+        AcademicsNavigation(
+            academicsBackStack = academicsBackStack,
+            onNavigateToStudentDetail = onNavigateToStudentDetail,
+            onNavigateToTeacherDetail = onNavigateToTeacherDetail
+        )
     }
 }

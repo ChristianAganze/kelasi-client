@@ -19,8 +19,11 @@ import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.SchoolS
 @Composable
 fun AcademicsNavigation(
     modifier: Modifier = Modifier,
-    academicsBackStack: NavBackStack<NavKey>
+    academicsBackStack: NavBackStack<NavKey>,
+    onNavigateToStudentDetail: (Long) -> Unit = {},
+    onNavigateToTeacherDetail: (Long) -> Unit = {}
 ) {
+
     NavDisplay(
         modifier = modifier,
         backStack = academicsBackStack,
@@ -33,7 +36,10 @@ fun AcademicsNavigation(
                 CalendarPeriodsScreen()
             }
             entry<Route.SchoolAdmin.Academics.SchoolStructure> {
-                SchoolStructureScreen()
+                SchoolStructureScreen(
+                    onNavigateToStudentDetail = onNavigateToStudentDetail,
+                    onNavigateToTeacherDetail = onNavigateToTeacherDetail
+                )
             }
 
             entry<Route.SchoolAdmin.Academics.Enrollment> {

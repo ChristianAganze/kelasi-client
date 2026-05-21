@@ -10,8 +10,8 @@ import kotlinx.serialization.modules.polymorphic
 
 @Composable
 fun SchoolStructureScreen(
-
-
+    onNavigateToStudentDetail: (Long) -> Unit = {},
+    onNavigateToTeacherDetail: (Long) -> Unit = {}
 ){
     val schoolStructureBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
@@ -40,7 +40,11 @@ fun SchoolStructureScreen(
         Route.SchoolAdmin.Academics.SchoolStructure.Structure
     )
 
-    SchoolStructureNavigation(schoolStructureBackStack = schoolStructureBackStack)
+    SchoolStructureNavigation(
+        schoolStructureBackStack = schoolStructureBackStack,
+        onNavigateToStudentDetail = onNavigateToStudentDetail,
+        onNavigateToTeacherDetail = onNavigateToTeacherDetail
+    )
 
 
 }
