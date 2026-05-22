@@ -187,6 +187,12 @@ sealed interface Route : NavKey {
         data object Students : NavigationBarRoute {
             override val icon: ImageVector = Icons.Filled.School
             override val label: String = "Students"
+
+            @Serializable
+            data object ListDetails : Route {
+                @Serializable data object List : Route
+                @Serializable data class Profile(val studentId : Long) : Route
+            }
         }
 
         @Serializable

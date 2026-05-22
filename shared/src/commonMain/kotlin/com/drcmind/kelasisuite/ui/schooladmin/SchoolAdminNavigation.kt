@@ -56,14 +56,7 @@ fun SchoolAdminNavigation(
             }
 
             entry<Route.SchoolAdmin.Students> {
-                StudentsScreen(
-                    onNavigateToAddStudent = {
-                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent())
-                    },
-                    onNavigateToStudentDetail = { id ->
-                        schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
-                    },
-                )
+                StudentsScreen()
             }
 
             entry<Route.SchoolAdmin.AddStudent> { key ->
@@ -84,6 +77,7 @@ fun SchoolAdminNavigation(
 
             entry<Route.SchoolAdmin.StudentDetail> { key ->
                 StudentDetailScreen(
+                    showTopAppBar = true,
                     studentId = key.studentId,
                     onBack = {
                         if (schoolAdminBackStack.size > 1) {

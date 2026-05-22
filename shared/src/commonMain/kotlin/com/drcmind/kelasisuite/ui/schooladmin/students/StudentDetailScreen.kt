@@ -29,6 +29,7 @@ fun StudentDetailScreen(
     studentId: Long,
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
+    showTopAppBar: Boolean = false,
     viewModel: StudentsViewModel = koinViewModel()
 ) {
     val state by viewModel.detailState.collectAsState()
@@ -38,10 +39,10 @@ fun StudentDetailScreen(
     }
 
     Scaffold(
-        containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = {
+        containerColor = Color.Transparent, topBar = {
+            if (showTopAppBar) {
+                TopAppBar(
+                    title = {
                     Text(
                         "Profil de l'élève",
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black)
@@ -53,7 +54,8 @@ fun StudentDetailScreen(
                 }, colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
-            )
+                )
+            }
         }) { padding ->
         Box(
             modifier = Modifier.fillMaxSize().padding(padding)
@@ -73,7 +75,7 @@ fun StudentDetailScreen(
 
                 Column(
                     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                        .padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)
+                        .padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     // 1. SECTION HEADER
                     HeaderSection(student, onEdit)
@@ -136,7 +138,11 @@ fun StudentDetailScreen(
                                     }
                                 }
                                 IconButton(onClick = { showEnrollDialog = true }) {
-                                    Icon(AppIcons.edit, null, tint = MaterialTheme.colorScheme.primary)
+                                    Icon(
+                                        AppIcons.edit,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
                                 }
                             }
                         }
