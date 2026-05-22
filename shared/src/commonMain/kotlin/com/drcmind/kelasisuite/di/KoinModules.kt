@@ -17,10 +17,14 @@ import com.drcmind.kelasisuite.data.datasource.remote.teachers.TeachersAPIServic
 import com.drcmind.kelasisuite.data.datasource.remote.teachers.TeachersAPIServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIService
 import com.drcmind.kelasisuite.data.datasource.remote.users.UsersAPIServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.assignments.AssignmentAPIService
+import com.drcmind.kelasisuite.data.datasource.remote.assignments.AssignmentAPIServiceImpl
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.parents.ParentsRepository
 import com.drcmind.kelasisuite.data.repository.parents.ParentsRepositoryImp
+import com.drcmind.kelasisuite.data.repository.assignments.AssignmentRepository
+import com.drcmind.kelasisuite.data.repository.assignments.AssignmentRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.profile.ProfileRepository
 import com.drcmind.kelasisuite.data.repository.profile.ProfileRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
@@ -73,6 +77,7 @@ val networkModule = module {
     single<TeachersAPIService> { TeachersAPIServiceImpl(get()) }
     single<UsersAPIService> { UsersAPIServiceImpl(get()) }
     single<ParentAPIService> { ParentAPIServiceImpl(get()) }
+    single<AssignmentAPIService> { AssignmentAPIServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -95,6 +100,7 @@ val repositoryModule = module {
     }
     single<UsersRepository> { UsersRepositoryImpl(get()) }
     single<ParentsRepository> { ParentsRepositoryImp(get(), get()) }
+    single<AssignmentRepository> { AssignmentRepositoryImpl(get(), get()) }
 }
 
 val viewModelModule = module {
