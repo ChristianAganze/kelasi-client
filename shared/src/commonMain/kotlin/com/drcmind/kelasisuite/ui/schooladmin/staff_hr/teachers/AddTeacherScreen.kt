@@ -1,8 +1,4 @@
 package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
-<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
-
-========
->>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -31,7 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.domain.dto.UserDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -62,17 +58,12 @@ fun AddTeacherScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                ),
                 title = { Text(if (isEditing) "Modification Enseignant" else if (state.showUserList) "Sélection de l'utilisateur" else "Recrutement Enseignant") },
                 navigationIcon = {
                     IconButton(onClick = if (!isEditing && !state.showUserList) viewModel::onBackToUserList else onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
                     }
-<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
-                }
-========
+
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
@@ -85,8 +76,6 @@ fun AddTeacherScreen(
                         .onSurface,
                 )
 
-
->>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
             )
         }
     ) { padding ->
@@ -167,11 +156,7 @@ private fun UserSelectionSection(
         Spacer(modifier = Modifier.height(24.dp))
 
         if (isLoading) {
-<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
-
-========
->>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/AddTeacherScreen.kt
-            Box(
+           Box(
                 modifier = Modifier.fillMaxWidth().padding(40.dp),
                 contentAlignment = Alignment.Center
             ) {

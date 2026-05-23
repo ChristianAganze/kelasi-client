@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.domain.dto
+package com.drcmind.kelasisuite.data.datasource.remote.dto
 
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
@@ -72,7 +72,7 @@ data class MajorDto(
     val id: Long,
     val name: String,
     val sectionId : Long,
-    val sectionName : String
+    val sectionName : String,
 )
 
 @Serializable

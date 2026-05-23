@@ -1,0 +1,230 @@
+package com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin
+
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateParentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentCreationRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UpdateEnrollmentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+
+class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdminApiService {
+
+
+
+    override suspend fun getParentsBySchool(schoolId: Long): List<ParentDto> {
+        return httpClient.get("parents/schools/$schoolId").body()
+    }
+
+    override suspend fun createParent(request: CreateParentRequest): ParentDto {
+        return httpClient.post("parents"){
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun linkStudentToParent(linkageRequest: ParentStudentLinkageRequest): ParentStudentLinkageDto {
+        return httpClient.post("parents/link-student"){
+            setBody(linkageRequest)
+        } .body()
+    }
+
+    override suspend fun unlinkStudentFromParent(linkageId: Long) {
+        return httpClient.delete ("parents/unlink-student/$linkageId").body()
+    }
+
+    override suspend fun updateParent(
+        parentId: Long,
+        createParentRequest: CreateParentRequest
+    ): ParentDto {
+        return httpClient.put("parents/$parentId"){
+            setBody(createParentRequest)
+        } .body()
+    }
+
+    override suspend fun deleteParent(parentId: Long) {
+        return httpClient.get("parents/$parentId").body()
+    }
+
+    override suspend fun getParentById(parentId: Long): ParentDto {
+        return httpClient.get("parents/$parentId").body()
+    }
+
+    override suspend fun getSchool(schoolId: Long): SchoolDTO {
+        return httpClient.get("schools/$schoolId").body()
+    }
+
+    override suspend fun getSchoolSections(schoolId: Long): List<SchoolSectionDTO> {
+        return httpClient.get("schools/$schoolId/school-sections").body()
+    }
+
+    override suspend fun getSectionBySchoolSectionAndSchool(
+        schoolSectionId: Long,
+        schoolId: Long
+    ): List<SectionDTO> {
+        return httpClient.get("schools/$schoolId/school-sections/$schoolSectionId/sections").body()
+    }
+
+    override suspend fun getOfferedMajorBySchoolAndBySection(
+        schoolId: Long,
+        sectionId: Long
+    ): List<MajorDto> {
+        return httpClient.get("schools/$schoolId/sections/$sectionId/majors").body()
+    }
+
+    override suspend fun getOfferedMajorsForSchool(schoolId: Long): List<MajorDto> {
+        return httpClient.get("schools/$schoolId/majors").body()
+    }
+
+    override suspend fun getGradeLevelsBySchoolAndByMajor(
+        schoolId: Long,
+        majorId: Long
+    ): List<GradeLevelDTO> {
+        return httpClient.get("schools/$schoolId/majors/$majorId/grade-levels").body()
+    }
+
+    override suspend fun getClassesForSchool(schoolId: Long): List<SchoolClassDTO> {
+        return httpClient.get("schools/$schoolId/classes").body()
+    }
+
+    override suspend fun getClassesForSchoolAndMajor(schoolId: Long, majorId: Long): List<SchoolClassDTO> {
+        return httpClient.get("schools/$schoolId/majors/$majorId/classes").body()
+    }
+
+    override suspend fun getClassesBySchoolAndGradeLevel(
+        schoolId: Long,
+        gradeLevelId: Long
+    ): List<SchoolClassDTO> {
+        return httpClient.get("schools/$schoolId/grade-levels/$gradeLevelId/classes").body()
+    }
+
+    override suspend fun createClass(request: CreateClassFromTemplateRequest): SchoolClassDTO {
+        return httpClient.post("schools/classes/from-template") {
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun updateClass(classId: Long, request: CreateClassFromTemplateRequest): SchoolClassDTO {
+        return httpClient.put("schools/classes/$classId") {
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun deleteClass(classId: Long) {
+        httpClient.delete("schools/classes/$classId")
+    }
+
+    override suspend fun getAcademicYears(): List<AcademicYearDTO> {
+        return httpClient.get("templates/academic-years").body()
+    }
+
+    override suspend fun getEvaluationPeriodsBySchool(schoolId: Long): List<EvaluationPeriodBySchoolDTO> {
+        return httpClient.get("schools/$schoolId/evaluation-periods").body()
+    }
+
+    override suspend fun createStudent(creationRequest: StudentCreationRequest): StudentDTO {
+        return httpClient.post("students") {
+            setBody(creationRequest)
+        }.body()
+    }
+
+    override suspend fun updateStudent(
+        studentId: Long,
+        updateRequest: StudentCreationRequest
+    ): StudentDTO {
+        return httpClient.put("students/$studentId") {
+            setBody(updateRequest)
+        }.body()
+    }
+
+    override suspend fun getStudents(schoolId: Long): List<StudentDTO> {
+        return httpClient.get("schools/$schoolId/students/all").body()
+    }
+
+    override suspend fun getEnrolledStudents(
+        schoolId: Long,
+        academicYearId: Long
+    ): List<EnrollmentDto> {
+        return httpClient.get("schools/$schoolId/enrolled-students") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun getStudentsForClass(
+        classId: Long,
+        academicYearId: Long
+    ): List<StudentDTO> {
+        return httpClient.get("classes/$classId/students") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun getStudent(studentId: Long): StudentDTO {
+        return httpClient.get("students/$studentId").body()
+    }
+
+    override suspend fun enrollStudent(request: EnrollmentRequest): StudentDTO {
+        return httpClient.post("enrollments") {
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun updateEnrollment(
+        enrollmentId: Long,
+        request: UpdateEnrollmentRequest
+    ): StudentDTO {
+        return httpClient.put("enrollments/$enrollmentId") {
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun createTeacher(creationRequest: TeacherProfileRequest): TeacherProfileDTO {
+        return httpClient.post("teachers") {
+            setBody(creationRequest)
+        }.body()
+    }
+
+    override suspend fun updateTeacher(teacherId: Long, updateRequest: TeacherProfileRequest): TeacherProfileDTO {
+        return httpClient.put("teachers/$teacherId") {
+            setBody(updateRequest)
+        }.body()
+    }
+
+    override suspend fun getTeachers(schoolId: Long): List<TeacherProfileDTO> {
+        return httpClient.get("schools/$schoolId/teachers").body()
+    }
+
+    override suspend fun getTeacher(teacherId: Long): TeacherProfileDTO {
+        return httpClient.get("teachers/$teacherId").body()
+    }
+
+    override suspend fun getUserBySchoolId(schoolId: Long): List<UserDTO> {
+        return httpClient.get("schools/$schoolId/users").body()
+    }
+
+}

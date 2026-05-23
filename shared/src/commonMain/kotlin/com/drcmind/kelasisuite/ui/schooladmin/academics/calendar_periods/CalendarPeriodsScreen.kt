@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -25,17 +26,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.drcmind.kelasisuite.domain.dto.EvaluationPeriodDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
 import com.drcmind.kelasisuite.domain.model.EvaluationStatus
 import com.drcmind.kelasisuite.navigation.Route
-import com.drcmind.kelasisuite.ui.components.AppIcons
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -58,11 +58,18 @@ fun CalendarPeriodsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Configuration de l'Année",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "Calendrier Académique",
+                            style = MaterialTheme.typography.displaySmall,
+                        )
+                        Text(
+                            text = "Définissez les périodes, les filières et le cycle de l'année scolaire en cours.",
+                            style = MaterialTheme.typography.labelLarge,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 },
                 actions = {
                     TextButton(onClick = { }) {
@@ -74,6 +81,7 @@ fun CalendarPeriodsScreen(
                     ) {
                         Text("Sauvegarder")
                     }
+                    Spacer(Modifier.width(16.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
@@ -123,27 +131,80 @@ fun CalendarPeriodsScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(32.dp)
                     ) {
-                        Column {
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Text(
-                                text = "Calendrier Académique",
-                                style = MaterialTheme.typography.displayLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                letterSpacing = (-0.5).sp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Définissez les périodes, les filières et le cycle de l'année scolaire en cours.",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
                         // --- Active Academic Year Card ---
                         AcademicYearCard(uiState)
 
                         // --- Majors and Cycles Card ---
-                        ConfigGrid(uiState)
+                        OutlinedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                // Sub-section: Majors Offered
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Majors Offered",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    IconButton(onClick = { /* TODO: Implement add major dialog */ }) {
+                                        Icon(Icons.Default.Add, contentDescription = "Add Major")
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                if (uiState.majors.isEmpty()) {
+                                    Text("No majors configured.", style = MaterialTheme.typography.bodySmall)
+                                } else {
+                                    FlowRow( // Use FlowRow for a flexible layout of majors
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        uiState.majors.forEach { major ->
+                                            SuggestionChip(
+                                                onClick = { /* TODO: Implement major edit/details */ },
+                                                label = { Text(major.name) },
+                                                colors = SuggestionChipDefaults.suggestionChipColors(
+                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                    labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+                                // Sub-section: School Sections / Cycles
+                                Text(
+                                    text = "School Sections / Cycles",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                if (uiState.schoolSections.isEmpty()) {
+                                    Text("No sections/cycles configured.", style = MaterialTheme.typography.bodySmall)
+                                } else {
+                                    FlowRow( // Use FlowRow for a flexible layout of sections
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        uiState.schoolSections.forEach { section ->
+                                            SuggestionChip(
+                                                onClick = { /* TODO: Implement section edit/details */ },
+                                                label = { Text(section.name) },
+                                                colors = SuggestionChipDefaults.suggestionChipColors(
+                                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                    labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                         // --- Evaluation Period Table Card ---
                         EvaluationPeriodsCard(uiState)
@@ -154,50 +215,40 @@ fun CalendarPeriodsScreen(
                 entry<Route.SchoolAdmin.Academics.CalendarPeriod.Supporting>(
                     metadata = SupportingPaneSceneStrategy.supportingPane()
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
+                    OutlinedCard(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     ) {
-                        Text(
-                            text = "HISTORIQUE DES ANNÉES",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.outline,
-                            letterSpacing = 1.sp
-                        )
-
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.extraLarge,
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                        ) {
-                            Column {
-                                uiState.academicYears.forEachIndexed { index, year ->
-                                    ListItem(
-                                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                                        headlineContent = {
-                                            Text(
-                                                year.label,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        },
-                                        trailingContent = {
-                                            if (year.isActive) {
-                                                ActiveYearBadge()
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "All Academic Years",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            if (uiState.academicYears.isEmpty()) {
+                                Text("No academic years configured.", style = MaterialTheme.typography.bodySmall)
+                            } else {
+                                LazyColumn {
+                                    items(uiState.academicYears) { academicYear ->
+                                        ListItem(
+                                            headlineContent = {
+                                                Text(
+                                                    text = academicYear.label,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    modifier = Modifier.padding(vertical = 4.dp)
+                                                )
+                                                if (academicYear.isActive){
+                                                    Text(
+                                                        text = "Active",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                        modifier = Modifier
+                                                            .background(color = MaterialTheme.colorScheme.secondaryContainer, shape = CircleShape)
+                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    )
+                                                }
                                             }
-                                        }
-                                    )
-                                    if (index < uiState.academicYears.size - 1) {
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                            color = MaterialTheme.colorScheme.outlineVariant.copy(
-                                                alpha = 0.5f
-                                            )
                                         )
+                                        HorizontalDivider()
                                     }
                                 }
                             }
@@ -222,11 +273,8 @@ fun AcademicYearCard(uiState: CalendarPeriodsUiState) {
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
-    Card(
+    OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -253,7 +301,6 @@ fun AcademicYearCard(uiState: CalendarPeriodsUiState) {
                     label = { Text("Année Scolaire") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    shape = MaterialTheme.shapes.large
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
@@ -276,14 +323,6 @@ fun AcademicYearCard(uiState: CalendarPeriodsUiState) {
                     readOnly = true,
                     label = { Text("Date de début") },
                     trailingIcon = { Icon(Icons.Default.DateRange, null) },
-                    shape = MaterialTheme.shapes.large,
-                    enabled = false,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                        disabledBorderColor = MaterialTheme.colorScheme.outline,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 )
 
                 OutlinedTextField(
@@ -293,14 +332,6 @@ fun AcademicYearCard(uiState: CalendarPeriodsUiState) {
                     readOnly = true,
                     label = { Text("Date de fin") },
                     trailingIcon = { Icon(Icons.Default.DateRange, null) },
-                    shape = MaterialTheme.shapes.large,
-                    enabled = false,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                        disabledBorderColor = MaterialTheme.colorScheme.outline,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 )
             }
         }
@@ -347,87 +378,6 @@ fun AcademicYearCard(uiState: CalendarPeriodsUiState) {
                 TextButton(onClick = { showEndDatePicker = false }) { Text("Annuler") }
             }
         ) { DatePicker(state = state) }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun ConfigGrid(uiState: CalendarPeriodsUiState) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-        ConfigCard(
-            title = "Options / Filières",
-            items = uiState.majors.map { it.name },
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            onAddClick = {},
-            modifier = Modifier.weight(1f)
-        )
-        ConfigCard(
-            title = "Cycles / Sections",
-            items = uiState.schoolSections.map { it.name },
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            onAddClick = {},
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun ConfigCard(
-    title: String,
-    items: List<String>,
-    containerColor: Color,
-    onAddClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(onClick = onAddClick) {
-                    Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary)
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            if (items.isEmpty()) {
-                Text(
-                    "Aucune configuration.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            } else {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items.forEach { item ->
-                        SuggestionChip(
-                            onClick = { },
-                            label = { Text(item) },
-                            shape = CircleShape,
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = containerColor.copy(alpha = 0.5f),
-                                labelColor = MaterialTheme.colorScheme.onSurface
-                            ),
-                            border = null
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -533,7 +483,7 @@ fun EvaluationPeriodRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            period.schoolSectionName ?: "",
+            period.label,
             modifier = Modifier.weight(0.3f),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold

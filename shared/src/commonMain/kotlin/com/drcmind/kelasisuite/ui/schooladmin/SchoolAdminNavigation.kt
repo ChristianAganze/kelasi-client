@@ -14,11 +14,7 @@ import com.drcmind.kelasisuite.ui.schooladmin.academics.AcademicsScreen
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardScreen
 import com.drcmind.kelasisuite.ui.schooladmin.parents.ParentsScreen
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.PedagogyScreen
-import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileScreen
 import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.StaffHrScreen
-import com.drcmind.kelasisuite.ui.schooladmin.students.AddStudentScreen
-import com.drcmind.kelasisuite.ui.schooladmin.students.StudentDetailScreen
-import com.drcmind.kelasisuite.ui.schooladmin.students.StudentsScreen
 
 @Composable
 fun SchoolAdminNavigation(
@@ -42,51 +38,6 @@ fun SchoolAdminNavigation(
 
             entry<Route.SchoolAdmin.Pedagogy> {
                 PedagogyScreen()
-            }
-
-            entry<Route.SchoolAdmin.Profile> {
-                ProfileScreen()
-            }
-
-            entry<Route.SchoolAdmin.Students> {
-                StudentsScreen(
-                    onNavigateToAddStudent = {
-                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent())
-                    },
-                    onNavigateToStudentDetail = { id ->
-                        schoolAdminBackStack.add(Route.SchoolAdmin.StudentDetail(id))
-                    },
-                )
-            }
-
-            entry<Route.SchoolAdmin.AddStudent> { key ->
-                AddStudentScreen(
-                    studentId = key.studentId,
-                    onBack = {
-                        if (schoolAdminBackStack.size > 1) {
-                            schoolAdminBackStack.removeLast()
-                        }
-                    },
-                    onStudentAdded = {
-                        if (schoolAdminBackStack.size > 1) {
-                            schoolAdminBackStack.removeLast()
-                        }
-                    }
-                )
-            }
-
-            entry<Route.SchoolAdmin.StudentDetail> { key ->
-                StudentDetailScreen(
-                    studentId = key.studentId,
-                    onBack = {
-                        if (schoolAdminBackStack.size > 1) {
-                            schoolAdminBackStack.removeLast()
-                        }
-                    },
-                    onEdit = { id ->
-                        schoolAdminBackStack.add(Route.SchoolAdmin.AddStudent(id))
-                    }
-                )
             }
 
             entry<Route.SchoolAdmin.Parents> {

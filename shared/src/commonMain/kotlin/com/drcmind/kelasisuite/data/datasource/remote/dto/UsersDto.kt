@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.domain.dto
+package com.drcmind.kelasisuite.data.datasource.remote.dto
 
 import kotlinx.serialization.Serializable
 

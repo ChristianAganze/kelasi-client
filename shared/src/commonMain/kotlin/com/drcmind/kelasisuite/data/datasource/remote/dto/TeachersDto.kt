@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.domain.dto
+package com.drcmind.kelasisuite.data.datasource.remote.dto
 
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
@@ -9,7 +9,7 @@ data class TeacherProfileRequest(
     val payrollId: String?,
     val address: Address,
     val qualifications: String,
-    val hireDate: LocalDate ,
+    val hireDate: LocalDate,
     val maxWeeklyHours: Int,
     val resumeUrl : String?
 )

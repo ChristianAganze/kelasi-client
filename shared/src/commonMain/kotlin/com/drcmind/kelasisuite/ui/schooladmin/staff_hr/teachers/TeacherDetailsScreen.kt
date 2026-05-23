@@ -2,7 +2,6 @@ package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-<<<<<<<< HEAD:shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/TeacherDetailsScreen.kt
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,9 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-========
-import androidx.compose.foundation.layout.*
->>>>>>>> eb2ed45 (Merged with main & improved HR design):composeApp/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/staff_hr/teachers/TeacherDetailsScreen.kt
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -51,7 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.drcmind.kelasisuite.domain.dto.TeacherProfileDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -130,7 +127,7 @@ fun TeacherDetailsScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(AppIcons.empty, contentDescription = null, Modifier.size(100.dp))
+                    Icon(Icons.Default.HourglassEmpty, contentDescription = null, Modifier.size(100.dp))
                     Spacer(Modifier.height(10.dp))
                     Text("Aucune selection")
                 }

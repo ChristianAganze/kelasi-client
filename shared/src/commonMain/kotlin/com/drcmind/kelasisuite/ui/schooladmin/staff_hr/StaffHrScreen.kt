@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +44,7 @@ fun StaffHrScreen() {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        PrimaryTabRow(selectedTabIndex = selectedDestination, containerColor = Color.Transparent) {
+        SecondaryScrollableTabRow(selectedTabIndex = selectedDestination, containerColor = Color.Transparent) {
             Route.SchoolAdmin.StaffHR.TabDestination.entries.forEachIndexed { index, destination ->
                 Tab(
                     selected = selectedDestination == index,

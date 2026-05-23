@@ -1,33 +1,33 @@
 package com.drcmind.kelasisuite.data.repository.auth
 
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
-import com.drcmind.kelasisuite.data.datasource.remote.auth.AuthAPIService
-import com.drcmind.kelasisuite.data.datasource.remote.profile.ProfileAPIService
-import com.drcmind.kelasisuite.domain.dto.LoginRequest
-import com.drcmind.kelasisuite.domain.dto.LoginResponse
-import com.drcmind.kelasisuite.domain.dto.UserResponseDTO
+import com.drcmind.kelasisuite.data.datasource.remote.SystemApiService
+import com.drcmind.kelasisuite.data.datasource.remote.dto.LoginRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.LoginResponse
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UserResponseDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class AuthRepositoryImpl(
-    private val authAPIService: AuthAPIService,
     private val settingStorage: SettingsStorage,
-    private val profileApiService: ProfileAPIService
+    private val systemApiService: SystemApiService
 ) : AuthRepository {
     override fun login(loginRequest: LoginRequest): Flow<Resource<LoginResponse>> {
         return flow {
             emit(Resource.Loading())
-            val loginResponse = authAPIService.login(loginRequest)
+            val loginResponse = systemApiService.login(loginRequest)
             settingStorage.saveUserInfo(
                 token = loginResponse.token,
                 username = loginResponse.username,
                 role = loginResponse.roles.first(),
             )
             try {
-                val userResponse = authAPIService.getUserMe()
-                val userInfoResponse = profileApiService.getUser (userResponse.id)
+                val userResponse = systemApiService.getUserMe()
+                val userInfoResponse = systemApiService.getUser (userResponse.id)
+                val school = systemApiService.getSchool(userInfoResponse.schoolId!!)
+                settingStorage.saveSchool(school)
                 settingStorage.saveUserInfo(
                     token = loginResponse.token,
                     username = userResponse.username,
@@ -47,9 +47,9 @@ class AuthRepositoryImpl(
     override fun fetchAndSaveCurrentUser(): Flow<Resource<UserResponseDTO>> {
         return flow {
             emit(Resource.Loading())
-            val userResponse = authAPIService.getUserMe()
+            val userResponse = systemApiService.getUserMe()
             val userInfo = settingStorage.getUserInfo()
-            val userInfoResponse = profileApiService.getUser (userResponse.id)
+            val userInfoResponse = systemApiService.getUser (userResponse.id)
             settingStorage.saveUserInfo(
                 token = userInfo.token ?: "",
                 username = userResponse.username,

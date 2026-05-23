@@ -3,8 +3,9 @@ package com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.*
@@ -15,12 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import com.drcmind.kelasisuite.domain.dto.CreateClassFromTemplateRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
 import com.drcmind.kelasisuite.domain.model.SchoolTreeNode
 import com.drcmind.kelasisuite.domain.util.NodeType
 import com.drcmind.kelasisuite.navigation.Route
@@ -43,131 +43,52 @@ fun StructureScreen(
                     containerColor = Color.Transparent,
                 ),
                 title = {
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                         Text(
                             text = "Structure de l'École",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight =
-                                    FontWeight.Black
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Visualisez et gérez l'organisation structurelle de votre établissement.",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.displaySmall
                         )
                     }
                 }
-
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth().padding(padding).padding(horizontal = 16.dp),
         ) {
-
-
-            item {
-                StatsGrid(uiState)
-            }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.extraLarge,
-
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                ) {
-                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                        visibleNodes.forEachIndexed { index, visibleNode ->
-                            TreeNodeRow(
-                                visibleNode = visibleNode,
-                                onToggle = { viewModel.onToggle(it) },
-                                onAction = { node, action -> viewModel.onAction(node, action) },
-                                onNavigateToClassDetails = {
-                                    schoolStructureBackStack.add(
-                                        Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail(
-                                            visibleNode.node.originalId,
-                                            visibleNode.node.title
-                                        )
-                                    )
-                                }
-                            )
-                            if (index < visibleNodes.size - 1) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 24.dp),
-                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            Column(modifier = Modifier.padding(vertical = 8.dp).verticalScroll(rememberScrollState())) {
+                visibleNodes.forEachIndexed { index, visibleNode ->
+                    TreeNodeRow(
+                        visibleNode = visibleNode,
+                        onToggle = { viewModel.onToggle(it) },
+                        onAction = { node, action -> viewModel.onAction(node, action) },
+                        onNavigateToClassDetails = {
+                            schoolStructureBackStack.add(
+                                Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail(
+                                    visibleNode.node.originalId,
+                                    "${visibleNode.node.parentTitle} ${visibleNode.node.title}"
                                 )
-                            }
+                            )
                         }
-
-                        if (visibleNodes.isEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(48.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
+                    )
+                    if (index < visibleNodes.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+                if (visibleNodes.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
             }
-
-            item { Spacer(modifier = Modifier.height(32.dp)) }
-        }
-    }
-}
-
-@Composable
-fun StatsGrid(state: ClassesState) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        StatCard("Cycles", state.totalCycles.toString(), "Académiques", Modifier.weight(1f))
-        StatCard("Sections", state.totalSections.toString(), "Filières", Modifier.weight(1f))
-        StatCard("Niveaux", state.totalGradeLevels.toString(), "Grades", Modifier.weight(1f))
-        StatCard("Classes", state.totalClasses.toString(), "Effectif total", Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun StatCard(
-    label: String,
-    value: String,
-    description: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = MaterialTheme.shapes.extraLarge,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(Modifier.padding(20.dp)) {
-            Text(
-                label.uppercase(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.outline
-            )
-            Text(
-                value,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
         }
     }
 }
@@ -242,7 +163,10 @@ fun TreeNodeRow(
                     text = node.title,
                     style = if (node.type == NodeType.CLASSROOM) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
                     fontWeight = if (node.type == NodeType.CLASSROOM) FontWeight.Medium else FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    softWrap = false,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 if (node.type != NodeType.CLASSROOM) {
                     Spacer(modifier = Modifier.width(12.dp))

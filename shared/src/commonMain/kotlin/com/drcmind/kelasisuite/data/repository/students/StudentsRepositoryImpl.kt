@@ -1,21 +1,24 @@
 package com.drcmind.kelasisuite.data.repository.students
 
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
-import com.drcmind.kelasisuite.data.datasource.remote.students.StudentsAPIService
-import com.drcmind.kelasisuite.domain.dto.*
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentCreationRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UpdateEnrollmentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class StudentsRepositoryImpl(
-    private val studentsAPIService: StudentsAPIService,
+    private val schoolAdminApiService: SchoolAdminApiService,
     private val settingsStorage: SettingsStorage
 ) : StudentsRepository {
     override fun createStudent(createRequest: StudentCreationRequest): Flow<Resource<StudentDTO>> {
         return flow {
             emit(Resource.Loading())
-            val creationResponse = studentsAPIService.createStudent(createRequest)
+            val creationResponse = schoolAdminApiService.createStudent(createRequest)
             emit(Resource.Success(creationResponse))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
@@ -28,7 +31,7 @@ class StudentsRepositoryImpl(
     ): Flow<Resource<StudentDTO>> {
         return flow {
             emit(Resource.Loading())
-            val updateResponse = studentsAPIService.updateStudent(studentId, updateRequest)
+            val updateResponse = schoolAdminApiService.updateStudent(studentId, updateRequest)
             emit(Resource.Success(updateResponse))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
@@ -38,27 +41,14 @@ class StudentsRepositoryImpl(
     override fun getStudents(schoolId: Long): Flow<Resource<List<StudentDTO>>> {
         return flow {
             emit(Resource.Loading())
-            val response = studentsAPIService.getStudents(schoolId)
+            val response = schoolAdminApiService.getStudents(schoolId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
         }
     }
 
-    override fun getEnrolledStudents(schoolId: Long): Flow<Resource<List<StudentDTO>>> {
-        return flow {
-            emit(Resource.Loading())
-            val academicYearId = settingsStorage.getActiveAcademicYear()?.id
-            if (academicYearId == null) {
-                emit(Resource.Error(message = "Aucune année académique active disponible."))
-                return@flow
-            }
-            val response = studentsAPIService.getEnrolledStudents(schoolId, academicYearId)
-            emit(Resource.Success(response))
-        }.catch {
-            emit(Resource.Error(message = it.message.toString()))
-        }
-    }
+
 
     override fun getStudentsForClass(classId: Long): Flow<Resource<List<StudentDTO>>> {
         return flow {
@@ -68,7 +58,7 @@ class StudentsRepositoryImpl(
                 emit(Resource.Error(message = "Aucune année académique active disponible."))
                 return@flow
             }
-            val response = studentsAPIService.getStudentsForClass(classId, academicYearId)
+            val response = schoolAdminApiService.getStudentsForClass(classId, academicYearId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
@@ -78,7 +68,7 @@ class StudentsRepositoryImpl(
     override fun getStudent(studentId: Long): Flow<Resource<StudentDTO>> {
         return flow {
             emit(Resource.Loading())
-            val response = studentsAPIService.getStudent(studentId)
+            val response = schoolAdminApiService.getStudent(studentId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
@@ -88,7 +78,7 @@ class StudentsRepositoryImpl(
     override fun enrollStudent(request: EnrollmentRequest): Flow<Resource<StudentDTO>> {
         return flow {
             emit(Resource.Loading())
-            val response = studentsAPIService.enrollStudent(request)
+            val response = schoolAdminApiService.enrollStudent(request)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
@@ -101,7 +91,7 @@ class StudentsRepositoryImpl(
     ): Flow<Resource<StudentDTO>> {
         return flow {
             emit(Resource.Loading())
-            val response = studentsAPIService.updateEnrollment(enrollmentId, request)
+            val response = schoolAdminApiService.updateEnrollment(enrollmentId, request)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))

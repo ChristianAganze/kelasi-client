@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
 import com.drcmind.kelasisuite.data.repository.users.UsersRepository
-import com.drcmind.kelasisuite.domain.dto.Address
-import com.drcmind.kelasisuite.domain.dto.TeacherProfileDTO
-import com.drcmind.kelasisuite.domain.dto.TeacherProfileRequest
-import com.drcmind.kelasisuite.domain.dto.UserDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.Address
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

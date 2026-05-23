@@ -7,8 +7,8 @@ import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_S
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_TOKEN
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_USERNAME
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_USER_ID
-import com.drcmind.kelasisuite.domain.dto.AcademicYearDTO
-import com.drcmind.kelasisuite.domain.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.domain.model.JwtPayload
 import com.drcmind.kelasisuite.domain.model.UserInfo
 import com.russhwolf.settings.Settings

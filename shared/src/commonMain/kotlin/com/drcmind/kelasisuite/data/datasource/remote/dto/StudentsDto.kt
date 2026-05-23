@@ -1,8 +1,9 @@
-package com.drcmind.kelasisuite.domain.dto
+package com.drcmind.kelasisuite.data.datasource.remote.dto
 
-import com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus
+import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentStatus
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 //CREATE
 @Serializable
@@ -94,4 +95,36 @@ data class EnrollmentRequest(
     val studentId: Long,
     val classId: Long,
     val academicYearId: Long
+)
+
+@Serializable
+data class EnrollmentDto(
+    val id: Long?,
+    val student: StudentSummaryDto,
+    val schoolClass: SchoolClassSummaryDto,
+    val academicYear: AcademicYearSummaryDto,
+    val enrollmentDate: Instant
+)
+
+@Serializable
+data class StudentSummaryDto(
+    val id: Long?,
+    val firstName: String,
+    val lastName: String
+)
+
+@Serializable
+data class SchoolClassSummaryDto(
+    val id: Long?,
+    val name: String,
+    val gradeLevel: String,
+    val major: String,
+    val section: String,
+    val schoolSection: String
+)
+
+@Serializable
+data class AcademicYearSummaryDto(
+    val id: Long?,
+    val label: String
 )

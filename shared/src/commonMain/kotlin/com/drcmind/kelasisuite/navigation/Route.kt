@@ -137,7 +137,29 @@ sealed interface Route : NavKey {
             }
 
             @Serializable
-            data object Enrollment : Route
+            data object StudentEnrollment : Route{
+                @Serializable
+                data object Enrollment : Route{
+                    @Serializable data object List : Route
+                    @Serializable data class Profile(val studentId: Long?) : Route
+                }
+                @Serializable
+                data object Students : Route{
+                    @Serializable data object List : Route
+                    @Serializable data class Profile(val studentId: Long) : Route
+                }
+
+                enum class TabDestination(
+                    val route: Route,
+                    val label: String,
+                    val icon: ImageVector,
+                    val contentDescription: String
+                ) {
+                    ENROLLMENT(Enrollment, "Inscriptions", Icons.AutoMirrored.Filled.Assignment, "Enrollment"),
+                    STUDENTS(Students, "Elèves", Icons.Default.School, "Students"),
+                }
+
+            }
             @Serializable
             data object EvaluationGrading : Route
 
@@ -155,7 +177,7 @@ sealed interface Route : NavKey {
             ) {
                 CALENDAR_PERIOD(CalendarPeriod, "Calendrier et périodes", Icons.Default.CalendarMonth, "calendar"),
                 SCHOOL_STRUCTURE(SchoolStructure, "Structure de l'école", Icons.Default.AccountTree, "AccountTree"),
-                ENROLLMENT(Enrollment, "Scolarité", Icons.AutoMirrored.Filled.Assignment, "Enrollment"),
+                STUDENT_ENROLLMENT(StudentEnrollment, "Suivi Scolaire", Icons.AutoMirrored.Filled.Assignment, "Enrollment"),
                 EVALUATION_GRADING(EvaluationGrading, "Evaluation et cotes", Icons.Default.Numbers, "Evaluation"),
                 DELIBERATION_CONDUCT(DeliberationsConduct, "Délibérations & conduite", Icons.Default.ControlPointDuplicate, "Deliberation et conduite"),
                 REPORT_CARDS(ReportCards, "Bulletins", Icons.Default.Report, "Report")
@@ -188,12 +210,6 @@ sealed interface Route : NavKey {
                     Icons.AutoMirrored.Filled.Notes, "Deliberation et conduite"),
                 INSPECTIONS(Inspections, "Inspections", Icons.Default.Analytics, "Report")
             }
-        }
-
-        @Serializable
-        data object Students : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Filled.School
-            override val label: String = "Students"
         }
 
         @Serializable
@@ -279,7 +295,6 @@ sealed interface Route : NavKey {
             SchoolDashboard,
             Academics,
             Pedagogy,
-            Students,
             Parents,
             StaffHR,
             Finance,

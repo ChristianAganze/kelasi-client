@@ -1,7 +1,7 @@
 package com.drcmind.kelasisuite.data.datasource.local.settings
 
-import com.drcmind.kelasisuite.domain.dto.AcademicYearDTO
-import com.drcmind.kelasisuite.domain.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.domain.model.UserInfo
 import kotlin.time.Instant
 

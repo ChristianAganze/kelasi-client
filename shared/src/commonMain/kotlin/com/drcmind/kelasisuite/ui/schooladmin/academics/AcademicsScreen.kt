@@ -30,13 +30,12 @@ fun AcademicsScreen() {
                         Route.SchoolAdmin.Academics.CalendarPeriod::class,
                         Route.SchoolAdmin.Academics.CalendarPeriod.serializer()
                     )
-                    subclass(
-                        Route.SchoolAdmin.Academics.SchoolStructure::class,
+                    subclass(Route.SchoolAdmin.Academics.SchoolStructure::class,
                         Route.SchoolAdmin.Academics.SchoolStructure.serializer()
                     )
                     subclass(
-                        Route.SchoolAdmin.Academics.Enrollment::class,
-                        Route.SchoolAdmin.Academics.Enrollment.serializer()
+                        Route.SchoolAdmin.Academics.StudentEnrollment::class,
+                        Route.SchoolAdmin.Academics.StudentEnrollment.serializer()
                     )
                     subclass(
                         Route.SchoolAdmin.Academics.EvaluationGrading::class,

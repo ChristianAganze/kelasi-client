@@ -3,7 +3,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.parents
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.repository.parents.ParentsRepository
-import com.drcmind.kelasisuite.domain.dto.ParentDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.*
 

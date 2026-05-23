@@ -1,7 +1,7 @@
 package com.drcmind.kelasisuite.data.repository.profile
 
-import com.drcmind.kelasisuite.domain.dto.SchoolDTO
-import com.drcmind.kelasisuite.domain.dto.UserDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 

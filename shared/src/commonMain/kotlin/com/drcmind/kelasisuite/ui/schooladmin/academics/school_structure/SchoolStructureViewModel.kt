@@ -7,8 +7,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
 import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
-import com.drcmind.kelasisuite.domain.dto.*
 import com.drcmind.kelasisuite.domain.model.SchoolTreeNode
 import com.drcmind.kelasisuite.domain.util.NodeType
 import com.drcmind.kelasisuite.domain.util.Resource
@@ -87,25 +94,6 @@ class SchoolStructureViewModel(
         }.launchIn(viewModelScope)
     }
 
-    fun loadEnrolledStudents() {
-        val schoolId = settingsStorage.getUserInfo().schoolId
-        if (schoolId == null) {
-            _enrolledStudents.value = emptyList()
-            return
-        }
-        studentsRepository.getEnrolledStudents(schoolId).onEach { resource ->
-            when (resource) {
-                is Resource.Loading -> _isLoadingEnrolledStudents.value = true
-                is Resource.Success -> {
-                    _enrolledStudents.value = resource.data ?: emptyList()
-                    _isLoadingEnrolledStudents.value = false
-                }
-
-                is Resource.Error -> _isLoadingEnrolledStudents.value = false
-            }
-        }.launchIn(viewModelScope)
-    }
-
     private fun loadStudents() {
         val schoolId = settingsStorage.getUserInfo().schoolId ?: return
         studentsRepository.getStudents(schoolId).onEach { resource ->
@@ -115,50 +103,26 @@ class SchoolStructureViewModel(
         }.launchIn(viewModelScope)
     }
 
-    fun enrollStudent(studentId: Long, classId: Long, academicYearId: Long) {
-        val request = EnrollmentRequest(studentId, classId, academicYearId)
-        studentsRepository.enrollStudent(request).onEach { resource ->
-            when (resource) {
-                is Resource.Loading -> _isLoadingEnrollment.value = true
-                is Resource.Success -> {
-                    _isLoadingEnrollment.value = false
-                    loadStudents() // Refresh to update status if needed
-                    loadEnrolledStudents()
-                }
 
-                is Resource.Error -> _isLoadingEnrollment.value = false
-                else -> Unit
-            }
-        }.launchIn(viewModelScope)
-    }
 
     val visibleNodes: State<List<VisibleNode>> = derivedStateOf {
-        println("derivedStateOf: Re-evaluating visibleNodes. Current 'nodes' size: ${nodes.size}. Content: $nodes")
         val builtNodes = buildVisibleNodes(nodes)
-        println("buildVisibleNodes returned ${builtNodes.size} nodes.")
         builtNodes
     }
 
     private fun loadRoots() {
-        println("loadRoots: Initial nodes state before loading roots: $nodes")
         schoolRepository.getSchoolSections().onEach { schoolSection ->
             when (schoolSection) {
 
                 is Resource.Success -> {
                     val data = schoolSection.data
                     if (data != null) {
-                        println("SUCCESS: Received ${data.size} school sections. Data: $data")
                         val newRootNodes = data.map { it.toSchoolTreeNode() }
                         val existingNodeKeys = nodes.map { "${it.id}-${it.type}" }.toSet()
                         val nodesToAdd =
                             newRootNodes.filter { "${it.id}-${it.type}" !in existingNodeKeys }
                         if (nodesToAdd.isNotEmpty()) {
                             nodes.addAll(nodesToAdd)
-                            println("Nodes list size after addAll: ${nodes.size}")
-                            println("Nodes added by loadRoots: $nodesToAdd")
-                            nodesToAdd.forEach {
-                                println("loadRoots: Added node ${it.title} (id: ${it.id}) childrenLoaded: ${it.childrenLoaded}")
-                            }
                         }
                     } else {
                         println("SUCCESS: Received null data for school sections.")
@@ -177,9 +141,7 @@ class SchoolStructureViewModel(
     fun onToggle(
         node: SchoolTreeNode
     ) {
-        println("onToggle: Initial node state received: $node")
-        println("onToggle called for: ${node.title}, id: ${node.id}, expanded: ${node.expanded}")
-        if (node.type == NodeType.CLASSROOM) {
+       if (node.type == NodeType.CLASSROOM) {
             return
         }
         if (node.expanded) {
@@ -199,11 +161,9 @@ class SchoolStructureViewModel(
 
     private fun expand(node: SchoolTreeNode) {
         viewModelScope.launch {
-            println("Expanding node: ${node.title}, id: ${node.id}, current expanded: ${node.expanded}, loading: ${node.loading}, childrenLoaded: ${node.childrenLoaded}")
             updateNode(node.originalId, node.type) { // MODIFIED: Pass node.type
                 it.copy(loading = true)
             }
-            println("Node ${node.title} (id: ${node.id}) set to loading=true")
 
             if (!node.childrenLoaded) {
                 when (node.type) {
@@ -214,23 +174,16 @@ class SchoolStructureViewModel(
                                     is Resource.Loading -> {
                                         println("LOADING children for ${node.title} (type: ${node.type})")
                                     }
-
                                     is Resource.Success -> {
-                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${section.data?.size ?: 0} items.")
                                         val newChildren =
                                             section.data?.map { it.toSchoolTreeNode() }
                                                 ?: emptyList()
-                                        println("expand (CYCLE): newChildren for ${node.title}: $newChildren")
-                                        // MODIFIED: Use composite key for existing nodes
                                         val existingNodeKeys =
                                             nodes.map { "${it.id}-${it.type}" }.toSet()
-                                        println("expand (CYCLE): existingNodeKeys: $existingNodeKeys") // Log the new set
                                         val childrenToAdd =
                                             newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                        println("expand (CYCLE): childrenToAdd for ${node.title}: $childrenToAdd")
                                         if (childrenToAdd.isNotEmpty()) {
                                             nodes.addAll(childrenToAdd)
-                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
                                         }
                                         updateNode(node.originalId, node.type) {
                                             it.copy(
@@ -239,17 +192,13 @@ class SchoolStructureViewModel(
                                                 childrenLoaded = true,
                                             )
                                         }
-                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
                                     }
-
                                     is Resource.Error -> {
                                         updateNode(node.originalId, node.type) {
                                             it.copy(loading = false)
                                         }
                                         println("ERROR fetching children for ${node.title}. Message: ${section.message}. Set loading=false.")
                                     }
-
-                                    else -> {}
                                 }
                             }.launchIn(viewModelScope)
                     }
@@ -263,20 +212,14 @@ class SchoolStructureViewModel(
                                     }
 
                                     is Resource.Success -> {
-                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${major.data?.size ?: 0} items.")
                                         val newChildren =
                                             major.data?.map { it.toSchoolTreeNode() } ?: emptyList()
-                                        println("expand (SECTION): newChildren for ${node.title}: $newChildren")
-                                        // MODIFIED: Use composite key for existing nodes
                                         val existingNodeKeys =
                                             nodes.map { "${it.id}-${it.type}" }.toSet()
-                                        println("expand (SECTION): existingNodeKeys: $existingNodeKeys") // Log the new set
                                         val childrenToAdd =
                                             newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                        println("expand (SECTION): childrenToAdd for ${node.title}: $childrenToAdd")
                                         if (childrenToAdd.isNotEmpty()) {
                                             nodes.addAll(childrenToAdd)
-                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
                                         }
                                         updateNode(node.originalId, node.type) {
                                             it.copy(
@@ -285,17 +228,13 @@ class SchoolStructureViewModel(
                                                 childrenLoaded = true
                                             )
                                         }
-                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
                                     }
 
                                     is Resource.Error -> {
                                         updateNode(node.originalId, node.type) {
                                             it.copy(loading = false)
                                         }
-                                        println("ERROR fetching children for ${node.title}. Message: ${major.message}. Set loading=false.")
                                     }
-
-                                    else -> {}
                                 }
                             }.launchIn(viewModelScope)
                     }
@@ -309,21 +248,15 @@ class SchoolStructureViewModel(
                                     }
 
                                     is Resource.Success -> {
-                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${gradeLevel.data?.size ?: 0} items.")
                                         val newChildren =
                                             gradeLevel.data?.map { it.toSchoolTreeNode() }
                                                 ?: emptyList()
-                                        println("expand (MAJOR): newChildren for ${node.title}: $newChildren")
-                                        // MODIFIED: Use composite key for existing nodes
                                         val existingNodeKeys =
                                             nodes.map { "${it.id}-${it.type}" }.toSet()
-                                        println("expand (MAJOR): existingNodeKeys: $existingNodeKeys") // Log the new set
                                         val childrenToAdd =
                                             newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                        println("expand (MAJOR): childrenToAdd for ${node.title}: $childrenToAdd")
                                         if (childrenToAdd.isNotEmpty()) {
                                             nodes.addAll(childrenToAdd)
-                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
                                         }
                                         updateNode(node.originalId, node.type) {
                                             it.copy(
@@ -332,17 +265,13 @@ class SchoolStructureViewModel(
                                                 childrenLoaded = true
                                             )
                                         }
-                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
                                     }
 
                                     is Resource.Error -> {
                                         updateNode(node.originalId, node.type) {
                                             it.copy(loading = false)
                                         }
-                                        println("ERROR fetching children for ${node.title}. Message: ${gradeLevel.message}. Set loading=false.")
                                     }
-
-                                    else -> {}
                                 }
 
                             }.launchIn(viewModelScope)
@@ -357,21 +286,15 @@ class SchoolStructureViewModel(
                                     }
 
                                     is Resource.Success -> {
-                                        println("SUCCESS fetching children for ${node.title} (type: ${node.type}). Received ${schoolClass.data?.size ?: 0} items.")
                                         val newChildren =
                                             schoolClass.data?.map { it.toSchoolTreeNode() }
                                                 ?: emptyList()
-                                        println("expand (GRADE_LEVEL): newChildren for ${node.title}: $newChildren")
-                                        // MODIFIED: Use composite key for existing nodes
                                         val existingNodeKeys =
                                             nodes.map { "${it.id}-${it.type}" }.toSet()
-                                        println("expand (GRADE_LEVEL): existingNodeKeys: $existingNodeKeys") // Log the new set
                                         val childrenToAdd =
                                             newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
-                                        println("expand (GRADE_LEVEL): childrenToAdd for ${node.title}: $childrenToAdd")
                                         if (childrenToAdd.isNotEmpty()) {
                                             nodes.addAll(childrenToAdd)
-                                            println("Children added for ${node.title}. Total nodes size: ${nodes.size}")
                                         }
                                         updateNode(node.originalId, node.type) {
                                             it.copy(
@@ -380,7 +303,6 @@ class SchoolStructureViewModel(
                                                 childrenLoaded = true
                                             )
                                         }
-                                        println("Node ${node.title} (id: ${node.id}) set to expanded=true, loading=false, childrenLoaded=true")
                                     }
 
                                     is Resource.Error -> {
@@ -389,15 +311,12 @@ class SchoolStructureViewModel(
                                         }
                                         println("ERROR fetching children for ${node.title}. Message: ${schoolClass.message}. Set loading=false.")
                                     }
-
-                                    else -> {}
                                 }
 
                             }.launchIn(viewModelScope)
                     }
 
                     else -> {
-                        // If no children are expected or loaded, set loading to false and expanded to true
                         updateNode(node.originalId, node.type) {
                             it.copy(
                                 expanded = true,
@@ -405,35 +324,28 @@ class SchoolStructureViewModel(
                                 childrenLoaded = true
                             )
                         }
-                        println("Node ${node.title} (id: ${node.id}) type is ${node.type}, no children to load. Set expanded=true, loading=false, childrenLoaded=true")
                     }
                 }
             } else {
-                // If children are already loaded, just expand the node and set loading to false
                 updateNode(node.originalId, node.type) {
                     it.copy(expanded = true, loading = false)
                 }
-                println("Node ${node.title} (id: ${node.id}) children already loaded. Set expanded=true, loading=false.")
             }
         }
     }
 
     private fun updateNode(
         nodeId: Long,
-        nodeType: NodeType, // MODIFIED: Accept nodeType
+        nodeType: NodeType,
         transform: (SchoolTreeNode) -> SchoolTreeNode
     ) {
-        // MODIFIED: Find node using both ID and Type
         val index = nodes.indexOfFirst { it.originalId == nodeId && it.type == nodeType }
         if (index == -1) {
-            println("WARN: updateNode failed. Node with id $nodeId and type $nodeType not found.")
             return
         }
         val oldNode = nodes[index]
         val newNode = transform(oldNode)
-        println("updateNode: Applying transform for node $nodeId (type: $nodeType). Old: $oldNode, New: $newNode")
         nodes[index] = newNode
-        println("Node with id $nodeId (type: $nodeType) updated. Old: $oldNode, New: $newNode")
     }
 
     fun onAction(
@@ -463,11 +375,7 @@ class SchoolStructureViewModel(
 data class ClassesState(
     val isLoading: Boolean = false,
     val isDeleting: Boolean = false,
-    val errorMessage: String? = null,
-    val totalCycles: Int = 2,
-    val totalSections: Int = 2,
-    val totalGradeLevels: Int = 8,
-    val totalClasses: Int = 12,
+    val errorMessage: String? = null
 )
 
 fun SchoolSectionDTO.toSchoolTreeNode() = SchoolTreeNode(
@@ -475,6 +383,7 @@ fun SchoolSectionDTO.toSchoolTreeNode() = SchoolTreeNode(
     title = this.name,
     type = NodeType.CYCLE,
     parentId = null,
+    parentTitle = null,
     expanded = false,
     loading = false, // Explicitly set
     childrenLoaded = false // Explicitly set
@@ -485,6 +394,7 @@ fun SectionDTO.toSchoolTreeNode() = SchoolTreeNode(
     title = this.name,
     type = NodeType.SECTION,
     parentId = "${NodeType.CYCLE}-${this.schoolSectionId}",
+    parentTitle = this.schoolSectionName
 )
 
 fun MajorDto.toSchoolTreeNode() = SchoolTreeNode(
@@ -492,6 +402,7 @@ fun MajorDto.toSchoolTreeNode() = SchoolTreeNode(
     title = this.name,
     type = NodeType.MAJOR,
     parentId = "${NodeType.SECTION}-${this.sectionId}",
+    parentTitle = this.sectionName
 )
 
 fun GradeLevelDTO.toSchoolTreeNode() = SchoolTreeNode(
@@ -499,11 +410,13 @@ fun GradeLevelDTO.toSchoolTreeNode() = SchoolTreeNode(
     title = this.name,
     type = NodeType.GRADE_LEVEL,
     parentId = "${NodeType.MAJOR}-${this.majorId}",
+    parentTitle = "${this.majorName} - ${this.sectionName}"
 )
 
 fun SchoolClassDTO.toSchoolTreeNode(): SchoolTreeNode = SchoolTreeNode(
     originalId = this.id,
     title = this.name,
     type = NodeType.CLASSROOM,
-    parentId = "${NodeType.GRADE_LEVEL}-${this.gradeLevelId}"
+    parentId = "${NodeType.GRADE_LEVEL}-${this.gradeLevelId}",
+    parentTitle = "${this.gradeLevelLabel} - ${this.majorName} - ${this.sectionName}"
 )

@@ -1,5 +1,6 @@
-package com.drcmind.kelasisuite.ui.schooladmin.students
+package com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AppRegistration
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.HowToReg
@@ -53,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.compose.viewmodel.koinViewModel
@@ -351,7 +352,7 @@ private fun InfoTag(icon: ImageVector, label: String, value: String) {
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.medium,
-        border = androidx.compose.foundation.BorderStroke(
+        border = BorderStroke(
             1.dp,
             MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
@@ -385,4 +386,4 @@ private fun InfoTag(icon: ImageVector, label: String, value: String) {
     }
 }
 
-fun Modifier.maxSize(width: androidx.compose.ui.unit.Dp) = this.widthIn(max = width)
+fun Modifier.maxSize(width: Dp) = this.widthIn(max = width)

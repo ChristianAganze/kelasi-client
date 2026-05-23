@@ -7,6 +7,7 @@ data class SchoolTreeNode(
     val title: String,
     val type: NodeType,
     val parentId: String?,
+    val parentTitle : String?,
     val expanded: Boolean = false,
     val loading: Boolean = false,
     val childrenLoaded: Boolean = false

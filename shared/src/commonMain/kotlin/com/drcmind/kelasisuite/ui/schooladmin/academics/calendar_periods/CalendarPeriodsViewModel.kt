@@ -3,10 +3,10 @@ package com.drcmind.kelasisuite.ui.schooladmin.academics.calendar_periods
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
-import com.drcmind.kelasisuite.domain.dto.AcademicYearDTO
-import com.drcmind.kelasisuite.domain.dto.EvaluationPeriodBySchoolDTO
-import com.drcmind.kelasisuite.domain.dto.MajorDto
-import com.drcmind.kelasisuite.domain.dto.SchoolSectionDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.*
 

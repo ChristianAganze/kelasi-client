@@ -14,6 +14,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.schooladmin.academics.calendar_periods.CalendarPeriodsScreen
 import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.SchoolStructureScreen
+import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.StudentEnrollmentScreen
 
 @Composable
 fun AcademicsNavigation(
@@ -35,8 +36,8 @@ fun AcademicsNavigation(
                 SchoolStructureScreen()
             }
 
-            entry<Route.SchoolAdmin.Academics.Enrollment> {
-                CourseAffectation()
+            entry<Route.SchoolAdmin.Academics.StudentEnrollment> {
+                StudentEnrollmentScreen()
             }
 
             entry<Route.SchoolAdmin.Academics.EvaluationGrading> {

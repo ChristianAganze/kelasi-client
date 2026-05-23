@@ -1,15 +1,15 @@
 package com.drcmind.kelasisuite.data.repository.schools
 
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
-import com.drcmind.kelasisuite.data.datasource.remote.schools.SchoolsAPIService
-import com.drcmind.kelasisuite.domain.dto.*
+import com.drcmind.kelasisuite.data.datasource.remote.dto.*
+import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class SchoolRepositoryImpl(
-    private val apiService: SchoolsAPIService,
+    private val apiService: SchoolAdminApiService,
     private val settingsStorage: SettingsStorage
 ) : SchoolRepository {
 
@@ -34,6 +34,10 @@ class SchoolRepositoryImpl(
 
     override fun saveSchoolLocally(school: SchoolDTO) {
         settingsStorage.saveSchool(school)
+    }
+
+    override fun saveActiveAcademicYearLocally(academicYearDTO: AcademicYearDTO) {
+        settingsStorage.saveActiveAcademicYear(academicYearDTO)
     }
 
     override fun getSchoolSections(): Flow<Resource<List<SchoolSectionDTO>>> {

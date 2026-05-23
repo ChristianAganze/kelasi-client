@@ -1,24 +1,24 @@
 package com.drcmind.kelasisuite.data.repository.parents
 
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
-import com.drcmind.kelasisuite.data.datasource.remote.parents.ParentAPIService
-import com.drcmind.kelasisuite.domain.dto.CreateParentRequest
-import com.drcmind.kelasisuite.domain.dto.ParentDto
-import com.drcmind.kelasisuite.domain.dto.ParentStudentLinkageDto
-import com.drcmind.kelasisuite.domain.dto.ParentStudentLinkageRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateParentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRequest
+import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class ParentsRepositoryImp(
-    private val parentAPIService: ParentAPIService,
+    private val schoolAdminService: SchoolAdminApiService,
     private val settingsStorage: SettingsStorage
 ) : ParentsRepository  {
     override fun createParent(createParentRequest: CreateParentRequest): Flow<Resource<ParentDto>> {
         return flow {
             emit(Resource.Loading())
-            val result = parentAPIService.createParent(createParentRequest)
+            val result = schoolAdminService.createParent(createParentRequest)
             emit(Resource.Success(result))
         }.catch {
             emit(Resource.Error(it.message ?: "Unknown Error"))
@@ -28,7 +28,7 @@ class ParentsRepositoryImp(
     override fun linkStudentToParent(parentStudentLinkageRequest: ParentStudentLinkageRequest): Flow<Resource<ParentStudentLinkageDto>> {
         return flow {
             emit(Resource.Loading())
-            val result = parentAPIService.linkStudentToParent(parentStudentLinkageRequest)
+            val result = schoolAdminService.linkStudentToParent(parentStudentLinkageRequest)
             emit(Resource.Success(result))
         }.catch {
             emit(Resource.Error(it.message ?: "Unknown Error"))
@@ -38,7 +38,7 @@ class ParentsRepositoryImp(
     override fun unlinkStudentFromParent(linkageId: Long): Flow<Resource<Unit>> {
         return flow {
             emit(Resource.Loading())
-            val result = parentAPIService.unlinkStudentFromParent(linkageId)
+            val result = schoolAdminService.unlinkStudentFromParent(linkageId)
             emit(Resource.Success(result))
         }.catch {
             emit(Resource.Error(it.message ?: "Unknown Error"))
@@ -51,7 +51,7 @@ class ParentsRepositoryImp(
     ): Flow<Resource<ParentDto>> {
         return flow {
             emit(Resource.Loading())
-            val result = parentAPIService.updateParent(parentId, createParentRequest)
+            val result = schoolAdminService.updateParent(parentId, createParentRequest)
             emit(Resource.Success(result))
         }.catch {
             emit(Resource.Error(it.message ?: "Unknown Error"))
@@ -61,7 +61,7 @@ class ParentsRepositoryImp(
     override fun deleteParent(parentId: Long): Flow<Resource<Unit>> {
         return flow {
             emit(Resource.Loading())
-            val result = parentAPIService.deleteParent(parentId)
+            val result = schoolAdminService.deleteParent(parentId)
             emit(Resource.Success(result))
         }.catch {
             emit(Resource.Error(it.message ?: "Unknown Error"))
@@ -71,7 +71,7 @@ class ParentsRepositoryImp(
     override fun getParentById(parentId: Long): Flow<Resource<ParentDto>> {
         return flow {
             emit(Resource.Loading())
-            val result = parentAPIService.getParentById(parentId)
+            val result = schoolAdminService.getParentById(parentId)
             emit(Resource.Success(result))
         }.catch {
             emit(Resource.Error(it.message ?: "Unknown Error"))
@@ -82,7 +82,7 @@ class ParentsRepositoryImp(
         return flow {
             emit(Resource.Loading())
             val schoolId = settingsStorage.getSchool()?.id
-            val result = parentAPIService.getParentsBySchool(schoolId!!)
+            val result = schoolAdminService.getParentsBySchool(schoolId!!)
             emit(Resource.Success(result))
         }.catch {
             emit(Resource.Error(it.message ?: "Unknown Error"))

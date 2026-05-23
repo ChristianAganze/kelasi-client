@@ -1,12 +1,21 @@
 package com.drcmind.kelasisuite.data.repository.schools
 
-import com.drcmind.kelasisuite.domain.dto.*
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface SchoolRepository {
     fun getSchool(): Flow<Resource<SchoolDTO>>
     fun saveSchoolLocally(school: SchoolDTO)
+    fun saveActiveAcademicYearLocally(academicYearDTO: AcademicYearDTO)
     fun getSchoolSections(): Flow<Resource<List<SchoolSectionDTO>>>
     fun getSectionBySchoolSectionAndSchool(schoolSectionId: Long) : Flow<Resource<List<SectionDTO>>>
     fun getOfferedMajorsForSchoolAndSection(sectionId: Long) : Flow<Resource<List<MajorDto>>>

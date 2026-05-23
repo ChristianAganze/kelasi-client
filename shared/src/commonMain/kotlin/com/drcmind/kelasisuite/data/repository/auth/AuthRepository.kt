@@ -1,8 +1,8 @@
 package com.drcmind.kelasisuite.data.repository.auth
 
-import com.drcmind.kelasisuite.domain.dto.LoginRequest
-import com.drcmind.kelasisuite.domain.dto.LoginResponse
-import com.drcmind.kelasisuite.domain.dto.UserResponseDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.LoginRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.LoginResponse
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UserResponseDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 

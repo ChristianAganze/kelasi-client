@@ -22,8 +22,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drcmind.kelasisuite.domain.dto.SchoolDTO
-import com.drcmind.kelasisuite.domain.dto.UserDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
