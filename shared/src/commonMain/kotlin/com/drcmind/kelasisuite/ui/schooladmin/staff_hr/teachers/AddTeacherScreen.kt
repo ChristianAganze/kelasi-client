@@ -63,19 +63,7 @@ fun AddTeacherScreen(
                     IconButton(onClick = if (!isEditing && !state.showUserList) viewModel::onBackToUserList else onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
                     }
-
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent,
-                    navigationIconContentColor =  MaterialTheme.colorScheme
-                        .onSurface,
-                    titleContentColor = MaterialTheme.colorScheme
-                        .onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme
-                        .onSurface,
-                )
-
+                }
             )
         }
     ) { padding ->

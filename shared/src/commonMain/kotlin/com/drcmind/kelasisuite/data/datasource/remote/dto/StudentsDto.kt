@@ -48,6 +48,17 @@ data class EnrollmentSummaryDTO(
 )
 
 @Serializable
+data class EnrollmentRequest(
+    val studentId: Long,
+    val classId: Long,
+    val academicYearId: Long
+)
+
+@Serializable
+data class UpdateEnrollmentRequest(
+    val newClassId: Long
+)
+@Serializable
 data class CreateParentRequest(
     val userId : Long,
     val address : String,

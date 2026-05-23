@@ -84,6 +84,9 @@ fun AddStudentScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                ),
                 title = {
                     Text(
                         if (studentId == null) "Ajout d'un élève" else "Modification de l'élève",
@@ -95,11 +98,8 @@ fun AddStudentScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
+
                 )
-            )
         }
     ) { padding ->
         Column(

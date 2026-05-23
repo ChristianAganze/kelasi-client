@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.HourglassEmpty
@@ -34,10 +35,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,6 +62,7 @@ fun TeacherDetailsScreen(
     teacherId: Long,
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
+    showTopAppBar : Boolean=false,
     viewModel: TeachersViewModel = koinViewModel()
 ) {
     val state by viewModel.detailState.collectAsState()
@@ -68,8 +73,24 @@ fun TeacherDetailsScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
-
-        ) { padding ->
+        topBar = {
+            if (showTopAppBar) {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    title = {
+                        Text(
+                            "Profil de l'enseignant",
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black)
+                        )
+                    }, navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        }
+                    }
+                )
+            }
+        }
+    ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -91,7 +112,7 @@ fun TeacherDetailsScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     TeacherHeaderCard(teacher, onEdit)
@@ -127,7 +148,7 @@ fun TeacherDetailsScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(Icons.Default.HourglassEmpty, contentDescription = null, Modifier.size(100.dp))
+                    Icon(AppIcons.empty, contentDescription = null, Modifier.size(100.dp))
                     Spacer(Modifier.height(10.dp))
                     Text("Aucune selection")
                 }
@@ -190,7 +211,7 @@ private fun TeacherHeaderCard(teacher: TeacherProfileDTO, onEdit: (Long) -> Unit
                     fontWeight = FontWeight.Black,
                 )
                 Text(
-                    "ID: ${teacher.userId}",
+                    "ID de référence utilisateur: ${teacher.userId}",
                     color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )

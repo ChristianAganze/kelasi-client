@@ -266,7 +266,7 @@ fun SchoolAdminAppScreen(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                 )
             ),
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
                 Route.SchoolAdmin.items.forEach { item ->

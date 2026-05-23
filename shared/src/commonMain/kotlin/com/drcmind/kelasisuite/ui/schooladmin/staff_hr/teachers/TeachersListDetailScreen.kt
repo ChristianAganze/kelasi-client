@@ -1,7 +1,9 @@
 package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -134,7 +136,11 @@ fun TeacherTableCard(
     Column(
         Modifier.clip(
             MaterialTheme.shapes.extraLarge
-        ).background(MaterialTheme.colorScheme.surface)
+        ).background(MaterialTheme.colorScheme.surface).border(
+            shape = MaterialTheme.shapes.extraLarge,
+            border =
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        )
     ) {
 
 
