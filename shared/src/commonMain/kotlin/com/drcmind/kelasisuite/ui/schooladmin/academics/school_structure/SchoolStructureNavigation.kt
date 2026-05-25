@@ -10,7 +10,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.component.getScopeName
 
 @Composable
 fun SchoolStructureNavigation(
