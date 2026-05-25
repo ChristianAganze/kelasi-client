@@ -7,6 +7,8 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
@@ -21,6 +23,9 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.UpdateEnrollmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
+import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentRequest
+import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -203,6 +208,47 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
         }.body()
     }
 
+    override suspend fun getUserBySchoolId(schoolId: Long): List<UserDTO> {
+        return httpClient.get("schools/$schoolId/users").body()
+    }
+
+    override suspend fun getAssignmentsForClass(classId: Long, academicYearId: Long): List<TeachingAssignmentDTO> {
+        return httpClient.get("classes/$classId/assignments") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun getAssignmentsForSchool(
+        schoolId: Long,
+        academicYearId: Long
+    ): List<TeachingAssignmentDTO> {
+        return httpClient.get("classes/$schoolId/assignments") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun getPendingAssignmentsForClass(classId: Long, academicYearId: Long): List<TemplateSubjectDTO> {
+        return httpClient.get("classes/$classId/pending-assignments") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun createTeachingAssignment(request: TeachingAssignmentRequest): TeachingAssignmentDTO {
+        return httpClient.post("assignments") {
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun deleteTeachingAssignment(assignmentId: Long) {
+        httpClient.delete("assignments/$assignmentId")
+    }
+
     override suspend fun createTeacher(creationRequest: TeacherProfileRequest): TeacherProfileDTO {
         return httpClient.post("teachers") {
             setBody(creationRequest)
@@ -223,8 +269,38 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
         return httpClient.get("teachers/$teacherId").body()
     }
 
-    override suspend fun getUserBySchoolId(schoolId: Long): List<UserDTO> {
-        return httpClient.get("schools/$schoolId/users").body()
+    override suspend fun assignHomeroomTeacher(
+        academicYearId: Long,
+        request: HomeroomAssignmentRequest
+    ): HomeroomAssignmentDTO {
+        return httpClient.post("homeroom-assignments") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun getHomeroomTeacher(
+        classId: Long,
+        academicYearId: Long
+    ): HomeroomAssignmentDTO {
+        return httpClient.get("classes/$classId/homeroom-teacher") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun getHomeroomAssignmentsByTeacher(
+        teacherProfileId: Long,
+        academicYearId: Long
+    ): List<HomeroomAssignmentDTO> {
+        return httpClient.get("teachers/$teacherProfileId/homeroom-assignments") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
     }
 
 }

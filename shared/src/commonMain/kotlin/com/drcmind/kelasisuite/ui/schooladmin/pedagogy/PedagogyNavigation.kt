@@ -11,6 +11,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.TeacherAssignmentsScreen
 
 @Composable
 fun PedagogyNavigation(
@@ -36,10 +37,8 @@ fun PedagogyNavigation(
                 }
             }
 
-            entry<Route.SchoolAdmin.Pedagogy.Assignment> {
-                Column {
-                    Text("Assigner les professeurs aux cours (étape préalable obligatoire avant de faire l'horaire).")
-                }
+            entry<Route.SchoolAdmin.Pedagogy.TeacherAssignments> {
+                TeacherAssignmentsScreen()
             }
 
             entry<Route.SchoolAdmin.Pedagogy.Preparation> {

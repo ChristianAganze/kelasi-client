@@ -17,15 +17,16 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.ListItemDefaults.colors
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
+import com.drcmind.kelasisuite.ui.schooladmin.component.InfoChip
+import com.drcmind.kelasisuite.ui.schooladmin.component.SectionCard
 
 @Composable
 fun StudentDetailScreen(
@@ -248,40 +249,6 @@ private fun StudentHeroCard(
 }
 
 @Composable
-private fun QuickActionsRow() {
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-
-        FilledTonalButton(
-            modifier = Modifier.weight(1f),
-            onClick = { }
-        ) {
-
-            Icon(Icons.Default.Print, null)
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text("Print ID")
-        }
-
-        FilledTonalButton(
-            modifier = Modifier.weight(1f),
-            onClick = { }
-        ) {
-
-            Icon(Icons.Default.NoteAdd, null)
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text("Observation")
-        }
-    }
-}
-
-@Composable
 private fun AdaptiveInfoGrid(
     student: StudentDTO
 ) {
@@ -477,48 +444,6 @@ private fun DocumentsCard() {
 }
 
 @Composable
-fun SectionCard(
-    title: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
-) {
-
-    OutlinedCard(
-        modifier = modifier.fillMaxWidth()
-    ) {
-
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            content()
-        }
-    }
-}
-
-@Composable
 private fun DetailItem(
     label: String,
     value: String
@@ -544,26 +469,7 @@ private fun DetailItem(
     }
 }
 
-@Composable
-private fun InfoChip(
-    icon: ImageVector,
-    label: String
-) {
 
-    AssistChip(
-        onClick = {},
-        label = {
-            Text(label)
-        },
-        leadingIcon = {
-            Icon(
-                icon,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-    )
-}
 
 @Composable
 private fun TimelineItem(

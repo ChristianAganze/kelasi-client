@@ -1,15 +1,13 @@
 package com.drcmind.kelasisuite.ui.schooladmin.parents
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.*
+import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
@@ -25,16 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.drcmind.kelasisuite.domain.dto.*
-import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.*
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.schooladmin.component.SectionCard
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,7 +69,7 @@ fun ParentsScreen(
     val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val directive = remember(windowAdaptiveInfo) {
         calculatePaneScaffoldDirective(windowAdaptiveInfo)
-            .copy(horizontalPartitionSpacerSize = 0.dp, verticalPartitionSpacerSize = 0.dp)
+            .copy(horizontalPartitionSpacerSize = 0.dp, verticalPartitionSpacerSize = 0.dp, defaultPanePreferredWidth = 800.dp)
     }
     val listDetailsStrateggy = rememberListDetailSceneStrategy<NavKey>(
         backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
@@ -92,23 +89,28 @@ fun ParentsScreen(
                     containerColor = Color.Transparent,
                     topBar = {
                         TopAppBar(
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent,
-                                scrolledContainerColor = Color.Transparent,
-                                navigationIconContentColor = Color.Transparent,
-                                titleContentColor = MaterialTheme.colorScheme
-                                    .onSurface,
-                                actionIconContentColor = Color.Transparent,
-                            ),
-
                             title = {
-                                Text(
-                                    text = "Gestion des parents",
-                                    style = MaterialTheme.typography.headlineSmall.copy(
-                                        fontWeight =
-                                            FontWeight.Black
-                                    )
-                                )
+                                SearchBar(
+                                    inputField = {
+
+                                        InputField(
+                                            modifier = Modifier.height(44.dp).padding(horizontal = 12.dp),
+                                            query = uiState.searchQuery,
+                                            onQueryChange = viewModel::onSearchQueryChange,
+                                            onSearch = {},
+                                            expanded = false,
+                                            onExpandedChange = {},
+                                            placeholder = {
+                                                Text("Rechercher un parent...")
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Default.Search, null)
+                                            }
+                                        )
+                                    },
+                                    expanded = false,
+                                    onExpandedChange = {}
+                                ) {}
 
                             },
                             actions = {
@@ -119,15 +121,11 @@ fun ParentsScreen(
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                ElevatedButton(
-                                    colors = ButtonDefaults.buttonColors(),
-                                    onClick = {
-                                        parentToEdit = null
-                                        showAddParentDialog = true
-                                    }
+                                IconButton(onClick = {
+                                    parentToEdit = null
+                                    showAddParentDialog = true }
                                 ) {
-                                    Icon(Icons.Default.Add, contentDescription = null)
-
+                                    Icon(Icons.Filled.Add, contentDescription = null)
                                 }
                             }
                         )
@@ -201,45 +199,9 @@ fun ParentTable(
     onNavigateToParentProfile: (Long) -> Unit,
     viewModel: ParentsViewModel, onEditParent: (ParentDto) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    Column(
-        modifier = modifier.fillMaxWidth().clip(
-            MaterialTheme.shapes.extraLarge
-        ).background(MaterialTheme.colorScheme.surface).border(
-            shape = MaterialTheme.shapes.extraLarge,
-            border =
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        )
+    OutlinedCard(
+        modifier = modifier.fillMaxWidth()
     ) {
-        TextField(
-            value = uiState.searchQuery,
-            onValueChange = viewModel::onSearchQueryChange,
-            modifier = Modifier.fillMaxWidth().padding(16.dp).widthIn(max = 400.dp),
-            placeholder = {
-                Text(
-                    "Rechercher un parent (Nom, ID)...",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            trailingIcon = {
-                if (uiState.searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                        Icon(Icons.Default.Close, contentDescription = null)
-                    }
-                }
-            },
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,    // Supprime la ligne sous le champ (focus)
-                unfocusedIndicatorColor = Color.Transparent,  // Supprime la ligne sous le champ
-                disabledIndicatorColor = Color.Transparent,
-            )
-        )
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -417,15 +379,14 @@ fun ParentDetailPane(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Détails du parent") },
+                title = { Text("${detailState.parent?.fullName}") },
                 actions = {
-                    ElevatedButton(
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    IconButton(
                         onClick = {
                             showDeleteConfirmation = true
                         }
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = null)
+                        Icon(Icons.Default.MoreVert, contentDescription = null)
                     }
                 }
             )
@@ -442,14 +403,11 @@ fun ParentDetailPane(
                     .fillMaxSize()
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Info Card
-                Card(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                ) {
+                OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.padding(24.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -489,37 +447,34 @@ fun ParentDetailPane(
                 }
 
                 // Linkages Section
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Étudiants liés",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Button(onClick = { showLinkDialog = true }) {
-                        Icon(Icons.Default.Link, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Lier un étudiant")
+                SectionCard(
+                    title = "Elèves liés",
+                    icon = Icons.Filled.AccountTree,
+                    actions = {
+                        IconButton(onClick = {showLinkDialog = true}){
+                            Icon(
+                                imageVector = Icons.Filled.AddLink,
+                                contentDescription = null
+                            )
+                        }
                     }
-                }
+                ){
+                    if (parent.linkages.isEmpty()) {
+                        Box(
+                            Modifier.fillMaxWidth().height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Aucun étudiant lié", color = MaterialTheme.colorScheme.outline)
 
-                if (parent.linkages.isEmpty()) {
-                    Box(
-                        Modifier.fillMaxWidth().height(200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Aucun étudiant lié", color = MaterialTheme.colorScheme.outline)
-                    }
-                } else {
-                    parent.linkages.forEach { linkage ->
-                        LinkageRow(
-                            linkage,
-                            onUnlink = {
-                                linkageToUnlink = linkage
-                            })
+                        }
+                    } else {
+                        parent.linkages.forEach { linkage ->
+                            LinkageRow(
+                                linkage,
+                                onUnlink = {
+                                    linkageToUnlink = linkage
+                                })
+                        }
                     }
                 }
             }
@@ -592,16 +547,8 @@ fun ParentDetailPane(
 
 @Composable
 fun LinkageRow(linkage: ParentStudentLinkageDto, onUnlink: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    ListItem(
+        leadingContent = {
             Box(
                 Modifier.size(40.dp)
                     .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
@@ -609,14 +556,17 @@ fun LinkageRow(linkage: ParentStudentLinkageDto, onUnlink: () -> Unit) {
             ) {
                 Text(linkage.student.fullName.take(1), fontWeight = FontWeight.Bold)
             }
-            Spacer(Modifier.width(16.dp))
-            Column(Modifier.weight(1f)) {
+        },
+        headlineContent = {
+            Column {
                 Text(linkage.student.fullName, fontWeight = FontWeight.Bold)
                 Text(
                     "${linkage.relationshipType} • ${if (linkage.isPrimaryPayer) "Payeur principal" else "Non payeur"}",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+        },
+        trailingContent = {
             IconButton(onClick = onUnlink) {
                 Icon(
                     Icons.Default.LinkOff,
@@ -625,7 +575,8 @@ fun LinkageRow(linkage: ParentStudentLinkageDto, onUnlink: () -> Unit) {
                 )
             }
         }
-    }
+    )
+    HorizontalDivider()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

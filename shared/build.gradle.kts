@@ -98,6 +98,10 @@ kotlin {
             implementation(libs.vicoComposeM3)
 
             implementation(libs.multiplatform.settings.no.arg)
+
+            implementation(libs.compose.multiplatform)
+
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

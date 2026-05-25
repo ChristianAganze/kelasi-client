@@ -1,9 +1,7 @@
 package com.drcmind.kelasisuite.data.repository.teachers
 
-import com.drcmind.kelasisuite.domain.dto.HomeroomAssignmentDTO
-import com.drcmind.kelasisuite.domain.dto.HomeroomAssignmentRequest
-import com.drcmind.kelasisuite.domain.dto.TeacherProfileDTO
-import com.drcmind.kelasisuite.domain.dto.TeacherProfileRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileRequest
 import com.drcmind.kelasisuite.domain.util.Resource

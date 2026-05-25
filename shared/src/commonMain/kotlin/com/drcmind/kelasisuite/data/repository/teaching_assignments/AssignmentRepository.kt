@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.data.repository.assignments
+package com.drcmind.kelasisuite.data.repository.teaching_assignments
 
 import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentRequest
@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface AssignmentRepository {
     fun getAssignmentsForClass(classId: Long): Flow<Resource<List<TeachingAssignmentDTO>>>
+    fun getAssignmentsForSchool(): Flow<Resource<List<TeachingAssignmentDTO>>>
     fun getPendingAssignmentsForClass(classId: Long): Flow<Resource<List<TemplateSubjectDTO>>>
     fun createTeachingAssignment(request: TeachingAssignmentRequest): Flow<Resource<TeachingAssignmentDTO>>
     fun deleteTeachingAssignment(assignmentId: Long): Flow<Resource<Unit>>

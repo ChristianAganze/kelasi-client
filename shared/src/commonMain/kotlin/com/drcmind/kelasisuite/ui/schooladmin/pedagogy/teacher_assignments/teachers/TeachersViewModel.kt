@@ -1,4 +1,4 @@
-package com.drcmind.kelasisuite.ui.schooladmin.staff_hr.teachers
+package com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teachers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,11 +28,146 @@ class TeachersViewModel(
     // --- Teachers List State ---
     private val _listState = MutableStateFlow(TeachersUiState())
     val listState: StateFlow<TeachersUiState> = _listState.asStateFlow()
-    private var allTeachers: List<TeacherItem> = emptyList()
+    private var allTeachers: List<TeacherProfileDTO> = emptyList()
 
     // --- Teacher Detail State ---
     private val _detailState = MutableStateFlow(TeacherDetailsState())
     val detailState: StateFlow<TeacherDetailsState> = _detailState.asStateFlow()
+
+    val sampleTeacherProfile = TeacherProfileUiState(
+
+        teacherName = "Jean-Claude Mukendi",
+        matricule = "ENS-2021-0045",
+
+        photoUrl = null,
+
+        specialization = "Mathématiques & Physique",
+
+        grade = "Enseignant Senior",
+
+        experienceYears = 12,
+
+        /*
+        ========================================================
+        TEACHING LOAD
+        ========================================================
+        */
+
+        classes = listOf(
+
+            TeachingClassUi(
+                className = "8ème Sciences A",
+                studentsCount = 42,
+                course = "Mathématiques",
+                hoursPerWeek = 6
+            ),
+
+            TeachingClassUi(
+                className = "7ème Commerciale",
+                studentsCount = 38,
+                course = "Mathématiques Financières",
+                hoursPerWeek = 4
+            ),
+
+            TeachingClassUi(
+                className = "6ème Scientifique",
+                studentsCount = 35,
+                course = "Physique",
+                hoursPerWeek = 5
+            ),
+
+            TeachingClassUi(
+                className = "5ème Technique Industrielle",
+                studentsCount = 29,
+                course = "Électricité Générale",
+                hoursPerWeek = 3
+            )
+        ),
+
+        /*
+        ========================================================
+        CURRICULUM PROGRESS
+        ========================================================
+        */
+
+        curriculumProgress = listOf(
+
+            CurriculumProgressUi(
+                className = "8ème Sciences A",
+                currentProgress = 0.72f,
+                nationalProgress = 0.68f
+            ),
+
+            CurriculumProgressUi(
+                className = "7ème Commerciale",
+                currentProgress = 0.61f,
+                nationalProgress = 0.64f
+            ),
+
+            CurriculumProgressUi(
+                className = "6ème Scientifique",
+                currentProgress = 0.81f,
+                nationalProgress = 0.75f
+            ),
+
+            CurriculumProgressUi(
+                className = "5ème Technique Industrielle",
+                currentProgress = 0.57f,
+                nationalProgress = 0.52f
+            )
+        ),
+
+        /*
+        ========================================================
+        RECENT ACTIVITIES
+        ========================================================
+        */
+
+        activities = listOf(
+
+            TeacherActivityUi(
+                title = "Préparation de leçon",
+                description = "Préparation du chapitre sur les équations différentielles pour la 8ème Sciences.",
+                timestamp = "Aujourd'hui • 08:15",
+                type = ActivityType.LESSON_PREPARATION
+            ),
+
+            TeacherActivityUi(
+                title = "Journal de classe enregistré",
+                description = "Cours de Physique validé pour la 6ème Scientifique.",
+                timestamp = "Aujourd'hui • 10:40",
+                type = ActivityType.CLASS_LOG
+            ),
+
+            TeacherActivityUi(
+                title = "Encodage des notes",
+                description = "Publication des résultats du devoir de Mathématiques.",
+                timestamp = "Hier • 16:20",
+                type = ActivityType.GRADING
+            ),
+
+            TeacherActivityUi(
+                title = "Présences enregistrées",
+                description = "Présences complétées pour la 7ème Commerciale.",
+                timestamp = "Hier • 07:55",
+                type = ActivityType.ATTENDANCE
+            ),
+
+            TeacherActivityUi(
+                title = "Préparation d'examen",
+                description = "Création de l'évaluation du second trimestre.",
+                timestamp = "Lundi • 18:10",
+                type = ActivityType.LESSON_PREPARATION
+            ),
+
+            TeacherActivityUi(
+                title = "Correction des copies",
+                description = "Correction de 42 copies pour la 8ème Sciences A.",
+                timestamp = "Dimanche • 14:30",
+                type = ActivityType.GRADING
+            )
+        )
+    )
 
     // --- Add/Edit Teacher State ---
     private val _formState = MutableStateFlow(AddTeacherState())
@@ -52,11 +187,10 @@ class TeachersViewModel(
             when (resource) {
                 is Resource.Loading -> _listState.update { it.copy(isLoading = true) }
                 is Resource.Success -> {
-                    allTeachers = resource.data?.map { it.toTeachersItem() } ?: emptyList()
+                    allTeachers = resource.data ?: emptyList()
                     filterTeachers()
                 }
                 is Resource.Error -> _listState.update { it.copy(isLoading = false) }
-                else -> Unit
             }
         }.launchIn(viewModelScope)
     }
@@ -82,15 +216,6 @@ class TeachersViewModel(
         }
     }
 
-    private fun TeacherProfileDTO.toTeachersItem() = TeacherItem(
-        id = id.toString(),
-        userId = userId.toString(),
-        fullName = fullName,
-        address = address,
-        payrollId = payrollId,
-        qualifications = qualifications
-    )
-
     // --- Detail Logic ---
     fun loadTeacherDetail(teacherId: Long) {
         teachersRepository.getTeacher(teacherId).onEach { resource ->
@@ -98,7 +223,6 @@ class TeachersViewModel(
                 is Resource.Loading -> _detailState.update { it.copy(isLoading = true, error = null) }
                 is Resource.Success -> _detailState.update { it.copy(isLoading = false, teacher = resource.data) }
                 is Resource.Error -> _detailState.update { it.copy(isLoading = false, error = resource.message) }
-                else -> Unit
             }
         }.launchIn(viewModelScope)
     }
@@ -243,25 +367,13 @@ class TeachersViewModel(
                 is Resource.Loading -> _formState.update { it.copy(isLoading = true, error = null) }
                 is Resource.Success -> _formState.update { it.copy(isLoading = false, isSuccess = true) }
                 is Resource.Error -> _formState.update { it.copy(isLoading = false, error = resource.message) }
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
 }
 
-// --- Data Classes ---
-
-data class TeacherItem(
-    val id: String,
-    val userId: String,
-    val fullName: String,
-    val address: Address,
-    val payrollId: String?,
-    val qualifications: String,
-)
-
 data class TeachersUiState(
-    val teachers: List<TeacherItem> = emptyList(),
+    val teachers: List<TeacherProfileDTO> = emptyList(),
     val totalTeachers: Int = 0,
     val searchQuery: String = "",
     val isLoading: Boolean = false

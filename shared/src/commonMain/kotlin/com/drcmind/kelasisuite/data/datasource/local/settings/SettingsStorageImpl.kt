@@ -160,27 +160,18 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
 
     override fun getActiveAcademicYear(): AcademicYearDTO? {
         return try {
-            val academicYearJson = AcademicYearDTO(
-                id = 1L,
-                label ="TestSchool",
-                startDate = LocalDate.parse("2003-10-12"),
-                endDate = LocalDate.parse("2033-10-12"),
-                isActive = true
-            )
-            academicYearJson
-            /* val academicYearJson = settings.getStringOrNull(KEY_ACTIVE_ACADEMIC_YEAR)
-                if (academicYearJson != null) {
-                    val academicYearJson = Json.decodeFromString<AcademicYearDTO>(academicYearJson)
-                    println("SettingsStorageImpl: Retrieved academicYearDTO locally")
-                    academicYearJson
-                } else {
-                    println("SettingsStorageImpl: No Academic Year found locally.")
-                    null
-                }
-                */
+            val academicYearJson = settings.getStringOrNull(KEY_ACTIVE_ACADEMIC_YEAR)
+            if (academicYearJson != null) {
+                val academicYearJson = Json.decodeFromString<AcademicYearDTO>(academicYearJson)
+                println("SettingsStorageImpl: Retrieved academicYearDTO locally")
+                academicYearJson
+            } else {
+                println("SettingsStorageImpl: No Academic Year found locally.")
+                null
+            }
         } catch (e: Exception) {
             println("SettingsStorageImpl: Error retrieving Academic Year: ${e.message}")
             null
-        } as AcademicYearDTO?
+        }
     }
 }

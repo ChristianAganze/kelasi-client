@@ -3,90 +3,46 @@ package com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryScrollableTabRow
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.drcmind.kelasisuite.domain.dto.HomeroomAssignmentDTO
-import com.drcmind.kelasisuite.domain.dto.StudentDTO
-import com.drcmind.kelasisuite.domain.dto.TeacherProfileDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
 import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
-import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentStatus
-import com.drcmind.kelasisuite.ui.schooladmin.students.StudentStatus
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
@@ -101,8 +57,10 @@ fun ClassDetailsScreen(
     onNavigateToStudentDetail: (Long) -> Unit = {},
     onNavigateToTeacherDetail: (Long) -> Unit = {}
 ) {
-    var showEnrollDialog by remember { mutableStateOf(false) }
+
     var showAssignTeacherDialog by remember { mutableStateOf(false) }
+
+    val homeroomAssignment by viewModel.homeroomAssignment.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -139,7 +97,6 @@ fun ClassDetailsScreen(
         ) { padding ->
         LaunchedEffect(Unit) {
             viewModel.loadClassStudents(classId)
-            viewModel.loadEnrolledStudents()
             viewModel.loadTeachers()
             viewModel.loadHomeroomTeacher(classId)
         }
@@ -188,7 +145,6 @@ fun ClassDetailsScreen(
                             }
                             SecondaryScrollableTabRow(
                                 selectedTabIndex = selectedDestination,
-                                containerColor = Color.Transparent,
                                 edgePadding = 0.dp,
                                 divider = {}
                             ) {
@@ -200,13 +156,14 @@ fun ClassDetailsScreen(
                                         },
                                         text = {
                                             Text(
-                                                text = destination.name,
+                                                text = if (destination == SchoolClassDetailsScreenTabs.StudentList) "${destination.name} (${viewModel.assignments.value.size})" else destination.name,
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = if (selectedDestination == index) FontWeight.Bold else FontWeight.Normal,
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                         }
                                     )
+
                                 }
                             }
 
@@ -258,13 +215,6 @@ fun ClassDetailsScreen(
         }
     }
 
-    if (showEnrollDialog) {
-        GlobalEnrollmentDialog(
-            viewModel = viewModel,
-            classId = classId,
-            onDismiss = { showEnrollDialog = false }
-        )
-    }
 
     if (showAssignTeacherDialog) {
         HomeroomTeacherAssignmentDialog(
@@ -288,7 +238,7 @@ fun HomeroomTeacherAssignmentDialog(
     val homeroomAssignment by viewModel.homeroomAssignment.collectAsState()
     val isAssigning by viewModel.isAssigningHomeroomTeacher.collectAsState()
 
-    var selectedTeacherId by remember { mutableStateOf<Long?>(homeroomAssignment?.teacherProfileId) }
+    var selectedTeacherId by remember { mutableStateOf(homeroomAssignment?.teacherProfileId) }
     var teacherExpanded by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -361,32 +311,11 @@ fun StudentsList(
     val students by viewModel.clasStudents.collectAsState()
     val isLoading by viewModel.isLoadingClassStudents.collectAsState()
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${students.size} ÉLÈVES INSCRITS".uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.outline,
-                letterSpacing = 1.sp
-            )
-            TextButton(onClick = {}) {
-                Text(
-                    text = "VOIR TOUT",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-
+    Column(modifier = Modifier.padding(top = 8.dp).fillMaxWidth()) {
 
         OutlinedCard (
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            shape = MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp))
         ) {
             Column {
                 when {
@@ -496,6 +425,7 @@ fun StudentRowItem(student: StudentDTO, onClick: (Long) -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubjectAssignmentsScreen(
     viewModel: SchoolStructureViewModel,
@@ -513,8 +443,8 @@ fun SubjectAssignmentsScreen(
     var showAssignDialog by remember { mutableStateOf(false) }
     var selectedSubject by remember { mutableStateOf<TemplateSubjectDTO?>(null) }
 
-    // Filter state: 0 = Tous, 1 = Assignés, 2 = Non assignés
-    var filterMode by remember { mutableStateOf(1) }
+    var subjectFilterOptions = listOf("Tous", "Assignés", "En attennte")
+    var selectedSubjectFilterOption by remember { mutableStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(classId) {
@@ -543,65 +473,60 @@ fun SubjectAssignmentsScreen(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Controls: search + filter mode
-        Spacer(Modifier.height(10.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text("Rechercher cours, code ou enseignant...") },
-                leadingIcon = { Icon(Icons.Default.Search, null) },
-                modifier = Modifier.weight(1f).padding(end = 12.dp),
-                shape = MaterialTheme.shapes.extraLarge
-            )
+            SearchBar(
+                modifier = Modifier.weight(1f).padding(end = 8.dp),
+                inputField = {
+                    InputField(
+                        modifier = Modifier.height(44.dp).padding(horizontal = 12.dp),
+                        query = searchQuery,
+                        onQueryChange = { searchQuery = it },
+                        onSearch = {},
+                        expanded = false,
+                        onExpandedChange = {},
+                        placeholder = {
+                            Text("Rechercher cours, code ou enseignant...")
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, null)
+                        }
+                    )
+                },
+                expanded = false,
+                onExpandedChange = {}
+            ){}
 
-            Row {
-                TextButton(onClick = { filterMode = 0 }, enabled = filterMode != 0) { Text("Tous") }
-                TextButton(
-                    onClick = { filterMode = 1 },
-                    enabled = filterMode != 1
-                ) { Text("Assignés") }
-                TextButton(
-                    onClick = { filterMode = 2 },
-                    enabled = filterMode != 2
-                ) { Text("Non assignés") }
+
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.weight(1f)) {
+                subjectFilterOptions.forEachIndexed { index, label ->
+
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = subjectFilterOptions.size
+                        ),
+                        onClick = { selectedSubjectFilterOption = index },
+                        selected = index == selectedSubjectFilterOption,
+                        label = { Text(label) }
+                    )
+                }
+
             }
+
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${assignments.size} cours assignés",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.outline,
-                letterSpacing = 1.sp
-            )
-            IconButton(onClick = {
-                viewModel.loadClassTeachingAssignments(classId)
-                viewModel.loadPendingTeachingAssignments(classId)
-            }) {
-                Icon(imageVector = Icons.Default.Refresh, contentDescription = "Rafraîchir")
-            }
-        }
 
-        if (filterMode == 0 || filterMode == 1) {
-            Card(
+        if (selectedSubjectFilterOption == 0 || selectedSubjectFilterOption == 1) {
+            OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Cours assignés",
+                        text = "Cours assignés (${assignments.size})",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -637,10 +562,7 @@ fun SubjectAssignmentsScreen(
                                         deleteEnabled = !isDeleting
                                     )
                                     if (index < filteredAssigned.size - 1) {
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(vertical = 8.dp),
-                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                                        )
+                                        HorizontalDivider()
                                     }
                                 }
                             }
@@ -650,12 +572,9 @@ fun SubjectAssignmentsScreen(
             }
         }
 
-        if (filterMode == 0 || filterMode == 2) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        if (selectedSubjectFilterOption == 0 || selectedSubjectFilterOption == 2) {
+            OutlinedCard(
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -731,10 +650,7 @@ fun SubjectAssignmentRow(
     deleteEnabled: Boolean
 ) {
     ListItem(
-        modifier = Modifier
-
-            .fillMaxWidth(),
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = Modifier.fillMaxWidth(),
         headlineContent = {
             Text(
                 assignment.subjectName,
@@ -759,17 +675,8 @@ fun SubjectAssignmentRow(
         },
         trailingContent = {
             Row {
-                OutlinedButton(
-                    onClick = {
-                        onNavigateToTeacherDetail(assignment.teacherId)
-                    }
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Profil de l'enseignant")
-                    }
+                IconButton(onClick = { onNavigateToTeacherDetail(assignment.teacherId) }) {
+                    Icon(Icons.Default.Person, contentDescription = null)
                 }
                 Spacer(Modifier.width(5.dp))
                 IconButton(onClick = onDelete, enabled = deleteEnabled) {

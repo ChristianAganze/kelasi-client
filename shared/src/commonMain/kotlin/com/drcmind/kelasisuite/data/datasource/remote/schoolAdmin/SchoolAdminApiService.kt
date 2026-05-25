@@ -7,6 +7,8 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
@@ -21,6 +23,9 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.UpdateEnrollmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
+import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentRequest
+import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
 
 interface SchoolAdminApiService {
     suspend fun getParentsBySchool(schoolId : Long) : List<ParentDto>
@@ -65,5 +70,26 @@ interface SchoolAdminApiService {
     suspend fun getTeacher(teacherId: Long): TeacherProfileDTO
 
     suspend fun getUserBySchoolId(schoolId: Long): List<UserDTO>
+
+    suspend fun getAssignmentsForClass(classId: Long, academicYearId: Long): List<TeachingAssignmentDTO>
+    suspend fun getAssignmentsForSchool(schoolId: Long, academicYearId: Long): List<TeachingAssignmentDTO>
+    suspend fun getPendingAssignmentsForClass(classId: Long, academicYearId: Long): List<TemplateSubjectDTO>
+    suspend fun createTeachingAssignment(request: TeachingAssignmentRequest): TeachingAssignmentDTO
+    suspend fun deleteTeachingAssignment(assignmentId: Long)
+
+    suspend fun assignHomeroomTeacher(
+        academicYearId: Long,
+        request: HomeroomAssignmentRequest
+    ): HomeroomAssignmentDTO
+
+    suspend fun getHomeroomTeacher(
+        classId: Long,
+        academicYearId: Long
+    ): HomeroomAssignmentDTO
+
+    suspend fun getHomeroomAssignmentsByTeacher(
+        teacherProfileId: Long,
+        academicYearId: Long
+    ): List<HomeroomAssignmentDTO>
 
 }

@@ -5,26 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -98,10 +88,6 @@ fun SchoolAdminAppScreen(
                     subclass(
                         Route.SchoolAdmin.Settings::class,
                         Route.SchoolAdmin.Settings.serializer()
-                    )
-                    subclass(
-                        Route.SchoolAdmin.AddStudent::class,
-                        Route.SchoolAdmin.AddStudent.serializer()
                     )
                     subclass(
                         Route.SchoolAdmin.Profile::class,
@@ -181,7 +167,10 @@ fun SchoolAdminAppScreen(
                             uiState.academicYears.forEach { academicYear->
                                 DropdownMenuItem(
                                     text = { Text(academicYear.label) },
-                                    onClick = { viewModel.selectAcademicYear(academicYear) },
+                                    onClick = {
+                                        viewModel.selectAcademicYear(academicYear)
+                                        checked = false
+                                              },
                                     leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) },
                                 )
                             }
@@ -266,7 +255,6 @@ fun SchoolAdminAppScreen(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                 )
             ),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
                 Route.SchoolAdmin.items.forEach { item ->

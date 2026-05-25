@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Architecture
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.GroupWork
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
@@ -137,8 +139,6 @@ sealed interface Route : NavKey {
             }
 
             @Serializable
-            data object Assignment : Route
-            @Serializable
             data object StudentEnrollment : Route{
                 @Serializable
                 data object Enrollment : Route{
@@ -179,7 +179,7 @@ sealed interface Route : NavKey {
             ) {
                 CALENDAR_PERIOD(CalendarPeriod, "Calendrier et périodes", Icons.Default.CalendarMonth, "calendar"),
                 SCHOOL_STRUCTURE(SchoolStructure, "Structure de l'école", Icons.Default.AccountTree, "AccountTree"),
-                STUDENT_ENROLLMENT(StudentEnrollment, "Suivi Scolaire", Icons.AutoMirrored.Filled.Assignment, "Enrollment"),
+                STUDENT_ENROLLMENT(StudentEnrollment, "Elèves & Inscriptions", Icons.AutoMirrored.Filled.Assignment, "Enrollment"),
                 EVALUATION_GRADING(EvaluationGrading, "Evaluation et cotes", Icons.Default.Numbers, "Evaluation"),
                 DELIBERATION_CONDUCT(DeliberationsConduct, "Délibérations & conduite", Icons.Default.ControlPointDuplicate, "Deliberation et conduite"),
                 REPORT_CARDS(ReportCards, "Bulletins", Icons.Default.Report, "Report")
@@ -193,7 +193,42 @@ sealed interface Route : NavKey {
 
             @Serializable data object Scheduling : Route
             @Serializable data object ProgramRadar : Route
-            @Serializable data object Assignment : Route
+            @Serializable data object TeacherAssignments : Route{
+
+                @Serializable data object TeachingAssignment : Route{
+                    @Serializable
+                    data object List : Route
+
+                    @Serializable
+                    data class Profile(val teacherId: Long) : Route
+
+                    @Serializable
+                    data class AddUpdate(val teacherId: Long?) : Route
+                }
+                @Serializable data object Teachers : Route{
+                    @Serializable
+                    data object List : Route
+
+                    @Serializable
+                    data class Profile(val teacherId: Long) : Route
+
+                    @Serializable
+                    data class AddUpdate(val teacherId: Long?) : Route
+                }
+
+
+                enum class TabDestination(
+                    val route: Route,
+                    val label: String,
+                    val icon: ImageVector,
+                    val contentDescription: String
+                ) {
+                    TEACHING_ASSIGNMENT(TeachingAssignment, "Affectation des cours", Icons.AutoMirrored.Filled.Assignment, "teaching assignment"),
+                    TEACHERS(Teachers, "Enseignants", Icons.Default.People, "Teachers"),
+                }
+
+            }
+
             @Serializable data object Preparation : Route
             @Serializable data object ClassLog : Route
             @Serializable data object Inspections : Route
@@ -206,25 +241,12 @@ sealed interface Route : NavKey {
             ) {
                 SCHEDULING(Scheduling, "Horaires des cours", Icons.Default.CalendarMonth, "calendar"),
                 PROGRAM_RADAR(ProgramRadar, "Radar Anti-Retard", Icons.Default.Check, "AccountTree"),
-                ASSIGNMENT(Pedagogy.Assignment, "Affectations & Titulariat", Icons.AutoMirrored.Filled.Assignment, "Assignment"),
+                ASSIGNMENT(TeacherAssignments, "Enseiggnants & Affectations", Icons.AutoMirrored.Filled.Assignment, "Assignment"),
                 PREPARATION(Preparation, "Préparations", Icons.Default.WorkspacePremium, "Evaluation"),
-                CLASSLOG(ClassLog, "Journaux de Classe",
-                    Icons.AutoMirrored.Filled.Notes, "Deliberation et conduite"),
+                CLASSLOG(ClassLog, "Journaux de Classe", Icons.AutoMirrored.Filled.Notes, "Deliberation et conduite"),
                 INSPECTIONS(Inspections, "Inspections", Icons.Default.Analytics, "Report")
             }
         }
-
-        @Serializable
-        data class AddStudent(val studentId: Long? = null) : Route
-
-        @Serializable
-        data class AddTeacher(val teacherId: Long? = null) : Route
-
-        @Serializable
-        data class StudentDetail(val studentId: Long) : Route
-
-        @Serializable
-        data class TeacherDetail(val teacherId: Long) : Route
 
 
         @Serializable
@@ -244,32 +266,6 @@ sealed interface Route : NavKey {
             override val icon: ImageVector = Icons.Default.GroupWork
             override val label: String = "Staffs & HR"
 
-            @Serializable
-            data object Teachers : Route {
-                @Serializable
-                data object ListDetails : Route {
-                    @Serializable
-                    data object List : Route
-
-                    @Serializable
-                    data class Profile(val teacherId: Long) : Route
-                }
-
-                @Serializable
-                data class ProfileDetails(val teacherId: Long) : Route
-
-                @Serializable
-                data class AddUpdate(val teacherId: Long?) : Route
-            }
-
-            enum class TabDestination(
-                val route: Route,
-                val label: String,
-                val icon: ImageVector,
-                val contentDescription: String
-            ) {
-                TEACHERS(Teachers, "Enseignants", Icons.Default.PeopleAlt, "Teachers"),
-            }
         }
 
         @Serializable

@@ -76,7 +76,8 @@ fun StudentsScreen(
             calculatePaneScaffoldDirective(windowAdaptiveInfo)
                 .copy(
                     horizontalPartitionSpacerSize = 0.dp,
-                    verticalPartitionSpacerSize = 0.dp
+                    verticalPartitionSpacerSize = 0.dp,
+                    defaultPanePreferredWidth = 800.dp
                 )
         }
         val listDetailsStrateggy = rememberListDetailSceneStrategy<NavKey>(

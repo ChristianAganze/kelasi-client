@@ -39,8 +39,8 @@ fun PedagogyScreen(){
                         Route.SchoolAdmin.Pedagogy.ProgramRadar.serializer()
                     )
                     subclass(
-                        Route.SchoolAdmin.Pedagogy.Assignment::class,
-                        Route.SchoolAdmin.Pedagogy.Assignment.serializer()
+                        Route.SchoolAdmin.Pedagogy.TeacherAssignments::class,
+                        Route.SchoolAdmin.Pedagogy.TeacherAssignments.serializer()
                     )
                     subclass(
                         Route.SchoolAdmin.Pedagogy.Preparation::class,

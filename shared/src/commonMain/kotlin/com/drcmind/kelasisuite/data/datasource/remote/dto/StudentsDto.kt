@@ -94,20 +94,6 @@ data class ParentStudentLinkageDto(
     val relationshipType: String
 )
 
-
-@Serializable
-data class UpdateEnrollmentRequest(
-    val newClassId: Long
-)
-
-
-@Serializable
-data class EnrollmentRequest(
-    val studentId: Long,
-    val classId: Long,
-    val academicYearId: Long
-)
-
 @Serializable
 data class EnrollmentDto(
     val id: Long?,
