@@ -38,21 +38,25 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
+import com.drcmind.kelasisuite.domain.dto.CombinedAssignmentModel
 import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentStatus
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.collections.plus
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ClassDetailsScreen(
     classId: Long,
     className: String,
-    viewModel: SchoolStructureViewModel = koinViewModel(),
+    viewModel: SchoolStructureViewModel,
     onBack: () -> Unit,
     onNavigateToStudentDetail: (Long) -> Unit = {},
     onNavigateToTeacherDetail: (Long) -> Unit = {}
@@ -72,17 +76,14 @@ fun ClassDetailsScreen(
                 title = {
                     Column {
                         Text(
-                            text = className,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            text = className, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back"
                         )
                     }
                 },
@@ -95,11 +96,7 @@ fun ClassDetailsScreen(
         },
 
         ) { padding ->
-        LaunchedEffect(Unit) {
-            viewModel.loadClassStudents(classId)
-            viewModel.loadTeachers()
-            viewModel.loadHomeroomTeacher(classId)
-        }
+
         Column(modifier = Modifier.padding(padding)) {
             val backStack = rememberNavBackStack(
                 configuration = SavedStateConfiguration {
@@ -121,12 +118,12 @@ fun ClassDetailsScreen(
             )
             val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
             val directive = remember(windowAdaptiveInfo) {
-                calculatePaneScaffoldDirective(windowAdaptiveInfo)
-                    .copy(horizontalPartitionSpacerSize = 0.dp, verticalPartitionSpacerSize = 0.dp)
+                calculatePaneScaffoldDirective(windowAdaptiveInfo).copy(
+                    horizontalPartitionSpacerSize = 0.dp, verticalPartitionSpacerSize = 0.dp
+                )
             }
             val supportingPaneStrategy = rememberSupportingPaneSceneStrategy<NavKey>(
-                backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
-                directive = directive
+                backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange, directive = directive
             )
 
             NavDisplay(
@@ -137,32 +134,24 @@ fun ClassDetailsScreen(
                 entryProvider = entryProvider {
                     entry<Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail.Main>(
                         metadata = SupportingPaneSceneStrategy.mainPane()
-                    )
-                    {
+                    ) {
                         Column(modifier = Modifier.padding(horizontal = 32.dp)) {
                             var selectedDestination by rememberSaveable {
                                 mutableStateOf(SchoolClassDetailsScreenTabs.StudentList.ordinal)
                             }
                             SecondaryScrollableTabRow(
-                                selectedTabIndex = selectedDestination,
-                                edgePadding = 0.dp,
-                                divider = {}
-                            ) {
+                                selectedTabIndex = selectedDestination, edgePadding = 0.dp, divider = {}) {
                                 SchoolClassDetailsScreenTabs.entries.forEachIndexed { index, destination ->
-                                    Tab(
-                                        selected = selectedDestination == index,
-                                        onClick = {
-                                            selectedDestination = index
-                                        },
-                                        text = {
-                                            Text(
-                                                text = if (destination == SchoolClassDetailsScreenTabs.StudentList) "${destination.name} (${viewModel.assignments.value.size})" else destination.name,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = if (selectedDestination == index) FontWeight.Bold else FontWeight.Normal,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                    )
+                                    Tab(selected = selectedDestination == index, onClick = {
+                                        selectedDestination = index
+                                    }, text = {
+                                        Text(
+                                            text = if (destination == SchoolClassDetailsScreenTabs.StudentList) "${destination.name} (${viewModel.assignments.value.size})" else destination.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = if (selectedDestination == index) FontWeight.Bold else FontWeight.Normal,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    })
 
                                 }
                             }
@@ -174,9 +163,7 @@ fun ClassDetailsScreen(
 
                                 1 -> {
                                     SubjectAssignmentsScreen(
-                                        viewModel,
-                                        classId,
-                                        onNavigateToTeacherDetail
+                                        viewModel, classId, onNavigateToTeacherDetail
                                     )
                                 }
 
@@ -189,13 +176,10 @@ fun ClassDetailsScreen(
                         metadata = SupportingPaneSceneStrategy.supportingPane()
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(32.dp),
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 DailyPlanningCard()
                                 TeacherMiniCard(
@@ -205,23 +189,18 @@ fun ClassDetailsScreen(
                                         homeroomAssignment?.teacherProfileId?.let(
                                             onNavigateToTeacherDetail
                                         )
-                                    }
-                                )
+                                    })
                             }
                         }
                     }
-                }
-            )
+                })
         }
     }
 
 
     if (showAssignTeacherDialog) {
         HomeroomTeacherAssignmentDialog(
-            viewModel = viewModel,
-            classId = classId,
-            onDismiss = { showAssignTeacherDialog = false }
-        )
+            viewModel = viewModel, classId = classId, onDismiss = { showAssignTeacherDialog = false })
 
     }
 }
@@ -230,9 +209,7 @@ fun ClassDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeroomTeacherAssignmentDialog(
-    viewModel: SchoolStructureViewModel,
-    classId: Long,
-    onDismiss: () -> Unit
+    viewModel: SchoolStructureViewModel, classId: Long, onDismiss: () -> Unit
 ) {
     val teachers by viewModel.teachers.collectAsState()
     val homeroomAssignment by viewModel.homeroomAssignment.collectAsState()
@@ -241,79 +218,60 @@ fun HomeroomTeacherAssignmentDialog(
     var selectedTeacherId by remember { mutableStateOf(homeroomAssignment?.teacherProfileId) }
     var teacherExpanded by remember { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Affecter un titulaire") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                ExposedDropdownMenuBox(
-                    expanded = teacherExpanded,
-                    onExpandedChange = { teacherExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = teachers.find { it.id == selectedTeacherId }?.fullName
-                            ?: "Sélectionner un professeur",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Professeur") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(teacherExpanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor(),
-                        shape = MaterialTheme.shapes.large,
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = teacherExpanded,
-                        onDismissRequest = { teacherExpanded = false }
-                    ) {
-                        teachers.forEach { teacher ->
-                            DropdownMenuItem(
-                                text = { Text(teacher.fullName) },
-                                onClick = {
-                                    selectedTeacherId = teacher.id
-                                    teacherExpanded = false
-                                }
-                            )
-                        }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("Affecter un titulaire") }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            ExposedDropdownMenuBox(
+                expanded = teacherExpanded, onExpandedChange = { teacherExpanded = it }) {
+                OutlinedTextField(
+                    value = teachers.find { it.id == selectedTeacherId }?.fullName ?: "Sélectionner un professeur",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Professeur") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(teacherExpanded) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    shape = MaterialTheme.shapes.large,
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                )
+                ExposedDropdownMenu(
+                    expanded = teacherExpanded, onDismissRequest = { teacherExpanded = false }) {
+                    teachers.forEach { teacher ->
+                        DropdownMenuItem(text = { Text(teacher.fullName) }, onClick = {
+                            selectedTeacherId = teacher.id
+                            teacherExpanded = false
+                        })
                     }
                 }
             }
-        },
-        confirmButton = {
-            Button(
-                enabled = selectedTeacherId != null && !isAssigning,
-                onClick = {
-                    viewModel.assignHomeroomTeacher(selectedTeacherId!!, classId)
-                    onDismiss()
-                }
-            ) {
-                if (isAssigning) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Text("Affecter")
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
         }
-    )
+    }, confirmButton = {
+        Button(
+            enabled = selectedTeacherId != null && !isAssigning, onClick = {
+                viewModel.assignHomeroomTeacher(selectedTeacherId!!, classId)
+                onDismiss()
+            }) {
+            if (isAssigning) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Affecter")
+            }
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) { Text("Annuler") }
+    })
 }
 
 @Composable
 fun StudentsList(
-    viewModel: SchoolStructureViewModel,
-    classId: Long,
-    onNavigateToStudentDetail: (Long) -> Unit = {}
+    viewModel: SchoolStructureViewModel, classId: Long, onNavigateToStudentDetail: (Long) -> Unit = {}
 ) {
     val students by viewModel.clasStudents.collectAsState()
     val isLoading by viewModel.isLoadingClassStudents.collectAsState()
 
     Column(modifier = Modifier.padding(top = 8.dp).fillMaxWidth()) {
 
-        OutlinedCard (
+        OutlinedCard(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(),
             shape = MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp))
         ) {
@@ -321,10 +279,7 @@ fun StudentsList(
                 when {
                     isLoading -> {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(48.dp),
-                            contentAlignment = Alignment.Center
+                            modifier = Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator()
                         }
@@ -376,9 +331,7 @@ fun StudentRowItem(student: StudentDTO, onClick: (Long) -> Unit) {
         },
         leadingContent = {
             Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -421,18 +374,16 @@ fun StudentRowItem(student: StudentDTO, onClick: (Long) -> Unit) {
                     )
                 }
             }
-        }
-    )
+        })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubjectAssignmentsScreen(
-    viewModel: SchoolStructureViewModel,
-    classId: Long,
-    onNavigateToTeacherDetail: (Long) -> Unit = {}
+    viewModel: SchoolStructureViewModel, classId: Long, onNavigateToTeacherDetail: (Long) -> Unit = {}
 ) {
     val assignments by viewModel.assignments.collectAsState()
+    val combinedAssignment by viewModel.combinedAssignmentAndPendings.collectAsState()
     val pendingSubjects by viewModel.pendingAssignmentsSubjects.collectAsState()
     val teachers by viewModel.teachers.collectAsState()
     val isLoadingAssignments by viewModel.isLoadingAssignments.collectAsState()
@@ -443,22 +394,31 @@ fun SubjectAssignmentsScreen(
     var showAssignDialog by remember { mutableStateOf(false) }
     var selectedSubject by remember { mutableStateOf<TemplateSubjectDTO?>(null) }
 
-    var subjectFilterOptions = listOf("Tous", "Assignés", "En attennte")
+    val subjectFilterOptions = listOf("Tous", "Assignés", "En attennte")
     var selectedSubjectFilterOption by remember { mutableStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(classId) {
         viewModel.loadClassTeachingAssignments(classId)
         viewModel.loadPendingTeachingAssignments(classId)
+        viewModel.loadCombinedAssignments()
+    }
+
+    val combinedFilteredAssigned = remember(combinedAssignment, searchQuery) {
+        if (searchQuery.isBlank()) combinedAssignment
+        else combinedAssignment.filter {
+            it.subjectName.contains(searchQuery, true) || it.subjectCode.contains(
+                searchQuery, true
+            )
+        }
     }
 
     val filteredAssigned = remember(assignments, searchQuery) {
         if (searchQuery.isBlank()) assignments
         else assignments.filter {
             it.subjectName.contains(searchQuery, true) || it.subjectCode.contains(
-                searchQuery,
-                true
-            ) || it.teacherName.contains(searchQuery, true)
+                searchQuery, true
+            )
         }
     }
 
@@ -470,35 +430,28 @@ fun SubjectAssignmentsScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SearchBar(
-                modifier = Modifier.weight(1f).padding(end = 8.dp),
-                inputField = {
-                    InputField(
-                        modifier = Modifier.height(44.dp).padding(horizontal = 12.dp),
-                        query = searchQuery,
-                        onQueryChange = { searchQuery = it },
-                        onSearch = {},
-                        expanded = false,
-                        onExpandedChange = {},
-                        placeholder = {
-                            Text("Rechercher cours, code ou enseignant...")
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Default.Search, null)
-                        }
-                    )
-                },
-                expanded = false,
-                onExpandedChange = {}
-            ){}
+            SearchBar(modifier = Modifier.weight(1f).padding(end = 8.dp), inputField = {
+                InputField(
+                    modifier = Modifier.height(44.dp).padding(horizontal = 12.dp),
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    onSearch = {},
+                    expanded = false,
+                    onExpandedChange = {},
+                    placeholder = {
+                        Text("Rechercher cours, code ou enseignant...")
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, null)
+                    })
+            }, expanded = false, onExpandedChange = {}) {}
 
 
             SingleChoiceSegmentedButtonRow(modifier = Modifier.weight(1f)) {
@@ -506,13 +459,11 @@ fun SubjectAssignmentsScreen(
 
                     SegmentedButton(
                         shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = subjectFilterOptions.size
+                            index = index, count = subjectFilterOptions.size
                         ),
                         onClick = { selectedSubjectFilterOption = index },
                         selected = index == selectedSubjectFilterOption,
-                        label = { Text(label) }
-                    )
+                        label = { Text(label) })
                 }
 
             }
@@ -520,7 +471,57 @@ fun SubjectAssignmentsScreen(
         }
 
 
-        if (selectedSubjectFilterOption == 0 || selectedSubjectFilterOption == 1) {
+        if (selectedSubjectFilterOption == 0) {
+            OutlinedCard(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Tous les cours (${combinedAssignment.size})",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    when {
+                        isLoadingAssignments || isLoadingPendingAssignments -> {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        combinedFilteredAssigned.isEmpty() -> {
+                            Text(
+                                text = "Aucun cours trouvé.",
+                                modifier = Modifier.padding(24.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+
+                        else -> {
+                            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                                itemsIndexed(combinedFilteredAssigned) { index, assignment ->
+                                    HorizontalDivider()
+                                    SubjectAssignmentRow(
+                                        assignment,
+                                        onDelete = {
+                                            viewModel.deleteTeachingAssignment(assignment.id, classId)
+                                        },
+                                        deleteEnabled = !isDeleting,
+                                        onNavigateToTeacherDetail = onNavigateToTeacherDetail,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        if (selectedSubjectFilterOption == 1) {
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -534,8 +535,7 @@ fun SubjectAssignmentsScreen(
                     when {
                         isLoadingAssignments -> {
                             Box(
-                                modifier = Modifier.fillMaxWidth().padding(24.dp),
-                                contentAlignment = Alignment.Center
+                                modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator()
                             }
@@ -551,19 +551,15 @@ fun SubjectAssignmentsScreen(
                         }
 
                         else -> {
-                            LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp)) {
+                            LazyColumn(modifier = Modifier.fillMaxWidth()) {
                                 itemsIndexed(filteredAssigned) { index, assignment ->
+                                    HorizontalDivider()
                                     SubjectAssignmentRow(
-                                        assignment,
-                                        onNavigateToTeacherDetail,
-                                        onDelete = {
+                                        assignment.toCombinedModel(), onNavigateToTeacherDetail, onDelete = {
                                             viewModel.deleteTeachingAssignment(assignment.id, classId)
-                                        },
-                                        deleteEnabled = !isDeleting
+                                        }, deleteEnabled = !isDeleting
                                     )
-                                    if (index < filteredAssigned.size - 1) {
-                                        HorizontalDivider()
-                                    }
+
                                 }
                             }
                         }
@@ -572,7 +568,7 @@ fun SubjectAssignmentsScreen(
             }
         }
 
-        if (selectedSubjectFilterOption == 0 || selectedSubjectFilterOption == 2) {
+        if (selectedSubjectFilterOption == 2) {
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(),
             ) {
@@ -586,8 +582,7 @@ fun SubjectAssignmentsScreen(
                     when {
                         isLoadingPendingAssignments -> {
                             Box(
-                                modifier = Modifier.fillMaxWidth().padding(24.dp),
-                                contentAlignment = Alignment.Center
+                                modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator()
                             }
@@ -603,18 +598,14 @@ fun SubjectAssignmentsScreen(
                         }
 
                         else -> {
-                            LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp)) {
+                            LazyColumn(modifier = Modifier.fillMaxWidth()) {
                                 itemsIndexed(filteredPending) { index, subject ->
+                                    HorizontalDivider()
                                     PendingSubjectRow(subject) {
                                         selectedSubject = subject
                                         showAssignDialog = true
                                     }
-                                    if (index < filteredPending.size - 1) {
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(vertical = 8.dp),
-                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                                        )
-                                    }
+
                                 }
                             }
                         }
@@ -637,44 +628,40 @@ fun SubjectAssignmentsScreen(
             onDismiss = {
                 selectedSubject = null
                 showAssignDialog = false
-            }
-        )
+            })
     }
 }
 
 @Composable
 fun SubjectAssignmentRow(
-    assignment: TeachingAssignmentDTO,
+    assignment: CombinedAssignmentModel,
     onNavigateToTeacherDetail: (Long) -> Unit,
     onDelete: () -> Unit,
     deleteEnabled: Boolean
 ) {
-    ListItem(
-        modifier = Modifier.fillMaxWidth(),
-        headlineContent = {
+    ListItem(modifier = Modifier.fillMaxWidth(), headlineContent = {
+        Text(
+            assignment.subjectName,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }, supportingContent = {
+        Column {
             Text(
-                assignment.subjectName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                assignment.teacherName ?: "--",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        },
-        supportingContent = {
-            Column {
-                Text(
-                    assignment.teacherName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    assignment.subjectCode,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
-        },
-        trailingContent = {
-            Row {
+            Text(
+                assignment.subjectCode,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+    }, trailingContent = {
+        Row {
+            if (assignment.teacherId != null) {
                 IconButton(onClick = { onNavigateToTeacherDetail(assignment.teacherId) }) {
                     Icon(Icons.Default.Person, contentDescription = null)
                 }
@@ -687,8 +674,9 @@ fun SubjectAssignmentRow(
                     )
                 }
             }
+
         }
-    )
+    })
 }
 
 @Composable
@@ -706,17 +694,14 @@ fun PendingSubjectRow(subject: TemplateSubjectDTO, onAssign: () -> Unit) {
         },
         supportingContent = {
             Text(
-                subject.code,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline
+                subject.code, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline
             )
         },
         trailingContent = {
             TextButton(onClick = onAssign) {
                 Text("Affecter")
             }
-        }
-    )
+        })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -731,106 +716,75 @@ fun TeachingAssignmentDialog(
     var selectedTeacherId by remember { mutableStateOf<Long?>(null) }
     var teacherExpanded by remember { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Affecter un enseignant") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    "Cours : ${subject.name}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("Affecter un enseignant") }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(
+                "Cours : ${subject.name}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium
+            )
+            ExposedDropdownMenuBox(
+                expanded = teacherExpanded, onExpandedChange = { teacherExpanded = it }) {
+                OutlinedTextField(
+                    value = teachers.find { it.id == selectedTeacherId }?.fullName ?: "Sélectionner un enseignant",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Enseignant") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(teacherExpanded) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    shape = MaterialTheme.shapes.large,
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                 )
-                ExposedDropdownMenuBox(
-                    expanded = teacherExpanded,
-                    onExpandedChange = { teacherExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = teachers.find { it.id == selectedTeacherId }?.fullName
-                            ?: "Sélectionner un enseignant",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Enseignant") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(teacherExpanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor(),
-                        shape = MaterialTheme.shapes.large,
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = teacherExpanded,
-                        onDismissRequest = { teacherExpanded = false }
-                    ) {
-                        teachers.forEach { teacher ->
-                            DropdownMenuItem(
-                                text = { Text(teacher.fullName) },
-                                onClick = {
-                                    selectedTeacherId = teacher.id
-                                    teacherExpanded = false
-                                }
-                            )
-                        }
+                ExposedDropdownMenu(
+                    expanded = teacherExpanded, onDismissRequest = { teacherExpanded = false }) {
+                    teachers.forEach { teacher ->
+                        DropdownMenuItem(text = { Text(teacher.fullName) }, onClick = {
+                            selectedTeacherId = teacher.id
+                            teacherExpanded = false
+                        })
                     }
                 }
             }
-        },
-        confirmButton = {
-            Button(
-                enabled = selectedTeacherId != null && !isSubmitting,
-                onClick = { onConfirm(selectedTeacherId!!) }
-            ) {
-                if (isSubmitting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Text("Affecter")
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
         }
-    )
+    }, confirmButton = {
+        Button(
+            enabled = selectedTeacherId != null && !isSubmitting, onClick = { onConfirm(selectedTeacherId!!) }) {
+            if (isSubmitting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Affecter")
+            }
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) { Text("Annuler") }
+    })
 }
 
 @Composable
 fun DailyPlanningCard() {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
+        modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+        ), border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    AppIcons.curriculum,
-                    null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
+                    AppIcons.curriculum, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    "Planning du jour",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    "Planning du jour", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
             val items = listOf(
-                "08:00" to "Chimie",
-                "09:00" to "Géo",
-                "10:00" to "Histoire",
-                "11:00" to "Ed. Vie",
-                "12:00" to "Maths"
+                "08:00" to "Chimie", "09:00" to "Géo", "10:00" to "Histoire", "11:00" to "Ed. Vie", "12:00" to "Maths"
             )
             items.forEach { (time, subject) ->
                 Row(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = time,
@@ -839,9 +793,7 @@ fun DailyPlanningCard() {
                         modifier = Modifier.width(48.dp)
                     )
                     Text(
-                        text = subject,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
+                        text = subject, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -851,9 +803,7 @@ fun DailyPlanningCard() {
 
 @Composable
 fun TeacherMiniCard(
-    homeroomAssignment: HomeroomAssignmentDTO?,
-    onAssignClick: () -> Unit,
-    onTeacherClick: (Long) -> Unit = {}
+    homeroomAssignment: HomeroomAssignmentDTO?, onAssignClick: () -> Unit, onTeacherClick: (Long) -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -861,16 +811,13 @@ fun TeacherMiniCard(
         Row(
             modifier = Modifier.clickable {
                 homeroomAssignment?.teacherProfileId?.let(onTeacherClick)
-            }
-                .fillMaxWidth()
-                .padding(24.dp),
+            }.fillMaxWidth().padding(24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier
-                        .size(48.dp)
+                    modifier = Modifier.size(48.dp)
                         .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {

@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.component.getScopeName
 
 @Composable
@@ -16,8 +17,9 @@ fun SchoolStructureNavigation(
     modifier: Modifier = Modifier,
     schoolStructureBackStack: NavBackStack<NavKey>,
     onNavigateToStudentDetail: (Long) -> Unit = {},
+    viewModel: SchoolStructureViewModel = koinViewModel(),
     onNavigateToTeacherDetail: (Long) -> Unit = {}
-){
+) {
     NavDisplay(
         modifier = modifier,
         backStack = schoolStructureBackStack,
@@ -32,7 +34,10 @@ fun SchoolStructureNavigation(
                 )
             }
             entry<Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail> { key ->
+                viewModel.loadPendingTeachingAssignments(key.classId)
+                viewModel.loadClassTeachingAssignments(key.classId)
                 ClassDetailsScreen(
+                    viewModel = viewModel,
                     classId = key.classId,
                     className = key.className,
                     onBack = {

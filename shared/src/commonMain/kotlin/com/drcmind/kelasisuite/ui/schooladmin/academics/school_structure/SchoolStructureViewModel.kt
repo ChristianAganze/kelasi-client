@@ -35,62 +35,81 @@ class SchoolStructureViewModel(
     private val teachersRepository: TeachersRepository,
     private val assignmentRepository: AssignmentRepository
 ) : ViewModel() {
-    private val _state = MutableStateFlow(ClassesState())
-    val state: StateFlow<ClassesState> = _state.asStateFlow()
 
-    private val _classes = MutableStateFlow<List<SchoolClassDTO>>(emptyList())
-    val classes: StateFlow<List<SchoolClassDTO>> = _classes.asStateFlow()
+    // --- États généraux ---
+    val state: StateFlow<ClassesState>
+        field = MutableStateFlow(ClassesState())
 
-    private val _academicYears = MutableStateFlow<List<AcademicYearDTO>>(emptyList())
-    val academicYears: StateFlow<List<AcademicYearDTO>> = _academicYears.asStateFlow()
+    val classes: StateFlow<List<SchoolClassDTO>>
+        field = MutableStateFlow(emptyList())
 
-    private val _students = MutableStateFlow<List<StudentDTO>>(emptyList())
-    val students: StateFlow<List<StudentDTO>> = _students.asStateFlow()
+    val academicYears: StateFlow<List<AcademicYearDTO>>
+        field = MutableStateFlow(emptyList())
 
-    private val _teachers = MutableStateFlow<List<TeacherProfileDTO>>(emptyList())
-    val teachers: StateFlow<List<TeacherProfileDTO>> = _teachers.asStateFlow()
+    val students: StateFlow<List<StudentDTO>>
+        field = MutableStateFlow(emptyList())
 
-    private val _homeroomAssignment = MutableStateFlow<HomeroomAssignmentDTO?>(null)
-    val homeroomAssignment: StateFlow<HomeroomAssignmentDTO?> = _homeroomAssignment.asStateFlow()
+    val teachers: StateFlow<List<TeacherProfileDTO>>
+        field = MutableStateFlow(emptyList())
 
-    private val _isLoadingHomeroomTeacher = MutableStateFlow(false)
-    val isLoadingHomeroomTeacher = _isLoadingHomeroomTeacher.asStateFlow()
 
-    private val _isAssigningHomeroomTeacher = MutableStateFlow(false)
-    val isAssigningHomeroomTeacher = _isAssigningHomeroomTeacher.asStateFlow()
+    // --- Titulaire de classe (Homeroom) ---
+    val homeroomAssignment: StateFlow<HomeroomAssignmentDTO?>
+        field = MutableStateFlow(null)
 
-    private val _clasStudents = MutableStateFlow<List<StudentDTO>>(emptyList())
-    val clasStudents: StateFlow<List<StudentDTO>> = _clasStudents.asStateFlow()
+    val isLoadingHomeroomTeacher: StateFlow<Boolean>
+        field = MutableStateFlow(false)
 
-    private val _isLoadingClassStudents = MutableStateFlow(false)
-    val isLoadingClassStudents = _isLoadingClassStudents.asStateFlow()
+    val isAssigningHomeroomTeacher: StateFlow<Boolean>
+        field = MutableStateFlow(false)
 
-    private val _assignments = MutableStateFlow<List<TeachingAssignmentDTO>>(emptyList())
-    val assignments: StateFlow<List<TeachingAssignmentDTO>> = _assignments.asStateFlow()
 
-    private val _pendingAssignmentsSubjects = MutableStateFlow<List<TemplateSubjectDTO>>(emptyList())
-    val pendingAssignmentsSubjects: StateFlow<List<TemplateSubjectDTO>> = _pendingAssignmentsSubjects.asStateFlow()
+    // --- Étudiants de la classe ---
+    val clasStudents: StateFlow<List<StudentDTO>>
+        field = MutableStateFlow(emptyList())
 
-    private val _isLoadingAssignments = MutableStateFlow(false)
-    val isLoadingAssignments = _isLoadingAssignments.asStateFlow()
+    val isLoadingClassStudents: StateFlow<Boolean>
+        field = MutableStateFlow(false)
 
-    private val _isLoadingPendingAssignments = MutableStateFlow(false)
-    val isLoadingPendingAssignments = _isLoadingPendingAssignments.asStateFlow()
 
-    private val _isAssigningTeachingAssignment = MutableStateFlow(false)
-    val isAssigningTeachingAssignment = _isAssigningTeachingAssignment.asStateFlow()
+    // --- Assignations et matières (Séparées) ---
+    val assignments: StateFlow<List<TeachingAssignmentDTO>>
+        field = MutableStateFlow(emptyList())
 
-    private val _isDeletingTeachingAssignment = MutableStateFlow(false)
-    val isDeletingTeachingAssignment = _isDeletingTeachingAssignment.asStateFlow()
+    val pendingAssignmentsSubjects: StateFlow<List<TemplateSubjectDTO>>
+        field = MutableStateFlow(emptyList())
 
-    private val _enrolledStudents = MutableStateFlow<List<StudentDTO>>(emptyList())
-    val enrolledStudents: StateFlow<List<StudentDTO>> = _enrolledStudents.asStateFlow()
+    val isLoadingAssignments: StateFlow<Boolean>
+        field = MutableStateFlow(false)
 
-    private val _isLoadingEnrolledStudents = MutableStateFlow(false)
-    val isLoadingEnrolledStudents = _isLoadingEnrolledStudents.asStateFlow()
+    val isLoadingPendingAssignments: StateFlow<Boolean>
+        field = MutableStateFlow(false)
 
-    private val _isLoadingEnrollment = MutableStateFlow(false)
-    val isLoadingEnrollment = _isLoadingEnrollment.asStateFlow()
+    val isAssigningTeachingAssignment: StateFlow<Boolean>
+        field = MutableStateFlow(false)
+
+    val isDeletingTeachingAssignment: StateFlow<Boolean>
+        field = MutableStateFlow(false)
+
+
+    // --- Inscriptions (Enrollments) ---
+    val enrolledStudents: StateFlow<List<StudentDTO>>
+        field = MutableStateFlow(emptyList())
+
+    val isLoadingEnrolledStudents: StateFlow<Boolean>
+        field = MutableStateFlow(false)
+
+    val isLoadingEnrollment: StateFlow<Boolean>
+        field = MutableStateFlow(false)
+
+
+    // --- Le Backing Field Combiné ---
+    val combinedAssignmentAndPendings: StateFlow<List<CombinedAssignmentModel>>
+        field = MutableStateFlow(
+            assignments.value.map { it.toCombinedModel() } +
+                    pendingAssignmentsSubjects.value.map { it.toCombinedModel() }
+        )
+
 
     var nodes = mutableStateListOf<SchoolTreeNode>()
 
@@ -105,7 +124,7 @@ class SchoolStructureViewModel(
     private fun loadClasses() {
         schoolRepository.getClassesForSchool().onEach { resource ->
             if (resource is Resource.Success) {
-                _classes.value = resource.data ?: emptyList()
+                classes.value = resource.data ?: emptyList()
             }
         }.launchIn(viewModelScope)
     }
@@ -113,7 +132,7 @@ class SchoolStructureViewModel(
     private fun loadAcademicYears() {
         schoolRepository.getAcademicYears().onEach { resource ->
             if (resource is Resource.Success) {
-                _academicYears.value = resource.data ?: emptyList()
+                academicYears.value = resource.data ?: emptyList()
             }
         }.launchIn(viewModelScope)
     }
@@ -121,13 +140,13 @@ class SchoolStructureViewModel(
     fun loadClassStudents(classId: Long) {
         studentsRepository.getStudentsForClass(classId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> _isLoadingClassStudents.value = true
+                is Resource.Loading -> isLoadingClassStudents.value = true
                 is Resource.Success -> {
-                    _clasStudents.value = resource.data ?: emptyList()
-                    _isLoadingClassStudents.value = false
+                    clasStudents.value = resource.data ?: emptyList()
+                    isLoadingClassStudents.value = false
                 }
 
-                is Resource.Error -> _isLoadingClassStudents.value = false
+                is Resource.Error -> isLoadingClassStudents.value = false
             }
         }.launchIn(viewModelScope)
     }
@@ -136,131 +155,135 @@ class SchoolStructureViewModel(
         val schoolId = settingsStorage.getUserInfo().schoolId ?: return
         studentsRepository.getStudents(schoolId).onEach { resource ->
             if (resource is Resource.Success) {
-                _students.value = resource.data ?: emptyList()
+                students.value = resource.data ?: emptyList()
             }
         }.launchIn(viewModelScope)
     }
-
 
 
     fun loadTeachers() {
         val schoolId = settingsStorage.getUserInfo().schoolId ?: return
         teachersRepository.getTeachers(schoolId).onEach { resource ->
             if (resource is Resource.Success) {
-                _teachers.value = resource.data ?: emptyList()
+                teachers.value = resource.data ?: emptyList()
             }
         }.launchIn(viewModelScope)
     }
 
     fun loadHomeroomTeacher(classId: Long) {
-        _isLoadingHomeroomTeacher.value = true
+        isLoadingHomeroomTeacher.value = true
         teachersRepository.getHomeroomTeacherForClass(classId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> _isLoadingHomeroomTeacher.value = true
+                is Resource.Loading -> isLoadingHomeroomTeacher.value = true
                 is Resource.Success -> {
-                    _homeroomAssignment.value = resource.data
-                    _isLoadingHomeroomTeacher.value = false
+                    homeroomAssignment.value = resource.data
+                    isLoadingHomeroomTeacher.value = false
                 }
 
                 is Resource.Error -> {
-                    _homeroomAssignment.value = null
-                    _isLoadingHomeroomTeacher.value = false
+                    homeroomAssignment.value = null
+                    isLoadingHomeroomTeacher.value = false
                 }
             }
         }.launchIn(viewModelScope)
     }
 
     fun assignHomeroomTeacher(teacherProfileId: Long, classId: Long) {
-        _isAssigningHomeroomTeacher.value = true
+        isAssigningHomeroomTeacher.value = true
         val request = HomeroomAssignmentRequest(teacherProfileId, classId)
-        teachersRepository.assignHomeroomTeacher( request).onEach { resource ->
+        teachersRepository.assignHomeroomTeacher(request).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> _isAssigningHomeroomTeacher.value = true
+                is Resource.Loading -> isAssigningHomeroomTeacher.value = true
                 is Resource.Success -> {
-                    _homeroomAssignment.value = resource.data
-                    _isAssigningHomeroomTeacher.value = false
+                    homeroomAssignment.value = resource.data
+                    isAssigningHomeroomTeacher.value = false
                     loadHomeroomTeacher(classId)
                 }
 
-                is Resource.Error -> _isAssigningHomeroomTeacher.value = false
+                is Resource.Error -> isAssigningHomeroomTeacher.value = false
             }
         }.launchIn(viewModelScope)
     }
 
+    fun loadCombinedAssignments() {
+        combinedAssignmentAndPendings.value =
+            assignments.value.map { it.toCombinedModel() } +
+                    pendingAssignmentsSubjects.value.map { it.toCombinedModel() }
+    }
+
     fun loadClassTeachingAssignments(classId: Long) {
-        _isLoadingAssignments.value = true
+        isLoadingAssignments.value = true
         assignmentRepository.getAssignmentsForClass(classId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> _isLoadingAssignments.value = true
+                is Resource.Loading -> isLoadingAssignments.value = true
                 is Resource.Success -> {
-                    _assignments.value = resource.data ?: emptyList()
-                    _isLoadingAssignments.value = false
+                    assignments.value = resource.data ?: emptyList()
+                    isLoadingAssignments.value = false
                 }
 
                 is Resource.Error -> {
-                    _assignments.value = emptyList()
-                    _isLoadingAssignments.value = false
+                    assignments.value = emptyList()
+                    isLoadingAssignments.value = false
                 }
             }
         }.launchIn(viewModelScope)
     }
 
     fun loadPendingTeachingAssignments(classId: Long) {
-        _isLoadingPendingAssignments.value = true
+        isLoadingPendingAssignments.value = true
         assignmentRepository.getPendingAssignmentsForClass(classId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> _isLoadingPendingAssignments.value = true
+                is Resource.Loading -> isLoadingPendingAssignments.value = true
                 is Resource.Success -> {
-                    _pendingAssignmentsSubjects.value = resource.data ?: emptyList()
-                    _isLoadingPendingAssignments.value = false
+                    pendingAssignmentsSubjects.value = resource.data ?: emptyList()
+                    isLoadingPendingAssignments.value = false
                 }
 
                 is Resource.Error -> {
-                    _pendingAssignmentsSubjects.value = emptyList()
-                    _isLoadingPendingAssignments.value = false
+                    pendingAssignmentsSubjects.value = emptyList()
+                    isLoadingPendingAssignments.value = false
                 }
             }
         }.launchIn(viewModelScope)
     }
 
     fun assignTeacherToSubject(subjectId: Long, teacherProfileId: Long, classId: Long) {
-        _isAssigningTeachingAssignment.value = true
+        isAssigningTeachingAssignment.value = true
         val academicYearId = settingsStorage.getActiveAcademicYear()?.id
         if (academicYearId == null) {
-            _isAssigningTeachingAssignment.value = false
+            isAssigningTeachingAssignment.value = false
             return
         }
         val request = TeachingAssignmentRequest(classId, subjectId, teacherProfileId, academicYearId)
         assignmentRepository.createTeachingAssignment(request).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> _isAssigningTeachingAssignment.value = true
+                is Resource.Loading -> isAssigningTeachingAssignment.value = true
                 is Resource.Success -> {
-                    _isAssigningTeachingAssignment.value = false
+                    isAssigningTeachingAssignment.value = false
                     loadClassTeachingAssignments(classId)
                     loadPendingTeachingAssignments(classId)
                 }
 
-                is Resource.Error -> _isAssigningTeachingAssignment.value = false
+                is Resource.Error -> isAssigningTeachingAssignment.value = false
             }
         }.launchIn(viewModelScope)
     }
 
     fun deleteTeachingAssignment(assignmentId: Long, classId: Long) {
-        _isDeletingTeachingAssignment.value = true
+        isDeletingTeachingAssignment.value = true
         assignmentRepository.deleteTeachingAssignment(assignmentId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> _isDeletingTeachingAssignment.value = true
+                is Resource.Loading -> isDeletingTeachingAssignment.value = true
                 is Resource.Success -> {
-                    _isDeletingTeachingAssignment.value = false
+                    isDeletingTeachingAssignment.value = false
                     loadClassTeachingAssignments(classId)
                     loadPendingTeachingAssignments(classId)
                 }
 
-                is Resource.Error -> _isDeletingTeachingAssignment.value = false
+                is Resource.Error -> isDeletingTeachingAssignment.value = false
             }
         }.launchIn(viewModelScope)
     }
-
 
 
     val visibleNodes: State<List<VisibleNode>> = derivedStateOf {
@@ -299,7 +322,7 @@ class SchoolStructureViewModel(
     fun onToggle(
         node: SchoolTreeNode
     ) {
-       if (node.type == NodeType.CLASSROOM) {
+        if (node.type == NodeType.CLASSROOM) {
             return
         }
         if (node.expanded) {
@@ -332,6 +355,7 @@ class SchoolStructureViewModel(
                                     is Resource.Loading -> {
                                         println("LOADING children for ${node.title} (type: ${node.type})")
                                     }
+
                                     is Resource.Success -> {
                                         val newChildren =
                                             section.data?.map { it.toSchoolTreeNode() }
@@ -351,6 +375,7 @@ class SchoolStructureViewModel(
                                             )
                                         }
                                     }
+
                                     is Resource.Error -> {
                                         updateNode(node.originalId, node.type) {
                                             it.copy(loading = false)
@@ -577,4 +602,27 @@ fun SchoolClassDTO.toSchoolTreeNode(): SchoolTreeNode = SchoolTreeNode(
     type = NodeType.CLASSROOM,
     parentId = "${NodeType.GRADE_LEVEL}-${this.gradeLevelId}",
     parentTitle = "${this.gradeLevelLabel} - ${this.majorName} - ${this.sectionName}"
+)
+
+fun TeachingAssignmentDTO.toCombinedModel() = CombinedAssignmentModel(
+    id = this.id, // The unique assignment ID
+    subjectId = this.subjectId,
+    subjectName = this.subjectName,
+    subjectCode = this.subjectCode,
+    status = AssignmentStatus.ASSIGNED,
+    teacherId = this.teacherId,
+    teacherName = this.teacherName,
+    classId = this.classId,
+    className = this.className,
+    academicYearId = this.academicYearId
+)
+
+fun TemplateSubjectDTO.toCombinedModel() = CombinedAssignmentModel(
+    id = this.id, // The unique template subject ID
+    subjectId = this.id,
+    subjectName = this.name,
+    subjectCode = this.code,
+    status = AssignmentStatus.PENDING,
+    domain = this.domain,
+    subDomain = this.subDomain
 )
