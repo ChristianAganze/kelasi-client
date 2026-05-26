@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
@@ -34,8 +36,10 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
 import com.drcmind.kelasisuite.domain.model.EvaluationStatus
 import com.drcmind.kelasisuite.navigation.Route
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -46,12 +50,18 @@ import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 
+enum class CalendarPeriodsTab {
+    CALENDAR_PERIODS,
+    TIME_SLOTS_CONFIGURATION
+}
+
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarPeriodsScreen(
     viewModel: CalendarPeriodsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var selectedTab by remember { mutableStateOf(CalendarPeriodsTab.CALENDAR_PERIODS) }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -128,88 +138,114 @@ fun CalendarPeriodsScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 32.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(32.dp)
                     ) {
-                        // --- Active Academic Year Card ---
-                        AcademicYearCard(uiState)
-
-                        // --- Majors and Cycles Card ---
-                        OutlinedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                // Sub-section: Majors Offered
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Majors Offered",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    IconButton(onClick = { /* TODO: Implement add major dialog */ }) {
-                                        Icon(Icons.Default.Add, contentDescription = "Add Major")
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                if (uiState.majors.isEmpty()) {
-                                    Text("No majors configured.", style = MaterialTheme.typography.bodySmall)
-                                } else {
-                                    FlowRow( // Use FlowRow for a flexible layout of majors
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        uiState.majors.forEach { major ->
-                                            SuggestionChip(
-                                                onClick = { /* TODO: Implement major edit/details */ },
-                                                label = { Text(major.name) },
-                                                colors = SuggestionChipDefaults.suggestionChipColors(
-                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                                    labelColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-
-                                // Sub-section: School Sections / Cycles
-                                Text(
-                                    text = "School Sections / Cycles",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                                if (uiState.schoolSections.isEmpty()) {
-                                    Text("No sections/cycles configured.", style = MaterialTheme.typography.bodySmall)
-                                } else {
-                                    FlowRow( // Use FlowRow for a flexible layout of sections
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        uiState.schoolSections.forEach { section ->
-                                            SuggestionChip(
-                                                onClick = { /* TODO: Implement section edit/details */ },
-                                                label = { Text(section.name) },
-                                                colors = SuggestionChipDefaults.suggestionChipColors(
-                                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                                    labelColor = MaterialTheme.colorScheme.onTertiaryContainer
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                        TabRow(selectedTabIndex = selectedTab.ordinal) {
+                            Tab(
+                                selected = selectedTab == CalendarPeriodsTab.CALENDAR_PERIODS,
+                                onClick = { selectedTab = CalendarPeriodsTab.CALENDAR_PERIODS },
+                                text = { Text("Périodes du Calendrier") }
+                            )
+                            Tab(
+                                selected = selectedTab == CalendarPeriodsTab.TIME_SLOTS_CONFIGURATION,
+                                onClick = { selectedTab = CalendarPeriodsTab.TIME_SLOTS_CONFIGURATION },
+                                text = { Text("Configuration des Créneaux Horaires") }
+                            )
                         }
 
-                        // --- Evaluation Period Table Card ---
-                        EvaluationPeriodsCard(uiState)
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        Spacer(modifier = Modifier.height(32.dp))
+                        when (selectedTab) {
+                            CalendarPeriodsTab.CALENDAR_PERIODS -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(rememberScrollState()),
+                                    verticalArrangement = Arrangement.spacedBy(32.dp)
+                                ) {
+                                    // --- Active Academic Year Card ---
+                                    AcademicYearCard(uiState)
+
+                                    // --- Majors and Cycles Card ---
+                                    OutlinedCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Column(modifier = Modifier.padding(16.dp)) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "Majors Offered",
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                                IconButton(onClick = { /* TODO: Implement add major dialog */ }) {
+                                                    Icon(Icons.Default.Add, contentDescription = "Add Major")
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            if (uiState.majors.isEmpty()) {
+                                                Text("No majors configured.", style = MaterialTheme.typography.bodySmall)
+                                            } else {
+                                                FlowRow( // Use FlowRow for a flexible layout of majors
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    uiState.majors.forEach { major ->
+                                                        SuggestionChip(
+                                                            onClick = { /* TODO: Implement major edit/details */ },
+                                                            label = { Text(major.name) },
+                                                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+                                            // Sub-section: School Sections / Cycles
+                                            Text(
+                                                text = "School Sections / Cycles",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                modifier = Modifier.padding(bottom = 8.dp)
+                                            )
+                                            if (uiState.schoolSections.isEmpty()) {
+                                                Text("No sections/cycles configured.", style = MaterialTheme.typography.bodySmall)
+                                            } else {
+                                                FlowRow( // Use FlowRow for a flexible layout of sections
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    uiState.schoolSections.forEach { section ->
+                                                        SuggestionChip(
+                                                            onClick = { /* TODO: Implement section edit/details */ },
+                                                            label = { Text(section.name) },
+                                                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                                labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // --- Evaluation Period Table Card ---
+                                    EvaluationPeriodsCard(uiState)
+
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                }
+                            }
+                            CalendarPeriodsTab.TIME_SLOTS_CONFIGURATION -> {
+                                TimeSlotsConfigurationTab(viewModel, uiState)
+                            }
+                        }
                     }
                 }
                 entry<Route.SchoolAdmin.Academics.CalendarPeriod.Supporting>(
@@ -642,5 +678,222 @@ fun getEvaluationStatus(
 
         else ->
             EvaluationStatus.ONGOING
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimeSlotsConfigurationTab(viewModel: CalendarPeriodsViewModel, uiState: CalendarPeriodsUiState) {
+    var selectedSectionExpanded by remember { mutableStateOf(false) }
+    var selectedSectionId by remember { mutableStateOf<Long?>(null) }
+    var showAddEditLearningTimeConfigDialog by remember { mutableStateOf(false) }
+    var editingConfig by remember { mutableStateOf<LearningTimeConfigDto?>(null) }
+
+    // Input states for new/edited learning time config
+    var newDayOfWeek by remember { mutableStateOf("") }
+    var newStartTime by remember { mutableStateOf("") }
+    var newEndTime by remember { mutableStateOf("") }
+    var dayOfWeekExpanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.schoolSections) {
+        if (uiState.schoolSections.isNotEmpty() && selectedSectionId == null) {
+            selectedSectionId = uiState.schoolSections.first().id
+            selectedSectionId?.let { viewModel.loadLearningTimeConfigsBySchoolSectionConfigId(it) }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Configuration des Créneaux Horaires",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // Section Selector
+        ExposedDropdownMenuBox(
+            expanded = selectedSectionExpanded,
+            onExpandedChange = { selectedSectionExpanded = !selectedSectionExpanded },
+            modifier = Modifier.fillMaxWidth(0.8f)
+        ) {
+            OutlinedTextField(
+                value = uiState.schoolSections.find { it.id == selectedSectionId }?.name ?: "Sélectionner une section",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Section Scolaire") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(selectedSectionExpanded) },
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
+            )
+            ExposedDropdownMenu(
+                expanded = selectedSectionExpanded,
+                onDismissRequest = { selectedSectionExpanded = false }
+            ) {
+                uiState.schoolSections.forEach { section ->
+                    DropdownMenuItem(
+                        text = { Text(section.name) },
+                        onClick = {
+                            selectedSectionId = section.id
+                            viewModel.loadLearningTimeConfigsBySchoolSectionConfigId(section.id)
+                            selectedSectionExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Add New Learning Time Config Button
+        Button(
+            onClick = {
+                editingConfig = null
+                newDayOfWeek = ""
+                newStartTime = ""
+                newEndTime = ""
+                showAddEditLearningTimeConfigDialog = true
+            },
+            shape = MaterialTheme.shapes.large,
+            enabled = selectedSectionId != null
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Ajouter un créneau horaire")
+            Spacer(Modifier.width(8.dp))
+            Text("Ajouter un créneau horaire")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // List of Learning Time Configurations
+        if (uiState.learningTimeConfigs.isEmpty()) {
+            Text("Aucun créneau horaire configuré pour cette section.", style = MaterialTheme.typography.bodyLarge)
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(0.9f).heightIn(max = 400.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.learningTimeConfigs) { config ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(text = "Jour: ${config.dayOfWeek}", style = MaterialTheme.typography.titleMedium)
+                                Text(text = "Début: ${config. startDayHourTime}", style = MaterialTheme.typography.bodyMedium)
+                                Text(text = "Fin: ${config.endDayHourTime}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                            Row {
+                                IconButton(onClick = {
+                                    editingConfig = config
+                                    newDayOfWeek = config.dayOfWeek.name
+                                    newStartTime = config.startDayHourTime
+                                    newEndTime = config.endDayHourTime
+                                    showAddEditLearningTimeConfigDialog = true
+                                }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Modifier")
+                                }
+                                IconButton(onClick = { config.id?.let { viewModel.deleteLearningTimeConfig(it) } }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Supprimer")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Add/Edit Learning Time Config Dialog
+    if (showAddEditLearningTimeConfigDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddEditLearningTimeConfigDialog = false },
+            title = { Text(if (editingConfig == null) "Ajouter un nouveau créneau horaire" else "Modifier le créneau horaire") },
+            text = {
+                Column {
+                    ExposedDropdownMenuBox(
+                        expanded = dayOfWeekExpanded,
+                        onExpandedChange = { dayOfWeekExpanded = !dayOfWeekExpanded },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = newDayOfWeek,
+                            onValueChange = { newDayOfWeek = it },
+                            readOnly = true,
+                            label = { Text("Jour de la semaine") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(dayOfWeekExpanded) },
+                            modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = dayOfWeekExpanded,
+                            onDismissRequest = { dayOfWeekExpanded = false }
+                        ) {
+                            listOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY").forEach { day ->
+                                DropdownMenuItem(
+                                    text = { Text(day) },
+                                    onClick = {
+                                        newDayOfWeek = day
+                                        dayOfWeekExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newStartTime,
+                        onValueChange = { newStartTime = it },
+                        label = { Text("Heure de début (HH:MM)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newEndTime,
+                        onValueChange = { newEndTime = it },
+                        label = { Text("Heure de fin (HH:MM)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedSectionId?.let { sectionId ->
+                        val configDto = LearningTimeConfigDto(
+                            id = editingConfig?.id, // Use existing ID if editing, null if adding
+                            dayOfWeek = DayOfWeek.valueOf(newDayOfWeek),
+                            startDayHourTime = newStartTime,
+                            endDayHourTime = newEndTime,
+                            schoolSectionConfigId = sectionId,
+                            label = "--"
+                        )
+                        if (editingConfig == null) {
+                            viewModel.createLearningTimeConfig(configDto)
+                        } else {
+                            editingConfig?.id?.let { id ->
+                                viewModel.updateLearningTimeConfig(id, configDto)
+                            }
+                        }
+                        showAddEditLearningTimeConfigDialog = false
+                        newDayOfWeek = ""
+                        newStartTime = ""
+                        newEndTime = ""
+                        editingConfig = null
+                    }
+                }) { Text(if (editingConfig == null) "Ajouter" else "Sauvegarder") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddEditLearningTimeConfigDialog = false }) { Text("Annuler") }
+            }
+        )
     }
 }

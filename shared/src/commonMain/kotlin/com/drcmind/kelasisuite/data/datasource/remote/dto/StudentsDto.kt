@@ -1,6 +1,7 @@
 package com.drcmind.kelasisuite.data.datasource.remote.dto
 
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentStatus
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -58,11 +59,12 @@ data class EnrollmentRequest(
 data class UpdateEnrollmentRequest(
     val newClassId: Long
 )
+
 @Serializable
 data class CreateParentRequest(
-    val userId : Long,
-    val address : String,
-    val occupation : String
+    val userId: Long,
+    val address: String,
+    val occupation: String
 )
 
 @Serializable
@@ -84,6 +86,7 @@ data class ParentDto(
     val occupation: String?,
     val linkages: List<ParentStudentLinkageDto>,
 )
+
 @Serializable
 data class ParentStudentLinkageDto(
     val id: Long?,
@@ -124,4 +127,15 @@ data class SchoolClassSummaryDto(
 data class AcademicYearSummaryDto(
     val id: Long?,
     val label: String
+)
+
+
+@Serializable
+data class LearningTimeConfigDto(
+    val id: Long?,
+    val label: String,
+    val startDayHourTime: String,
+    val endDayHourTime: String,
+    val dayOfWeek: DayOfWeek,
+    val schoolSectionConfigId: Long
 )

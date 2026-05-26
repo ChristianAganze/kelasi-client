@@ -9,6 +9,8 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodByScho
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
+// import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigRequest // Removed
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
@@ -34,9 +36,9 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import kotlinx.datetime.DayOfWeek
 
 class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdminApiService {
-
 
 
     override suspend fun getParentsBySchool(schoolId: Long): List<ParentDto> {
@@ -44,28 +46,28 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
     }
 
     override suspend fun createParent(request: CreateParentRequest): ParentDto {
-        return httpClient.post("parents"){
+        return httpClient.post("parents") {
             setBody(request)
         }.body()
     }
 
     override suspend fun linkStudentToParent(linkageRequest: ParentStudentLinkageRequest): ParentStudentLinkageDto {
-        return httpClient.post("parents/link-student"){
+        return httpClient.post("parents/link-student") {
             setBody(linkageRequest)
-        } .body()
+        }.body()
     }
 
     override suspend fun unlinkStudentFromParent(linkageId: Long) {
-        return httpClient.delete ("parents/unlink-student/$linkageId").body()
+        return httpClient.delete("parents/unlink-student/$linkageId").body()
     }
 
     override suspend fun updateParent(
         parentId: Long,
         createParentRequest: CreateParentRequest
     ): ParentDto {
-        return httpClient.put("parents/$parentId"){
+        return httpClient.put("parents/$parentId") {
             setBody(createParentRequest)
-        } .body()
+        }.body()
     }
 
     override suspend fun deleteParent(parentId: Long) {
@@ -303,4 +305,39 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
         }.body()
     }
 
+    // LearningTimeConfig Endpoints
+    override suspend fun createLearningTimeConfig(configDto: LearningTimeConfigDto): LearningTimeConfigDto {
+        return httpClient.post("learning-time-configs") {
+            setBody(configDto)
+        }.body()
+    }
+
+    override suspend fun getLearningTimeConfigById(id: Long): LearningTimeConfigDto {
+        return httpClient.get("learning-time-configs/$id").body()
+    }
+
+    override suspend fun getAllLearningTimeConfigs(): List<LearningTimeConfigDto> {
+        return httpClient.get("learning-time-configs").body()
+    }
+
+    override suspend fun getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId: Long): List<LearningTimeConfigDto> {
+        return httpClient.get("learning-time-configs/school-section-config/$schoolSectionConfigId").body()
+    }
+
+    override suspend fun getLearningTimeConfigsByDayOfWeekAndSchoolSectionConfigId(
+        dayOfWeek: DayOfWeek,
+        schoolSectionConfigId: Long
+    ): List<LearningTimeConfigDto> {
+        return httpClient.get("learning-time-configs/day-of-week/$dayOfWeek/school-section-config/$schoolSectionConfigId").body()
+    }
+
+    override suspend fun updateLearningTimeConfig(id: Long, configDto: LearningTimeConfigDto): LearningTimeConfigDto {
+        return httpClient.put("learning-time-configs/$id") {
+            setBody(configDto)
+        }.body()
+    }
+
+    override suspend fun deleteLearningTimeConfig(id: Long) {
+        httpClient.delete("learning-time-configs/$id")
+    }
 }

@@ -7,6 +7,7 @@ import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.datetime.DayOfWeek
 
 class SchoolRepositoryImpl(
     private val apiService: SchoolAdminApiService,
@@ -189,6 +190,80 @@ class SchoolRepositoryImpl(
         return flow {
             emit(Resource.Loading())
             apiService.deleteClass(classId)
+            emit(Resource.Success(Unit))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    // LearningTimeConfig Endpoints
+    override fun createLearningTimeConfig(configDto: LearningTimeConfigDto): Flow<Resource<LearningTimeConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.createLearningTimeConfig(configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getLearningTimeConfigById(id: Long): Flow<Resource<LearningTimeConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getLearningTimeConfigById(id)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getAllLearningTimeConfigs(): Flow<Resource<List<LearningTimeConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getAllLearningTimeConfigs()
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId: Long): Flow<Resource<List<LearningTimeConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getLearningTimeConfigsByDayOfWeekAndSchoolSectionConfigId(
+        dayOfWeek: DayOfWeek,
+        schoolSectionConfigId: Long
+    ): Flow<Resource<List<LearningTimeConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getLearningTimeConfigsByDayOfWeekAndSchoolSectionConfigId(dayOfWeek, schoolSectionConfigId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun updateLearningTimeConfig(id: Long, configDto: LearningTimeConfigDto): Flow<Resource<LearningTimeConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.updateLearningTimeConfig(id, configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun deleteLearningTimeConfig(id: Long): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            apiService.deleteLearningTimeConfig(id)
             emit(Resource.Success(Unit))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
