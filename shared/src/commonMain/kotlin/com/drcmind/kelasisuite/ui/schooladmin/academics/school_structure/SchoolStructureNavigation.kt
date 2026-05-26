@@ -35,6 +35,8 @@ fun SchoolStructureNavigation(
             entry<Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail> { key ->
                 viewModel.loadPendingTeachingAssignments(key.classId)
                 viewModel.loadClassTeachingAssignments(key.classId)
+                viewModel.loadClassStudents(key.classId)
+                viewModel.loadHomeroomTeacher(key.classId)
                 ClassDetailsScreen(
                     viewModel = viewModel,
                     classId = key.classId,
@@ -50,5 +52,4 @@ fun SchoolStructureNavigation(
             }
         }
     )
-
 }
