@@ -33,7 +33,6 @@ fun StructureScreen(
     schoolStructureBackStack: NavBackStack<NavKey>
 ) {
     val visibleNodes by viewModel.visibleNodes
-    val uiState by viewModel.state.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -63,6 +62,7 @@ fun StructureScreen(
                         onToggle = { viewModel.onToggle(it) },
                         onAction = { node, action -> viewModel.onAction(node, action) },
                         onNavigateToClassDetails = {
+                            viewModel.loadClassTeachingAssignments(visibleNode.node.originalId)
                             schoolStructureBackStack.add(
                                 Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail(
                                     visibleNode.node.originalId,

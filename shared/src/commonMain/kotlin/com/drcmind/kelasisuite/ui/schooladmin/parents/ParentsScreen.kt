@@ -31,6 +31,7 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.*
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.schooladmin.component.CircularProfile
 import com.drcmind.kelasisuite.ui.schooladmin.component.SectionCard
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -276,7 +277,7 @@ fun ParentRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(24.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -328,7 +329,7 @@ fun ParentRow(
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy((-12).dp)) {
                     parent.linkages.take(3).forEach { linkage ->
-                        CircularProfile(linkage.student.fullName.take(1))
+                        CircularProfile(text = linkage.student.fullName.take(1))
                     }
                     if (parent.linkages.size > 3) {
                         Box(
@@ -773,23 +774,3 @@ fun LinkStudentDialog(
     )
 }
 
-@Composable
-fun CircularProfile(
-    text: String
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(32.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-            .border(1.dp, Color.White, CircleShape)
-    ) {
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.labelSmall
-        )
-    }
-}
