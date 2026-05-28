@@ -11,6 +11,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule.ScheduleScreen
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.TeacherAssignmentsScreen
 
 @Composable
@@ -26,10 +27,7 @@ fun PedagogyNavigation(
         ),
         entryProvider = entryProvider {
             entry<Route.SchoolAdmin.Pedagogy.Scheduling> {
-                Column {
-                    Text("C'est l'interface de création. Le Préfet place les cours (déjà affectés dans Scolarité > Affectations) dans une grille hebdomadaire pour chaque classe.")
-                    Text("Intelligence du système : L'interface bloque les conflits (ex: empêcher de placer M. Kabongo en 7ème A et en 8ème B le lundi à 8h00).")
-                }
+                ScheduleScreen()
             }
             entry<Route.SchoolAdmin.Pedagogy.ProgramRadar> {
                 Column {

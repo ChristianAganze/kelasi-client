@@ -6,6 +6,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodByScho
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
@@ -44,4 +45,55 @@ interface SchoolRepository {
     ): Flow<Resource<List<LearningTimeConfigDto>>>
     fun updateLearningTimeConfig(id: Long, configDto: LearningTimeConfigDto): Flow<Resource<LearningTimeConfigDto>>
     fun deleteLearningTimeConfig(id: Long): Flow<Resource<Unit>>
+
+    // ScheduleEntry Endpoints
+    fun createScheduleEntry(entryDto: ScheduleEntryDto): Flow<Resource<ScheduleEntryDto>>
+    fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto): Flow<Resource<ScheduleEntryDto>>
+    fun deleteScheduleEntry(id: Long): Flow<Resource<Unit>>
+    fun getScheduleEntriesByWeekNumber(weekNumber: Int): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesByLearningTimeConfigDayOfWeekAndWeekNumber(
+        dayOfWeek: DayOfWeek,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesByTeachingAssignmentIdAndWeekNumber(
+        teachingAssignmentId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesBySchoolIdAndWeekNumber(
+        schoolId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesBySchoolSectionIdAndWeekNumber(
+        schoolSectionId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesByTemplateSchoolSectionIdAndWeekNumber(
+        templateSchoolSectionId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesByTemplateSectionIdAndWeekNumber(
+        templateSectionId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesByGradeLevelIdAndWeekNumber(
+        gradeLevelId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun getScheduleEntriesBySchoolClassIdAndWeekNumber(
+        schoolClassId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun duplicateScheduleEntries(
+        sourceWeek: Int,
+        classId: Long,
+        targetWeeks: List<Int>
+    ): Flow<Resource<Unit>>
+    fun getWeeklySchedule(
+        weekNumber: Int,
+        classId: Long
+    ): Flow<Resource<List<ScheduleEntryDto>>>
+    fun clearWeek(
+        weekNumber: Int,
+        classId: Long
+    ): Flow<Resource<Unit>>
 }

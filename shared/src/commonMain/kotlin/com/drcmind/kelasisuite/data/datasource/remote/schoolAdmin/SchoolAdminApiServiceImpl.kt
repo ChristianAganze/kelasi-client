@@ -10,11 +10,11 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
-// import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigRequest // Removed
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
@@ -39,7 +39,6 @@ import io.ktor.client.request.setBody
 import kotlinx.datetime.DayOfWeek
 
 class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdminApiService {
-
 
     override suspend fun getParentsBySchool(schoolId: Long): List<ParentDto> {
         return httpClient.get("parents/schools/$schoolId").body()
@@ -325,10 +324,12 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
     }
 
     override suspend fun getLearningTimeConfigsByDayOfWeekAndSchoolSectionConfigId(
-        dayOfWeek: DayOfWeek,
+        dayOfWeek: String,
         schoolSectionConfigId: Long
     ): List<LearningTimeConfigDto> {
-        return httpClient.get("learning-time-configs/day-of-week/$dayOfWeek/school-section-config/$schoolSectionConfigId").body()
+        return httpClient.get("learning-time-configs/day-of-week/$dayOfWeek/school-section-config/$schoolSectionConfigId")
+            .body()
+
     }
 
     override suspend fun updateLearningTimeConfig(id: Long, configDto: LearningTimeConfigDto): LearningTimeConfigDto {
@@ -339,5 +340,107 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
 
     override suspend fun deleteLearningTimeConfig(id: Long) {
         httpClient.delete("learning-time-configs/$id")
+    }
+
+    // ScheduleEntry Endpoints
+    override suspend fun createScheduleEntry(entryDto: ScheduleEntryDto): ScheduleEntryDto {
+        return httpClient.post("schedule-entries") {
+            setBody(entryDto)
+        }.body()
+    }
+
+    override suspend fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto): ScheduleEntryDto {
+        return httpClient.put("schedule-entries/$id") {
+            setBody(entryDto)
+        }.body()
+    }
+
+    override suspend fun deleteScheduleEntry(id: Long) {
+        httpClient.delete("schedule-entries/$id")
+    }
+
+    override suspend fun getScheduleEntriesByWeekNumber(weekNumber: Int): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/week/$weekNumber").body()
+    }
+
+    override suspend fun getScheduleEntriesByLearningTimeConfigDayOfWeekAndWeekNumber(
+        dayOfWeek: DayOfWeek,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/learning-time-config/day-of-week/$dayOfWeek/week/$weekNumber").body()
+    }
+
+    override suspend fun getScheduleEntriesByTeachingAssignmentIdAndWeekNumber(
+        teachingAssignmentId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/teaching-assignment/$teachingAssignmentId/week/$weekNumber").body()
+    }
+
+    override suspend fun getScheduleEntriesBySchoolIdAndWeekNumber(
+        schoolId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/school/$schoolId/week/$weekNumber").body()
+    }
+
+    override suspend fun getScheduleEntriesBySchoolSectionIdAndWeekNumber(
+        schoolSectionId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/school-section/$schoolSectionId/week/$weekNumber").body()
+    }
+
+    override suspend fun getScheduleEntriesByTemplateSchoolSectionIdAndWeekNumber(
+        templateSchoolSectionId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/template-school-section/$templateSchoolSectionId/week/$weekNumber")
+            .body()
+    }
+
+    override suspend fun getScheduleEntriesByTemplateSectionIdAndWeekNumber(
+        templateSectionId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/template-section/$templateSectionId/week/$weekNumber").body()
+    }
+
+    override suspend fun getScheduleEntriesByGradeLevelIdAndWeekNumber(
+        gradeLevelId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/grade-level/$gradeLevelId/week/$weekNumber").body()
+    }
+
+    override suspend fun getScheduleEntriesBySchoolClassIdAndWeekNumber(
+        schoolClassId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/school-class/$schoolClassId/week/$weekNumber").body()
+    }
+
+    override suspend fun duplicateScheduleEntries(
+        sourceWeek: Int,
+        classId: Long,
+        targetWeeks: List<Int>
+    ) {
+//        httpClient.post("schedule-entries/duplicate/week/$sourceWeek/class/$classId") {
+//            setBody(targetWeeks)
+//        }.body()
+    }
+
+    override suspend fun getWeeklySchedule(
+        weekNumber: Int,
+        classId: Long
+    ): List<ScheduleEntryDto> {
+        return httpClient.get("schedule-entries/week/$weekNumber/class/$classId").body()
+    }
+
+    override suspend fun clearWeek(
+        weekNumber: Int,
+        classId: Long
+    ) {
+        httpClient.delete("schedule-entries/week/$weekNumber/class/$classId")
     }
 }

@@ -14,6 +14,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
@@ -27,8 +28,6 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
 import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentRequest
 import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
-import com.drcmind.kelasisuite.domain.util.Resource
-import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.DayOfWeek
 
 interface SchoolAdminApiService {
@@ -102,9 +101,60 @@ interface SchoolAdminApiService {
     suspend fun getAllLearningTimeConfigs(): List<LearningTimeConfigDto>
     suspend fun getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId: Long): List<LearningTimeConfigDto>
     suspend fun getLearningTimeConfigsByDayOfWeekAndSchoolSectionConfigId(
-        dayOfWeek: DayOfWeek,
+        dayOfWeek: String,
         schoolSectionConfigId: Long
     ): List<LearningTimeConfigDto>
     suspend fun updateLearningTimeConfig(id: Long, configDto: LearningTimeConfigDto): LearningTimeConfigDto
     suspend fun deleteLearningTimeConfig(id: Long)
+
+    // ScheduleEntry Endpoints
+    suspend fun createScheduleEntry(entryDto: ScheduleEntryDto): ScheduleEntryDto
+    suspend fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto): ScheduleEntryDto
+    suspend fun deleteScheduleEntry(id: Long)
+    suspend fun getScheduleEntriesByWeekNumber(weekNumber: Int): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesByLearningTimeConfigDayOfWeekAndWeekNumber(
+        dayOfWeek: DayOfWeek,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesByTeachingAssignmentIdAndWeekNumber(
+        teachingAssignmentId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesBySchoolIdAndWeekNumber(
+        schoolId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesBySchoolSectionIdAndWeekNumber(
+        schoolSectionId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesByTemplateSchoolSectionIdAndWeekNumber(
+        templateSchoolSectionId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesByTemplateSectionIdAndWeekNumber(
+        templateSectionId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesByGradeLevelIdAndWeekNumber(
+        gradeLevelId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun getScheduleEntriesBySchoolClassIdAndWeekNumber(
+        schoolClassId: Long,
+        weekNumber: Int
+    ): List<ScheduleEntryDto>
+    suspend fun duplicateScheduleEntries(
+        sourceWeek: Int,
+        classId: Long,
+        targetWeeks: List<Int>
+    )
+    suspend fun getWeeklySchedule(
+        weekNumber: Int,
+        classId: Long
+    ): List<ScheduleEntryDto>
+    suspend fun clearWeek(
+        weekNumber: Int,
+        classId: Long
+    )
 }

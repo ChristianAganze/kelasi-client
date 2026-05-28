@@ -36,6 +36,7 @@ import com.drcmind.kelasisuite.ui.schooladmin.parents.ParentsViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teachers.TeachersViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentsViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule.ScheduleViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teaching_assignment.TeachingAssignmentViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.*
@@ -107,6 +108,7 @@ val viewModelModule = module {
     viewModelOf(::EnrollmentViewModel)
     viewModelOf(::SchoolAdminViewModel)
     viewModelOf(::TeachingAssignmentViewModel)
+    viewModelOf(::ScheduleViewModel)
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {

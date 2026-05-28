@@ -139,3 +139,11 @@ data class LearningTimeConfigDto(
     val dayOfWeek: DayOfWeek,
     val schoolSectionConfigId: Long
 )
+
+@Serializable
+data class ScheduleEntryDto(
+    val id: Long?,
+    val learningTimeConfigId: Long,
+    val teachingAssignmentId: Long,
+    val weekNumber: Int
+)
