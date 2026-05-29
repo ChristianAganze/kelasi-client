@@ -9,8 +9,10 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
+import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.DayOfWeek
@@ -33,6 +35,15 @@ interface SchoolRepository {
     fun createClass(request: CreateClassFromTemplateRequest): Flow<Resource<SchoolClassDTO>>
     fun updateClass(classId: Long, request: CreateClassFromTemplateRequest): Flow<Resource<SchoolClassDTO>>
     fun deleteClass(classId: Long): Flow<Resource<Unit>>
+
+    fun getAssignmentsForClass(classId: Long, academicYearId: Long): Flow<Resource<List<TeachingAssignmentDTO>>>
+
+    // SchoolSectionConfig Endpoints
+    fun createSchoolSectionConfig(configDto: SchoolSectionConfigDto): Flow<Resource<SchoolSectionConfigDto>>
+    fun getSchoolSectionConfigById(id: Long): Flow<Resource<SchoolSectionConfigDto>>
+    fun getAllSchoolSectionConfigsBySchool(): Flow<Resource<List<SchoolSectionConfigDto>>>
+    fun updateSchoolSectionConfig(id: Long, configDto: SchoolSectionConfigDto): Flow<Resource<SchoolSectionConfigDto>>
+    fun deleteSchoolSectionConfig(id: Long): Flow<Resource<Unit>>
 
     // LearningTimeConfig Endpoints
     fun createLearningTimeConfig(configDto: LearningTimeConfigDto): Flow<Resource<LearningTimeConfigDto>>

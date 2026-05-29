@@ -7,6 +7,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.*
@@ -25,7 +26,7 @@ class CalendarPeriodsViewModel(
         loadActiveAcademicYear()
         loadMajors()
         loadSchoolSections()
-//        loadLearningTimeConfigsBySchoolSectionConfigId(1)
+        loadSchoolSectionConfigs()
     }
 
     private fun getActiveAcademicYear() {
@@ -86,6 +87,91 @@ class CalendarPeriodsViewModel(
 
                 is Resource.Success<*> -> {
                     uiState.update { it.copy(schoolSections = ressource.data ?: emptyList()) }
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun loadSchoolSectionConfigs() {
+        schoolRepository.getAllSchoolSectionConfigsBySchool().onEach { ressource ->
+            when (ressource) {
+                is Resource.Error<*> -> {
+                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                }
+
+                is Resource.Loading<*> -> {
+                    uiState.update { it.copy(isLoading = true) }
+                }
+
+                is Resource.Success<*> -> {
+                    uiState.update {
+                        it.copy(
+                            schoolSectionConfigs = ressource.data ?: emptyList(),
+                            isLoading = false
+                        )
+                    }
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun createSchoolSectionConfig(configDto: SchoolSectionConfigDto) {
+        schoolRepository.createSchoolSectionConfig(configDto).onEach { ressource ->
+            when (ressource) {
+                is Resource.Error<*> -> {
+                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                }
+
+                is Resource.Loading<*> -> {
+                    uiState.update { it.copy(isLoading = true) }
+                }
+
+                is Resource.Success<*> -> {
+                    loadSchoolSectionConfigs()
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun updateSchoolSectionConfig(id: Long, configDto: SchoolSectionConfigDto) {
+        schoolRepository.updateSchoolSectionConfig(id, configDto).onEach { ressource ->
+            when (ressource) {
+                is Resource.Error<*> -> {
+                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                }
+
+                is Resource.Loading<*> -> {
+                    uiState.update { it.copy(isLoading = true) }
+                }
+
+                is Resource.Success<*> -> {
+                    loadSchoolSectionConfigs()
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun deleteSchoolSectionConfig(id: Long) {
+        schoolRepository.deleteSchoolSectionConfig(id).onEach { ressource ->
+            when (ressource) {
+                is Resource.Error<*> -> {
+                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                }
+
+                is Resource.Loading<*> -> {
+                    uiState.update { it.copy(isLoading = true) }
+                }
+
+                is Resource.Success<*> -> {
+                    loadSchoolSectionConfigs()
                 }
 
                 else -> {}
@@ -295,6 +381,7 @@ data class CalendarPeriodsUiState(
     val academicYears: List<AcademicYearDTO> = emptyList(),
     val majors: List<MajorDto> = emptyList(),
     val schoolSections: List<SchoolSectionDTO> = emptyList(),
+    val schoolSectionConfigs: List<SchoolSectionConfigDto> = emptyList(),
     val evaluationPeriods: List<EvaluationPeriodBySchoolDTO> = emptyList(),
     val learningTimeConfigs: List<LearningTimeConfigDto> = emptyList(),
     val isLoading: Boolean = false,

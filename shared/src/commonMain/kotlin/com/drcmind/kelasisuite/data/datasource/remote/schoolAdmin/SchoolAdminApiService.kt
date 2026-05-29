@@ -17,6 +17,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRe
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentCreationRequest
@@ -94,6 +95,13 @@ interface SchoolAdminApiService {
         teacherProfileId: Long,
         academicYearId: Long
     ): List<HomeroomAssignmentDTO>
+
+    // SchoolSectionConfig Endpoints
+    suspend fun createSchoolSectionConfig(configDto: SchoolSectionConfigDto): SchoolSectionConfigDto
+    suspend fun getSchoolSectionConfigById(id: Long): SchoolSectionConfigDto
+    suspend fun getAllSchoolSectionConfigsBySchool(schoolId: Long): List<SchoolSectionConfigDto>
+    suspend fun updateSchoolSectionConfig(id: Long, configDto: SchoolSectionConfigDto): SchoolSectionConfigDto
+    suspend fun deleteSchoolSectionConfig(id: Long)
 
     // LearningTimeConfig Endpoints
     suspend fun createLearningTimeConfig(configDto: LearningTimeConfigDto): LearningTimeConfigDto

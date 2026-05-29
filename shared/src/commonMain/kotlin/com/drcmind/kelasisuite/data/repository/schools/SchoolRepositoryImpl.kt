@@ -3,6 +3,7 @@ package com.drcmind.kelasisuite.data.repository.schools
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.remote.dto.*
 import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
+import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -190,6 +191,74 @@ class SchoolRepositoryImpl(
         return flow {
             emit(Resource.Loading())
             apiService.deleteClass(classId)
+            emit(Resource.Success(Unit))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getAssignmentsForClass(
+        classId: Long,
+        academicYearId: Long
+    ): Flow<Resource<List<TeachingAssignmentDTO>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getAssignmentsForClass(classId, academicYearId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    // SchoolSectionConfig Endpoints
+    override fun createSchoolSectionConfig(configDto: SchoolSectionConfigDto): Flow<Resource<SchoolSectionConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.createSchoolSectionConfig(configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getSchoolSectionConfigById(id: Long): Flow<Resource<SchoolSectionConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getSchoolSectionConfigById(id)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getAllSchoolSectionConfigsBySchool(): Flow<Resource<List<SchoolSectionConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val schoolId = settingsStorage.getUserInfo().schoolId
+            val response = apiService.getAllSchoolSectionConfigsBySchool(schoolId!!)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun updateSchoolSectionConfig(
+        id: Long,
+        configDto: SchoolSectionConfigDto
+    ): Flow<Resource<SchoolSectionConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.updateSchoolSectionConfig(id, configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun deleteSchoolSectionConfig(id: Long): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            apiService.deleteSchoolSectionConfig(id)
             emit(Resource.Success(Unit))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))

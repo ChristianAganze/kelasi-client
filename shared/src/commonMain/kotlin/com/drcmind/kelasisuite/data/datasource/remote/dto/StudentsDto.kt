@@ -3,6 +3,7 @@ package com.drcmind.kelasisuite.data.datasource.remote.dto
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentStatus
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
@@ -146,4 +147,11 @@ data class ScheduleEntryDto(
     val learningTimeConfigId: Long,
     val teachingAssignmentId: Long,
     val weekNumber: Int
+)
+@Serializable
+data class SchoolSectionConfigDto(
+    val id: Long?,
+    val dayStartTime: LocalTime,
+    val dayEndTime: LocalTime,
+    val schoolSectionId: Long
 )

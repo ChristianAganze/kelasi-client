@@ -25,6 +25,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
 
@@ -38,7 +39,16 @@ class ScheduleViewModel(
 
     init {
         loadSchoolSections()
+        loadSchoolSectionConfigs()
         _uiState.update { it.copy(currentWeekNumber = getCurrentWeekNumber()) }
+    }
+
+    private fun loadSchoolSectionConfigs() {
+        schoolRepository.getAllSchoolSectionConfigsBySchool().onEach { resource ->
+            if (resource is Resource.Success) {
+                _uiState.update { it.copy(schoolSectionConfigs = resource.data ?: emptyList()) }
+            }
+        }.launchIn(viewModelScope)
     }
 
     private fun getCurrentWeekNumber(): Int {
@@ -80,11 +90,17 @@ class ScheduleViewModel(
                 sections = emptyList(),
                 majors = emptyList(),
                 gradeLevels = emptyList(),
-                classes = emptyList()
+                classes = emptyList(),
+                allLearningTimeConfigs = emptyList()
             )
         }
+        
+        val configId = _uiState.value.schoolSectionConfigs.find { it.schoolSectionId == schoolSection.id }?.id
+        if (configId != null) {
+            loadLearningTimeConfigs(configId)
+        }
+        
         loadSections(schoolSection.id)
-        loadLearningTimeConfigs(schoolSection.id)
     }
 
     private fun loadSections(schoolSectionId: Long) {
@@ -234,6 +250,87 @@ class ScheduleViewModel(
     fun selectClass(schoolClass: SchoolClassDTO) {
         _uiState.update { it.copy(selectedClass = schoolClass) }
         loadWeeklySchedule(schoolClass.id, _uiState.value.currentWeekNumber)
+        loadAssignments(schoolClass.id)
+    }
+
+    fun loadAssignments(classId: Long) {
+        val academicYearId = settingsStorage.getActiveAcademicYear()?.id ?: return
+        schoolRepository.getAssignmentsForClass(classId, academicYearId).onEach { resource ->
+            _uiState.update { currentState ->
+                when (resource) {
+                    is Resource.Loading -> currentState // or copy(isLoadingAssignments = true)
+                    is Resource.Success -> currentState.copy(assignments = resource.data ?: emptyList())
+                    is Resource.Error -> currentState.copy(error = resource.message)
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun createScheduleEntry(entryDto: ScheduleEntryDto) {
+        schoolRepository.createScheduleEntry(entryDto).onEach { resource ->
+            when (resource) {
+                is Resource.Success -> {
+                    _uiState.value.selectedClass?.id?.let {
+                        loadWeeklySchedule(it, _uiState.value.currentWeekNumber)
+                    }
+                }
+                is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto) {
+        schoolRepository.updateScheduleEntry(id, entryDto).onEach { resource ->
+            when (resource) {
+                is Resource.Success -> {
+                    _uiState.value.selectedClass?.id?.let {
+                        loadWeeklySchedule(it, _uiState.value.currentWeekNumber)
+                    }
+                }
+                is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun deleteScheduleEntry(id: Long) {
+        schoolRepository.deleteScheduleEntry(id).onEach { resource ->
+            when (resource) {
+                is Resource.Success -> {
+                    _uiState.value.selectedClass?.id?.let {
+                        loadWeeklySchedule(it, _uiState.value.currentWeekNumber)
+                    }
+                }
+                is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun clearWeek(classId: Long, weekNumber: Int) {
+        schoolRepository.clearWeek(weekNumber, classId).onEach { resource ->
+            when (resource) {
+                is Resource.Success -> {
+                    loadWeeklySchedule(classId, weekNumber)
+                }
+                is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun duplicateWeek(sourceWeek: Int, classId: Long, targetWeeks: List<Int>) {
+        schoolRepository.duplicateScheduleEntries(sourceWeek, classId, targetWeeks).onEach { resource ->
+            when (resource) {
+                is Resource.Success -> {
+                    // Maybe show success message
+                    loadWeeklySchedule(classId, _uiState.value.currentWeekNumber)
+                }
+                is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
     }
 
     fun goToNextWeek() {
@@ -273,16 +370,12 @@ class ScheduleViewModel(
                                 val learningTimeConfigDeferred = async {
                                     schoolRepository.getLearningTimeConfigById(entry.learningTimeConfigId).firstSuccessOrNull()
                                 }
-                                val teachingAssignmentDeferred = async {
-                                    // Make sure to implement this if needed, otherwise it will always be null
-                                    // For now, it's commented out as per the original code
-                                    null // Placeholder
-                                }
+                                val teachingAssignment = _uiState.value.assignments.find { it.id == entry.teachingAssignmentId }
 
                                 DetailedScheduleEntry(
                                     scheduleEntry = entry,
                                     learningTimeConfig = learningTimeConfigDeferred.await(),
-                                    //teachingAssignment = teachingAssignmentDeferred.await()
+                                    teachingAssignment = teachingAssignment
                                 )
                             }
                         }
@@ -313,6 +406,8 @@ data class ScheduleUiState(
     val selectedSchoolSection: SchoolSectionDTO? = null,
     val isLoadingSchoolSections: Boolean = false,
 
+    val schoolSectionConfigs: List<SchoolSectionConfigDto> = emptyList(),
+
     val sections: List<SectionDTO> = emptyList(),
     val selectedSection: SectionDTO? = null,
     val isLoadingSections: Boolean = false,
@@ -332,6 +427,7 @@ data class ScheduleUiState(
     val currentWeekNumber: Int = 1,
     val schedule: List<DetailedScheduleEntry> = emptyList(),
     val allLearningTimeConfigs: List<LearningTimeConfigDto> = emptyList(),
+    val assignments: List<TeachingAssignmentDTO> = emptyList(),
     val isLoadingSchedule: Boolean = false,
     val error: String? = null
 )

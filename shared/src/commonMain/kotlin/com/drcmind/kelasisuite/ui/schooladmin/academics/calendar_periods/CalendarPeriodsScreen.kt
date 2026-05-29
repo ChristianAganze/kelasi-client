@@ -23,8 +23,10 @@ import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,10 +39,12 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.domain.model.EvaluationStatus
 import com.drcmind.kelasisuite.navigation.Route
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
@@ -61,7 +65,7 @@ fun CalendarPeriodsScreen(
     viewModel: CalendarPeriodsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedTab by remember { mutableStateOf(CalendarPeriodsTab.CALENDAR_PERIODS) }
+    var selectedTab by rememberSaveable { mutableStateOf(CalendarPeriodsTab.CALENDAR_PERIODS) }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -147,7 +151,9 @@ fun CalendarPeriodsScreen(
                             )
                             Tab(
                                 selected = selectedTab == CalendarPeriodsTab.TIME_SLOTS_CONFIGURATION,
-                                onClick = { selectedTab = CalendarPeriodsTab.TIME_SLOTS_CONFIGURATION },
+                                onClick = {
+                                    selectedTab = CalendarPeriodsTab.TIME_SLOTS_CONFIGURATION
+                                },
                                 text = { Text("Configuration des Créneaux Horaires") }
                             )
                         }
@@ -180,12 +186,18 @@ fun CalendarPeriodsScreen(
                                                     style = MaterialTheme.typography.titleMedium
                                                 )
                                                 IconButton(onClick = { /* TODO: Implement add major dialog */ }) {
-                                                    Icon(Icons.Default.Add, contentDescription = "Add Major")
+                                                    Icon(
+                                                        Icons.Default.Add,
+                                                        contentDescription = "Add Major"
+                                                    )
                                                 }
                                             }
                                             Spacer(modifier = Modifier.height(8.dp))
                                             if (uiState.majors.isEmpty()) {
-                                                Text("No majors configured.", style = MaterialTheme.typography.bodySmall)
+                                                Text(
+                                                    "No majors configured.",
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
                                             } else {
                                                 FlowRow( // Use FlowRow for a flexible layout of majors
                                                     modifier = Modifier.fillMaxWidth(),
@@ -214,7 +226,10 @@ fun CalendarPeriodsScreen(
                                                 modifier = Modifier.padding(bottom = 8.dp)
                                             )
                                             if (uiState.schoolSections.isEmpty()) {
-                                                Text("No sections/cycles configured.", style = MaterialTheme.typography.bodySmall)
+                                                Text(
+                                                    "No sections/cycles configured.",
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
                                             } else {
                                                 FlowRow( // Use FlowRow for a flexible layout of sections
                                                     modifier = Modifier.fillMaxWidth(),
@@ -242,6 +257,7 @@ fun CalendarPeriodsScreen(
                                     Spacer(modifier = Modifier.height(32.dp))
                                 }
                             }
+
                             CalendarPeriodsTab.TIME_SLOTS_CONFIGURATION -> {
                                 TimeSlotsConfigurationTab(viewModel, uiState)
                             }
@@ -261,7 +277,10 @@ fun CalendarPeriodsScreen(
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                             if (uiState.academicYears.isEmpty()) {
-                                Text("No academic years configured.", style = MaterialTheme.typography.bodySmall)
+                                Text(
+                                    "No academic years configured.",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             } else {
                                 LazyColumn {
                                     items(uiState.academicYears) { academicYear ->
@@ -272,14 +291,20 @@ fun CalendarPeriodsScreen(
                                                     style = MaterialTheme.typography.bodyLarge,
                                                     modifier = Modifier.padding(vertical = 4.dp)
                                                 )
-                                                if (academicYear.isActive){
+                                                if (academicYear.isActive) {
                                                     Text(
                                                         text = "Active",
                                                         style = MaterialTheme.typography.labelSmall,
                                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                                         modifier = Modifier
-                                                            .background(color = MaterialTheme.colorScheme.secondaryContainer, shape = CircleShape)
-                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                            .background(
+                                                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                                                shape = CircleShape
+                                                            )
+                                                            .padding(
+                                                                horizontal = 6.dp,
+                                                                vertical = 2.dp
+                                                            )
                                                     )
                                                 }
                                             }
@@ -681,219 +706,523 @@ fun getEvaluationStatus(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimeSlotsConfigurationTab(viewModel: CalendarPeriodsViewModel, uiState: CalendarPeriodsUiState) {
+fun TimeSlotsConfigurationTab(
+    viewModel: CalendarPeriodsViewModel,
+    uiState: CalendarPeriodsUiState,
+    modifier: Modifier = Modifier
+) {
     var selectedSectionExpanded by remember { mutableStateOf(false) }
     var selectedSectionId by remember { mutableStateOf<Long?>(null) }
-    var showAddEditLearningTimeConfigDialog by remember { mutableStateOf(false) }
-    var editingConfig by remember { mutableStateOf<LearningTimeConfigDto?>(null) }
 
-    // Input states for new/edited learning time config
-    var newDayOfWeek by remember { mutableStateOf("") }
-    var newStartTime by remember { mutableStateOf("") }
-    var newEndTime by remember { mutableStateOf("") }
-    var dayOfWeekExpanded by remember { mutableStateOf(false) }
+    var showSectionConfigDialog by remember { mutableStateOf(false) }
+    var editingSectionConfig by remember { mutableStateOf<SchoolSectionConfigDto?>(null) }
+    var sectionStartTime by remember { mutableStateOf("") }
+    var sectionEndTime by remember { mutableStateOf("") }
+
+    var showLearningTimeDialog by remember { mutableStateOf(false) }
+    var editingLearningConfig by remember { mutableStateOf<LearningTimeConfigDto?>(null) }
+    var learningLabel by remember { mutableStateOf("") }
+    var learningDayOfWeek by remember { mutableStateOf("") }
+    var learningStartTime by remember { mutableStateOf("") }
+    var learningEndTime by remember { mutableStateOf("") }
 
     LaunchedEffect(uiState.schoolSections) {
         if (uiState.schoolSections.isNotEmpty() && selectedSectionId == null) {
             selectedSectionId = uiState.schoolSections.first().id
-            selectedSectionId?.let { viewModel.loadLearningTimeConfigsBySchoolSectionConfigId(it) }
         }
     }
 
-    Column(
-        modifier = Modifier
+    val currentSectionConfig =
+        uiState.schoolSectionConfigs.find { it.schoolSectionId == selectedSectionId }
+
+    LaunchedEffect(currentSectionConfig) {
+        currentSectionConfig?.id?.let {
+            viewModel.loadLearningTimeConfigsBySchoolSectionConfigId(it)
+        }
+    }
+
+    // Structure principale à défilement unique pour des performances optimales
+    LazyColumn(
+        modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            text = "Configuration des Créneaux Horaires",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Section Selector
-        ExposedDropdownMenuBox(
-            expanded = selectedSectionExpanded,
-            onExpandedChange = { selectedSectionExpanded = !selectedSectionExpanded },
-            modifier = Modifier.fillMaxWidth(0.8f)
-        ) {
-            OutlinedTextField(
-                value = uiState.schoolSections.find { it.id == selectedSectionId }?.name ?: "Sélectionner une section",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Section Scolaire") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(selectedSectionExpanded) },
-                modifier = Modifier.fillMaxWidth().menuAnchor(),
-            )
-            ExposedDropdownMenu(
+        // 1. Menu de sélection de la section
+        item {
+            SectionSelector(
+                uiState = uiState,
+                selectedSectionId = selectedSectionId,
                 expanded = selectedSectionExpanded,
-                onDismissRequest = { selectedSectionExpanded = false }
-            ) {
-                uiState.schoolSections.forEach { section ->
-                    DropdownMenuItem(
-                        text = { Text(section.name) },
-                        onClick = {
-                            selectedSectionId = section.id
-                            viewModel.loadLearningTimeConfigsBySchoolSectionConfigId(section.id)
-                            selectedSectionExpanded = false
-                        }
-                    )
-                }
+                onExpandedChange = { selectedSectionExpanded = it },
+                onSectionSelected = { selectedSectionId = it }
+            )
+        }
+        // 2. Carte de configuration globale de la section
+        if (selectedSectionId != null) {
+            item {
+                SectionConfigurationCard(
+                    uiState = uiState,
+                    config = currentSectionConfig,
+                    onEditClick = {
+                        editingSectionConfig = currentSectionConfig
+                        sectionStartTime = currentSectionConfig?.dayStartTime?.toString() ?: "08:00"
+                        sectionEndTime = currentSectionConfig?.dayEndTime?.toString() ?: "16:00"
+                        showSectionConfigDialog = true
+                    }
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Add New Learning Time Config Button
-        Button(
-            onClick = {
-                editingConfig = null
-                newDayOfWeek = ""
-                newStartTime = ""
-                newEndTime = ""
-                showAddEditLearningTimeConfigDialog = true
-            },
-            shape = MaterialTheme.shapes.large,
-            enabled = selectedSectionId != null
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Ajouter un créneau horaire")
-            Spacer(Modifier.width(8.dp))
-            Text("Ajouter un créneau horaire")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // List of Learning Time Configurations
-        if (uiState.learningTimeConfigs.isEmpty()) {
-            Text("Aucun créneau horaire configuré pour cette section.", style = MaterialTheme.typography.bodyLarge)
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(0.9f).heightIn(max = 400.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(uiState.learningTimeConfigs) { config ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        // 3. Section d'en-tête pour les créneaux horaires
+        if (currentSectionConfig != null) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "CRÉNEAUX HORAIRES CONFIGURÉS",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Button(
+                        onClick = {
+                            editingLearningConfig = null
+                            learningLabel = ""
+                            learningDayOfWeek = "MONDAY"
+                            learningStartTime = ""
+                            learningEndTime = ""
+                            showLearningTimeDialog = true
+                        },
+                        shape = MaterialTheme.shapes.large,
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Text(text = "Jour: ${config.dayOfWeek}", style = MaterialTheme.typography.titleMedium)
-                                Text(text = "Début: ${config. startDayHourTime}", style = MaterialTheme.typography.bodyMedium)
-                                Text(text = "Fin: ${config.endDayHourTime}", style = MaterialTheme.typography.bodyMedium)
-                            }
-                            Row {
-                                IconButton(onClick = {
-                                    editingConfig = config
-                                    newDayOfWeek = config.dayOfWeek.name
-                                    newStartTime = config.startDayHourTime
-                                    newEndTime = config.endDayHourTime
-                                    showAddEditLearningTimeConfigDialog = true
-                                }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Modifier")
-                                }
-                                IconButton(onClick = { config.id?.let { viewModel.deleteLearningTimeConfig(it) } }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Supprimer")
-                                }
-                            }
-                        }
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Ajouter un créneau")
                     }
+                }
+            }
+
+            // 4. Liste des créneaux horaires (Directement intégrée à la LazyColumn parente)
+            if (uiState.learningTimeConfigs.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Aucun créneau horaire configuré pour cette section.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                items(
+                    items = uiState.learningTimeConfigs,
+                    key = { it.id ?: it.hashCode() }
+                ) { config ->
+                    LearningTimeItemRow(
+                        config = config,
+                        onEdit = {
+                            editingLearningConfig = config
+                            learningDayOfWeek = config.dayOfWeek.name
+                            learningStartTime = config.startDayHourTime
+                            learningEndTime = config.endDayHourTime
+                            learningLabel = config.label
+                            showLearningTimeDialog = true
+                        },
+                        onDelete = { config.id?.let { viewModel.deleteLearningTimeConfig(it) } }
+                    )
                 }
             }
         }
     }
 
-    // Add/Edit Learning Time Config Dialog
-    if (showAddEditLearningTimeConfigDialog) {
-        AlertDialog(
-            onDismissRequest = { showAddEditLearningTimeConfigDialog = false },
-            title = { Text(if (editingConfig == null) "Ajouter un nouveau créneau horaire" else "Modifier le créneau horaire") },
-            text = {
-                Column {
-                    ExposedDropdownMenuBox(
-                        expanded = dayOfWeekExpanded,
-                        onExpandedChange = { dayOfWeekExpanded = !dayOfWeekExpanded },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        OutlinedTextField(
-                            value = newDayOfWeek,
-                            onValueChange = { newDayOfWeek = it },
-                            readOnly = true,
-                            label = { Text("Jour de la semaine") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(dayOfWeekExpanded) },
-                            modifier = Modifier.fillMaxWidth().menuAnchor(),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = dayOfWeekExpanded,
-                            onDismissRequest = { dayOfWeekExpanded = false }
-                        ) {
-                            listOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY").forEach { day ->
-                                DropdownMenuItem(
-                                    text = { Text(day) },
-                                    onClick = {
-                                        newDayOfWeek = day
-                                        dayOfWeekExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = newStartTime,
-                        onValueChange = { newStartTime = it },
-                        label = { Text("Heure de début (HH:MM)") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = newEndTime,
-                        onValueChange = { newEndTime = it },
-                        label = { Text("Heure de fin (HH:MM)") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    selectedSectionId?.let { sectionId ->
-                        val configDto = LearningTimeConfigDto(
-                            id = editingConfig?.id, // Use existing ID if editing, null if adding
-                            dayOfWeek = DayOfWeek.valueOf(newDayOfWeek),
-                            startDayHourTime = newStartTime,
-                            endDayHourTime = newEndTime,
-                            schoolSectionConfigId = sectionId,
-                            label = "--"
-                        )
-                        if (editingConfig == null) {
-                            viewModel.createLearningTimeConfig(configDto)
-                        } else {
-                            editingConfig?.id?.let { id ->
-                                viewModel.updateLearningTimeConfig(id, configDto)
-                            }
-                        }
-                        showAddEditLearningTimeConfigDialog = false
-                        newDayOfWeek = ""
-                        newStartTime = ""
-                        newEndTime = ""
-                        editingConfig = null
-                    }
-                }) { Text(if (editingConfig == null) "Ajouter" else "Sauvegarder") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAddEditLearningTimeConfigDialog = false }) { Text("Annuler") }
+    // Gestionnaires de Dialogues déportés de la vue principale
+    if (showSectionConfigDialog) {
+        SchoolSectionConfigDialog(
+            editingConfig = editingSectionConfig,
+            startTime = sectionStartTime,
+            endTime = sectionEndTime,
+            onStartTimeChange = { sectionStartTime = it },
+            onEndTimeChange = { sectionEndTime = it },
+            onDismiss = { showSectionConfigDialog = false },
+            onConfirm = {
+                val config = SchoolSectionConfigDto(
+                    id = editingSectionConfig?.id,
+                    dayStartTime = LocalTime.parse(sectionStartTime),
+                    dayEndTime = LocalTime.parse(sectionEndTime),
+                    schoolSectionId = selectedSectionId!!
+                )
+                if (editingSectionConfig == null) viewModel.createSchoolSectionConfig(config)
+                else viewModel.updateSchoolSectionConfig(editingSectionConfig!!.id!!, config)
+                showSectionConfigDialog = false
             }
         )
     }
+
+    if (showLearningTimeDialog) {
+        LearningTimeConfigDialog(
+            editingConfig = editingLearningConfig,
+            label = learningLabel,
+            dayOfWeek = learningDayOfWeek,
+            startTime = learningStartTime,
+            endTime = learningEndTime,
+            onLabelChange = { learningLabel = it },
+            onDayOfWeekChange = { learningDayOfWeek = it },
+            onStartTimeChange = { learningStartTime = it },
+            onEndTimeChange = { learningEndTime = it },
+            onDismiss = { showLearningTimeDialog = false },
+            onConfirm = {
+                currentSectionConfig?.id?.let { configId ->
+                    val configDto = LearningTimeConfigDto(
+                        id = editingLearningConfig?.id,
+                        dayOfWeek = DayOfWeek.valueOf(learningDayOfWeek),
+                        startDayHourTime = learningStartTime,
+                        endDayHourTime = learningEndTime,
+                        schoolSectionConfigId = configId,
+                        label = learningLabel
+                    )
+                    if (editingLearningConfig == null) viewModel.createLearningTimeConfig(configDto)
+                    else editingLearningConfig?.id?.let { id ->
+                        viewModel.updateLearningTimeConfig(
+                            id,
+                            configDto
+                        )
+                    }
+                    showLearningTimeDialog = false
+                }
+            }
+        )
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SectionSelector(
+    uiState: CalendarPeriodsUiState,
+    selectedSectionId: Long?,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onSectionSelected: (Long) -> Unit
+) {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = uiState.schoolSections.find { it.id == selectedSectionId }?.name
+                ?: "Sélectionner une section",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Section Scolaire") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            shape = MaterialTheme.shapes.large,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+            ),
+            modifier = Modifier.fillMaxWidth().menuAnchor(),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) }
+        ) {
+            uiState.schoolSections.forEach { section ->
+                DropdownMenuItem(
+                    text = { Text(section.name, style = MaterialTheme.typography.bodyLarge) },
+                    onClick = {
+                        onSectionSelected(section.id)
+                        onExpandedChange(false)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionConfigurationCard(
+    uiState: CalendarPeriodsUiState,
+    config: SchoolSectionConfigDto?,
+    onEditClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Configuration de la section ${
+                            uiState.schoolSections.find { it.id == config!!.schoolSectionId }!!.name
+                        }",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Plage journalière globale de travail",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        imageVector = if (config == null) Icons.Default.Add else Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            if (config != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+                    Column {
+                        Text(
+                            "DÉBUT",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                        Text(
+                            config.dayStartTime.toString(),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    Column {
+                        Text(
+                            "FIN",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                        Text(
+                            config.dayEndTime.toString(),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = "Aucune configuration de base pour cette section.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LearningTimeItemRow(
+    config: LearningTimeConfigDto,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = config.dayOfWeek.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = config.label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "${config.startDayHourTime} — ${config.endDayHourTime}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Modifier",
+                        tint = MaterialTheme.colorScheme.outline
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Supprimer",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SchoolSectionConfigDialog(
+    editingConfig: SchoolSectionConfigDto?,
+    startTime: String,
+    endTime: String,
+    onStartTimeChange: (String) -> Unit,
+    onEndTimeChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                if (editingConfig == null) "Ajouter Configuration" else "Modifier Configuration",
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = startTime,
+                    onValueChange = onStartTimeChange,
+                    label = { Text("Heure de début (HH:MM)") },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = endTime,
+                    onValueChange = onEndTimeChange,
+                    label = { Text("Heure de fin (HH:MM)") },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = { Button(onClick = onConfirm) { Text("Confirmer") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LearningTimeConfigDialog(
+    editingConfig: LearningTimeConfigDto?,
+    label: String,
+    dayOfWeek: String,
+    startTime: String,
+    endTime: String,
+    onLabelChange: (String) -> Unit,
+    onDayOfWeekChange: (String) -> Unit,
+    onStartTimeChange: (String) -> Unit,
+    onEndTimeChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    var dayDropdownExpanded by remember { mutableStateOf(false) }
+    val days = listOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                if (editingConfig == null) "Nouveau créneau" else "Modifier le créneau",
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = label,
+                    onValueChange = onLabelChange,
+                    label = { Text("Libellé (ex: 1ère Heure)") },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ExposedDropdownMenuBox(
+                    expanded = dayDropdownExpanded,
+                    onExpandedChange = { dayDropdownExpanded = it },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = dayOfWeek,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Jour de la semaine") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                dayDropdownExpanded
+                            )
+                        },
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = dayDropdownExpanded,
+                        onDismissRequest = { dayDropdownExpanded = false }
+                    ) {
+                        days.forEach { day ->
+                            DropdownMenuItem(
+                                text = { Text(day) },
+                                onClick = {
+                                    onDayOfWeekChange(day)
+                                    dayDropdownExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = startTime,
+                    onValueChange = onStartTimeChange,
+                    label = { Text("Heure de début (HH:MM)") },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = endTime,
+                    onValueChange = onEndTimeChange,
+                    label = { Text("Heure de fin (HH:MM)") },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = { Button(onClick = onConfirm) { Text(if (editingConfig == null) "Ajouter" else "Sauvegarder") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } }
+    )
 }

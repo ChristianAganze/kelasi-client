@@ -17,6 +17,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRe
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentCreationRequest
@@ -304,6 +305,34 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
         }.body()
     }
 
+    // SchoolSectionConfig Endpoints
+    override suspend fun createSchoolSectionConfig(configDto: SchoolSectionConfigDto): SchoolSectionConfigDto {
+        return httpClient.post("school-section-configs") {
+            setBody(configDto)
+        }.body()
+    }
+
+    override suspend fun getSchoolSectionConfigById(id: Long): SchoolSectionConfigDto {
+        return httpClient.get("school-section-configs/$id").body()
+    }
+
+    override suspend fun getAllSchoolSectionConfigsBySchool(schoolId: Long): List<SchoolSectionConfigDto> {
+        return httpClient.get("schools/$schoolId/school-section-configs").body()
+    }
+
+    override suspend fun updateSchoolSectionConfig(
+        id: Long,
+        configDto: SchoolSectionConfigDto
+    ): SchoolSectionConfigDto {
+        return httpClient.put("school-section-configs/$id") {
+            setBody(configDto)
+        }.body()
+    }
+
+    override suspend fun deleteSchoolSectionConfig(id: Long) {
+        httpClient.delete("school-section-configs/$id")
+    }
+
     // LearningTimeConfig Endpoints
     override suspend fun createLearningTimeConfig(configDto: LearningTimeConfigDto): LearningTimeConfigDto {
         return httpClient.post("learning-time-configs") {
@@ -425,9 +454,9 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
         classId: Long,
         targetWeeks: List<Int>
     ) {
-//        httpClient.post("schedule-entries/duplicate/week/$sourceWeek/class/$classId") {
-//            setBody(targetWeeks)
-//        }.body()
+        httpClient.post("schedule-entries/duplicate/week/$sourceWeek/class/$classId") {
+            setBody(targetWeeks)
+        }
     }
 
     override suspend fun getWeeklySchedule(
