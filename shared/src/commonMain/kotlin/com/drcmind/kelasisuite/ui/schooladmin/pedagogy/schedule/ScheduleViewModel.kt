@@ -28,6 +28,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
+import io.ktor.util.logging.Logger
 
 class ScheduleViewModel(
     private val schoolRepository: SchoolRepository,
@@ -73,6 +74,7 @@ class ScheduleViewModel(
                             error = null
                         )
                     }
+
                     is Resource.Error -> currentState.copy(isLoadingSchoolSections = false, error = resource.message)
                 }
             }
@@ -94,12 +96,12 @@ class ScheduleViewModel(
                 allLearningTimeConfigs = emptyList()
             )
         }
-        
+
         val configId = _uiState.value.schoolSectionConfigs.find { it.schoolSectionId == schoolSection.id }?.id
         if (configId != null) {
             loadLearningTimeConfigs(configId)
         }
-        
+
         loadSections(schoolSection.id)
     }
 
@@ -120,6 +122,7 @@ class ScheduleViewModel(
                             error = null
                         )
                     }
+
                     is Resource.Error -> currentState.copy(isLoadingSections = false, error = resource.message)
                 }
             }
@@ -158,6 +161,7 @@ class ScheduleViewModel(
                             error = null
                         )
                     }
+
                     is Resource.Error -> currentState.copy(isLoadingMajors = false, error = resource.message)
                 }
             }
@@ -194,6 +198,7 @@ class ScheduleViewModel(
                             error = null
                         )
                     }
+
                     is Resource.Error -> currentState.copy(isLoadingGradeLevels = false, error = resource.message)
                 }
             }
@@ -229,6 +234,7 @@ class ScheduleViewModel(
                             error = null
                         )
                     }
+
                     is Resource.Error -> currentState.copy(isLoadingClasses = false, error = resource.message)
                 }
             }
@@ -274,9 +280,12 @@ class ScheduleViewModel(
                         loadWeeklySchedule(it, _uiState.value.currentWeekNumber)
                     }
                 }
+
                 is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
                 else -> {}
             }
+
+            println("SCHEDULE CREATION : " + resource.message)
         }.launchIn(viewModelScope)
     }
 
@@ -288,6 +297,7 @@ class ScheduleViewModel(
                         loadWeeklySchedule(it, _uiState.value.currentWeekNumber)
                     }
                 }
+
                 is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
                 else -> {}
             }
@@ -302,6 +312,7 @@ class ScheduleViewModel(
                         loadWeeklySchedule(it, _uiState.value.currentWeekNumber)
                     }
                 }
+
                 is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
                 else -> {}
             }
@@ -314,6 +325,7 @@ class ScheduleViewModel(
                 is Resource.Success -> {
                     loadWeeklySchedule(classId, weekNumber)
                 }
+
                 is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
                 else -> {}
             }
@@ -327,6 +339,7 @@ class ScheduleViewModel(
                     // Maybe show success message
                     loadWeeklySchedule(classId, _uiState.value.currentWeekNumber)
                 }
+
                 is Resource.Error -> _uiState.update { it.copy(error = resource.message) }
                 else -> {}
             }
@@ -360,7 +373,12 @@ class ScheduleViewModel(
                     val academicYearId = settingsStorage.getActiveAcademicYear()?.id
 
                     if (academicYearId == null) {
-                        _uiState.update { it.copy(isLoadingSchedule = false, error = "Aucune année académique active.") }
+                        _uiState.update {
+                            it.copy(
+                                isLoadingSchedule = false,
+                                error = "Aucune année académique active."
+                            )
+                        }
                         return@onEach
                     }
 
@@ -368,9 +386,11 @@ class ScheduleViewModel(
                         val detailedEntriesDeferred = scheduleEntries.map { entry ->
                             async {
                                 val learningTimeConfigDeferred = async {
-                                    schoolRepository.getLearningTimeConfigById(entry.learningTimeConfigId).firstSuccessOrNull()
+                                    schoolRepository.getLearningTimeConfigById(entry.learningTimeConfigId)
+                                        .firstSuccessOrNull()
                                 }
-                                val teachingAssignment = _uiState.value.assignments.find { it.id == entry.teachingAssignmentId }
+                                val teachingAssignment =
+                                    _uiState.value.assignments.find { it.id == entry.teachingAssignmentId }
 
                                 DetailedScheduleEntry(
                                     scheduleEntry = entry,
@@ -391,6 +411,7 @@ class ScheduleViewModel(
                         }
                     }
                 }
+
                 is Resource.Error -> _uiState.update { it.copy(isLoadingSchedule = false, error = resource.message) }
             }
         }.launchIn(viewModelScope)
@@ -435,5 +456,5 @@ data class ScheduleUiState(
 data class DetailedScheduleEntry(
     val scheduleEntry: ScheduleEntryDto,
     val learningTimeConfig: LearningTimeConfigDto?,
-    val teachingAssignment: TeachingAssignmentDTO?=null
+    val teachingAssignment: TeachingAssignmentDTO? = null
 )

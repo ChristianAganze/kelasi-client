@@ -49,7 +49,6 @@ fun ParentsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showAddParentDialog by remember { mutableStateOf(false) }
     var parentToEdit by remember { mutableStateOf<ParentDto?>(null) }
-
     val backStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {
@@ -70,7 +69,11 @@ fun ParentsScreen(
     val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val directive = remember(windowAdaptiveInfo) {
         calculatePaneScaffoldDirective(windowAdaptiveInfo)
-            .copy(horizontalPartitionSpacerSize = 0.dp, verticalPartitionSpacerSize = 0.dp, defaultPanePreferredWidth = 800.dp)
+            .copy(
+                horizontalPartitionSpacerSize = 0.dp,
+                verticalPartitionSpacerSize = 0.dp,
+                defaultPanePreferredWidth = 800.dp
+            )
     }
     val listDetailsStrateggy = rememberListDetailSceneStrategy<NavKey>(
         backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
@@ -124,7 +127,8 @@ fun ParentsScreen(
                                 }
                                 IconButton(onClick = {
                                     parentToEdit = null
-                                    showAddParentDialog = true }
+                                    showAddParentDialog = true
+                                }
                                 ) {
                                     Icon(Icons.Filled.Add, contentDescription = null)
                                 }
@@ -145,7 +149,9 @@ fun ParentsScreen(
                         ParentTable(
                             viewModel = viewModel,
                             modifier = Modifier.padding(it).padding(horizontal = 16.dp),
-                            parents = uiState.list,
+                            parents = uiState.list.filter { filter ->
+                                filter.fullName.contains(uiState.searchQuery, true)
+                            },
                             onNavigateToParentProfile = { id ->
                                 backStack.add(Route.SchoolAdmin.Parents.Profile(id))
                             },
@@ -452,14 +458,14 @@ fun ParentDetailPane(
                     title = "Elèves liés",
                     icon = Icons.Filled.AccountTree,
                     actions = {
-                        IconButton(onClick = {showLinkDialog = true}){
+                        IconButton(onClick = { showLinkDialog = true }) {
                             Icon(
                                 imageVector = Icons.Filled.AddLink,
                                 contentDescription = null
                             )
                         }
                     }
-                ){
+                ) {
                     if (parent.linkages.isEmpty()) {
                         Box(
                             Modifier.fillMaxWidth().height(200.dp),
@@ -470,6 +476,7 @@ fun ParentDetailPane(
                         }
                     } else {
                         parent.linkages.forEach { linkage ->
+                            HorizontalDivider()
                             LinkageRow(
                                 linkage,
                                 onUnlink = {
@@ -577,7 +584,6 @@ fun LinkageRow(linkage: ParentStudentLinkageDto, onUnlink: () -> Unit) {
             }
         }
     )
-    HorizontalDivider()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

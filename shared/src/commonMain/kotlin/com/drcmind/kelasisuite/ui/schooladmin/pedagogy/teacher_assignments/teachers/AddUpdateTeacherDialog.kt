@@ -47,7 +47,9 @@ fun AddTeacherDialog(
         onTeacherAdded()
     }
 
-    OutlinedCard() {
+    OutlinedCard(
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
         var expanded by rememberSaveable { mutableStateOf(false) }
         TopAppBar(
             title = {
@@ -55,14 +57,14 @@ fun AddTeacherDialog(
             },
             navigationIcon = {
                 IconButton(onClick = if (!isEditing && !state.showUserList) viewModel::onBackToUserList else onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                    Icon(AppIcons.cancel, contentDescription = "Retour")
                 }
             }
         )
 
         Column(
             modifier = Modifier
-                .padding(top = 4.dp, start = 8.dp, end = 8.dp, bottom = 8.dp)
+                .padding(top = 4.dp, start = 8.dp, end = 8.dp, bottom = 20.dp)
         ) {
             Box(
                 Modifier
@@ -202,6 +204,7 @@ fun AddTeacherDialog(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     OutlinedTextField(
+                        shape = MaterialTheme.shapes.large,
                         modifier = Modifier.fillMaxWidth(),
                         value = state.fullName,
                         onValueChange = { viewModel.onFullNameChange(it) },
@@ -213,6 +216,7 @@ fun AddTeacherDialog(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
                             modifier = Modifier.weight(1f),
                             value = state.hireDate,
                             onValueChange = viewModel::onHireDateChange,
@@ -220,6 +224,7 @@ fun AddTeacherDialog(
                             placeholder = { Text("Date d'Embauche") },
                         )
                         OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
                             modifier = Modifier.weight(1f),
                             value = state.qualifications,
                             onValueChange = viewModel::onQualificationsChange,
@@ -232,6 +237,7 @@ fun AddTeacherDialog(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
                             modifier = Modifier.weight(1f),
                             value = state.maxWeeklyHours,
                             onValueChange = viewModel::onMaxHoursChange,
@@ -240,6 +246,7 @@ fun AddTeacherDialog(
                         )
 
                         OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
                             modifier = Modifier.weight(1f),
                             value = state.city,
                             onValueChange = viewModel::onCityChange,
@@ -252,6 +259,7 @@ fun AddTeacherDialog(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
                             modifier = Modifier.weight(1f),
                             value = state.province,
                             onValueChange = viewModel::onProvinceChange,
@@ -259,6 +267,7 @@ fun AddTeacherDialog(
                             placeholder = { Text("Ex: Sud-Kivu") },
                         )
                         OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
                             modifier = Modifier.weight(1f),
                             value = state.streetAddress,
                             onValueChange = viewModel::onAddressChange,

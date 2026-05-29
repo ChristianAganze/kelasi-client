@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,8 +31,10 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.format.DayOfWeekNames
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -48,7 +52,7 @@ fun ScheduleScreen(
     var selectedQuickSlot by remember { mutableStateOf<LearningTimeConfigDto?>(null) }
 
     Scaffold(
-        containerColor = Color.Transparent, 
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {
@@ -64,8 +68,20 @@ fun ScheduleScreen(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                },
-                actions = {
+                }, actions = {
+                    if (uiState.selectedClass != null && uiState.allLearningTimeConfigs.isNotEmpty()) {
+                        Button(
+                            onClick = {
+                                selectedEntryToEdit = null
+                                showQuickAddDialog = true
+                            },
+                        ) {
+                            Icon(AppIcons.add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Planifier")
+                        }
+
+                    }
                     if (uiState.selectedClass != null) {
                         IconButton(onClick = {
                             viewModel.clearWeek(uiState.selectedClass!!.id, uiState.currentWeekNumber)
@@ -73,32 +89,17 @@ fun ScheduleScreen(
                             Icon(Icons.Default.DeleteSweep, contentDescription = "Vider la semaine")
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                }, colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        floatingActionButton = {
-            if (uiState.selectedClass != null && uiState.allLearningTimeConfigs.isNotEmpty()) {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        selectedEntryToEdit = null
-                        showQuickAddDialog = true
-                    },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Planifier") },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-    ) { paddingValues ->
+
+        ) { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues).padding(horizontal = 32.dp).fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // School Section Selector
                 StructureSelector(
@@ -196,12 +197,12 @@ fun ScheduleScreen(
                         showEntryOptionsDialog = true
                     },
                     onEmptySlotClick = { day, start, end ->
-                        val config = uiState.allLearningTimeConfigs.find { it.dayOfWeek == day && it.startDayHourTime == start && it.endDayHourTime == end }
+                        val config =
+                            uiState.allLearningTimeConfigs.find { it.dayOfWeek == day && it.startDayHourTime == start && it.endDayHourTime == end }
                         selectedSlotConfigId = config?.id
                         selectedEntryToEdit = null
                         showAssignDialog = true
-                    }
-                )
+                    })
             }
         }
     }
@@ -221,8 +222,7 @@ fun ScheduleScreen(
                             selectedSlotConfigId = selectedEntryToEdit?.scheduleEntry?.learningTimeConfigId
                             showEntryOptionsDialog = false
                             showAssignDialog = true
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                        }, modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Default.Edit, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
@@ -246,8 +246,7 @@ fun ScheduleScreen(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { showEntryOptionsDialog = false }) { Text("Fermer") }
-            }
-        )
+            })
     }
 
     if (showAssignDialog && selectedSlotConfigId != null) {
@@ -272,8 +271,7 @@ fun ScheduleScreen(
                                     )
                                 } else {
                                     viewModel.updateScheduleEntry(
-                                        selectedEntryToEdit!!.scheduleEntry.id!!,
-                                        ScheduleEntryDto(
+                                        selectedEntryToEdit!!.scheduleEntry.id!!, ScheduleEntryDto(
                                             id = selectedEntryToEdit!!.scheduleEntry.id,
                                             learningTimeConfigId = selectedSlotConfigId!!,
                                             teachingAssignmentId = assignment.id,
@@ -283,8 +281,7 @@ fun ScheduleScreen(
                                 }
                                 showAssignDialog = false
                                 selectedEntryToEdit = null
-                            }
-                        )
+                            })
                     }
                     if (uiState.assignments.isEmpty()) {
                         item { Text("Aucune attribution de cours disponible pour cette classe.") }
@@ -293,12 +290,11 @@ fun ScheduleScreen(
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { 
+                TextButton(onClick = {
                     showAssignDialog = false
                     selectedEntryToEdit = null
                 }) { Text("Annuler") }
-            }
-        )
+            })
     }
 
     if (showDeleteConfirm && selectedEntryToEdit != null) {
@@ -314,42 +310,97 @@ fun ScheduleScreen(
                 }) { Text("Supprimer", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { 
-                    showDeleteConfirm = false 
+                TextButton(onClick = {
+                    showDeleteConfirm = false
                     selectedEntryToEdit = null
                 }) { Text("Annuler") }
-            }
-        )
+            })
     }
 
     if (showQuickAddDialog) {
         var expandedSlots by remember { mutableStateOf(false) }
+        var assignment by remember { mutableStateOf<TeachingAssignmentDTO?>(null) }
         AlertDialog(
             onDismissRequest = { showQuickAddDialog = false },
             title = { Text("Planification rapide") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     ExposedDropdownMenuBox(
-                        expanded = expandedSlots,
-                        onExpandedChange = { expandedSlots = !expandedSlots }
-                    ) {
+                        expanded = expandedSlots, onExpandedChange = { expandedSlots = !expandedSlots }) {
                         OutlinedTextField(
-                            value = selectedQuickSlot?.let { "${it.dayOfWeek.name.take(3)} ${it.startDayHourTime}" } ?: "Choisir un créneau",
+                            value = selectedQuickSlot?.let { "${it.dayOfWeek.name.take(3)} ${it.startDayHourTime}" }
+                                ?: "Choisir un créneau",
                             onValueChange = {},
                             readOnly = true,
+                            shape = MaterialTheme.shapes.large,
                             label = { Text("Créneau horaire") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSlots) },
                             modifier = Modifier.fillMaxWidth().menuAnchor()
                         )
-                        ExposedDropdownMenu(expanded = expandedSlots, onDismissRequest = { expandedSlots = false }) {
-                            uiState.allLearningTimeConfigs.forEach { slot ->
-                                DropdownMenuItem(
-                                    text = { Text("${slot.dayOfWeek} : ${slot.startDayHourTime} - ${slot.endDayHourTime} (${slot.label})") },
-                                    onClick = {
-                                        selectedQuickSlot = slot
-                                        expandedSlots = false
+
+                        val expandedDropdownDays = remember { mutableStateMapOf<String, Boolean>() }
+
+                        ExposedDropdownMenu(
+                            expanded = expandedSlots, onDismissRequest = { expandedSlots = false }) {
+                            DayOfWeekNames.ENGLISH_FULL.names.forEach { dayName ->
+
+                                val configsForDay = uiState.allLearningTimeConfigs.filter {
+                                    it.dayOfWeek.name.equals(dayName, ignoreCase = true)
+                                }
+
+                                if (configsForDay.isNotEmpty()) {
+                                    val isDayExpanded = expandedDropdownDays[dayName] ?: false
+
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Text(
+                                                    text = dayName,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Icon(
+                                                    imageVector = if (isDayExpanded) AppIcons.arrowUp else AppIcons.arrowDown,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            expandedDropdownDays[dayName] = !isDayExpanded
+                                        },
+
+                                        )
+
+                                    if (isDayExpanded) {
+                                        configsForDay.forEach { slot ->
+                                            DropdownMenuItem(text = {
+                                                // Contenu stylisé pour le slot
+                                                Column(modifier = Modifier.padding(2.dp)) {
+                                                    Text(
+                                                        text = "${slot.startDayHourTime} - ${slot.endDayHourTime}",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+
+                                                    Text(
+                                                        text = slot.label,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+
+                                                }
+                                            }, onClick = {
+                                                selectedQuickSlot = slot
+                                                expandedSlots = false
+                                            })
+                                        }
                                     }
-                                )
+                                }
                             }
                         }
                     }
@@ -357,23 +408,19 @@ fun ScheduleScreen(
                     if (selectedQuickSlot != null) {
                         Text("Attribuer un cours :", style = MaterialTheme.typography.labelLarge)
                         LazyColumn(modifier = Modifier.heightIn(max = 250.dp)) {
-                            items(uiState.assignments) { assignment ->
+                            items(uiState.assignments) { it ->
                                 ListItem(
-                                    headlineContent = { Text(assignment.subjectName) },
-                                    supportingContent = { Text(assignment.teacherName) },
-                                    modifier = Modifier.clickable {
-                                        viewModel.createScheduleEntry(
-                                            ScheduleEntryDto(
-                                                id = null,
-                                                learningTimeConfigId = selectedQuickSlot!!.id!!,
-                                                teachingAssignmentId = assignment.id,
-                                                weekNumber = uiState.currentWeekNumber
-                                            )
-                                        )
-                                        showQuickAddDialog = false
-                                        selectedQuickSlot = null
-                                    }
-                                )
+
+                                    headlineContent = { Text(it.subjectName) },
+                                    supportingContent = { Text(it.teacherName) },
+                                    modifier = Modifier.border(
+                                        width = 1.dp,
+                                        color = if (assignment == it) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        shape = MaterialTheme.shapes.large
+                                    ).clip(MaterialTheme.shapes.large).clickable {
+                                        assignment = it
+                                    })
+                                Spacer(Modifier.height(4.dp))
                             }
                             if (uiState.assignments.isEmpty()) {
                                 item { Text("Aucune attribution disponible.") }
@@ -382,14 +429,28 @@ fun ScheduleScreen(
                     }
                 }
             },
-            confirmButton = {},
+            confirmButton = {
+                if (assignment != null && selectedQuickSlot != null) {
+                    Button(onClick = {
+                        viewModel.createScheduleEntry(
+                            ScheduleEntryDto(
+                                id = 2,
+                                learningTimeConfigId = selectedQuickSlot!!.id!!,
+                                teachingAssignmentId = assignment!!.id,
+                                weekNumber = uiState.currentWeekNumber
+                            )
+                        )
+                        showQuickAddDialog = false
+                        selectedQuickSlot = null
+                    }) { Text("Confirmer") }
+                }
+            },
             dismissButton = {
-                TextButton(onClick = { 
+                TextButton(onClick = {
                     showQuickAddDialog = false
                     selectedQuickSlot = null
                 }) { Text("Annuler") }
-            }
-        )
+            })
     }
 }
 
@@ -418,6 +479,7 @@ fun <T> StructureSelector(
             label = {
                 Text(label)
             },
+            shape = MaterialTheme.shapes.large,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(),
             enabled = !isLoading && enabled
@@ -555,13 +617,12 @@ fun ScheduleTable(
 
                         Box(
                             modifier = Modifier.weight(1f).fillMaxHeight().padding(2.dp).background(
-                                    MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.small
-                                ).clickable {
-                                    if (entriesForSlot.isEmpty()) {
-                                        onEmptySlotClick(day, startTime, endTime)
-                                    }
-                                },
-                            contentAlignment = Alignment.Center
+                                MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.small
+                            ).clickable {
+                                if (entriesForSlot.isEmpty()) {
+                                    onEmptySlotClick(day, startTime, endTime)
+                                }
+                            }, contentAlignment = Alignment.Center
                         ) {
                             if (entriesForSlot.isNotEmpty()) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

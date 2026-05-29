@@ -17,6 +17,8 @@ object AppIcons {
     val personAdd = Icons.Rounded.PersonAdd
     val school = Icons.Rounded.School
     val payments = Icons.Rounded.Payments
+    val arrowDown = Icons.Rounded.KeyboardArrowDown
+    val arrowUp = Icons.Rounded.KeyboardArrowUp
     val arrowFWD = Icons.AutoMirrored.Rounded.ArrowForward
     val checkMark = Icons.Rounded.Verified
     val edit = Icons.Rounded.Edit
@@ -27,4 +29,6 @@ object AppIcons {
     val refresh = Icons.Rounded.Refresh
     val email = Icons.Rounded.Email
     val phone = Icons.Rounded.Phone
+    val add = Icons.Rounded.Add
+    val cancel = Icons.Rounded.Clear
 }
