@@ -431,7 +431,6 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
                     fontWeight = FontWeight.Bold,
                 )
             }
-
             if (isSelected) {
                 Box(
                     modifier = Modifier
