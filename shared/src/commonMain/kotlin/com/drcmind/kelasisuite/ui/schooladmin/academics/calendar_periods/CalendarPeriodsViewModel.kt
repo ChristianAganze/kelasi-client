@@ -13,6 +13,10 @@ import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.first
+import kotlin.collections.map
 
 class CalendarPeriodsViewModel(
     private val schoolRepository: SchoolRepository
@@ -49,7 +53,6 @@ class CalendarPeriodsViewModel(
                     uiState.update { it.copy(academicYears = ressource.data ?: emptyList()) }
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -69,7 +72,6 @@ class CalendarPeriodsViewModel(
                     uiState.update { it.copy(majors = ressource.data ?: emptyList()) }
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -88,8 +90,6 @@ class CalendarPeriodsViewModel(
                 is Resource.Success<*> -> {
                     uiState.update { it.copy(schoolSections = ressource.data ?: emptyList()) }
                 }
-
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -99,6 +99,7 @@ class CalendarPeriodsViewModel(
             when (ressource) {
                 is Resource.Error<*> -> {
                     uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    print(ressource.message.toString())
                 }
 
                 is Resource.Loading<*> -> {
@@ -111,10 +112,10 @@ class CalendarPeriodsViewModel(
                             schoolSectionConfigs = ressource.data ?: emptyList(),
                             isLoading = false
                         )
-                    }
-                }
 
-                else -> {}
+                    }
+
+                }
             }
         }.launchIn(viewModelScope)
     }
@@ -134,7 +135,6 @@ class CalendarPeriodsViewModel(
                     loadSchoolSectionConfigs()
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -154,7 +154,6 @@ class CalendarPeriodsViewModel(
                     loadSchoolSectionConfigs()
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -173,8 +172,6 @@ class CalendarPeriodsViewModel(
                 is Resource.Success<*> -> {
                     loadSchoolSectionConfigs()
                 }
-
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -194,7 +191,6 @@ class CalendarPeriodsViewModel(
                     uiState.update { it.copy(evaluationPeriods = ressource.data ?: emptyList()) }
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -203,18 +199,37 @@ class CalendarPeriodsViewModel(
         schoolRepository.getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId).onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = true) }
                 }
 
                 is Resource.Success<*> -> {
-                    uiState.update { it.copy(learningTimeConfigs = ressource.data ?: emptyList()) }
+                    val results = ressource.data?.groupBy {
+                        listOf(
+                            it.label,
+                            it.startDayHourTime,
+                            it.endDayHourTime,
+                            it.schoolSectionConfigId
+                        )
+                    }
+                        ?.map { (_, values) ->
+
+                            val first = values.first()
+
+                            LearningTimeKey(
+                                label = first.label,
+                                startDayHourTime = first.startDayHourTime,
+                                endDayHourTime = first.endDayHourTime,
+                                schoolSectionConfigId = first.schoolSectionConfigId,
+                                daysWithIds = values.associate { it.dayOfWeek to it.id!! }
+                            )
+                        } ?: emptyList()
+                    uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = false,learningTimeConfigs = results) }
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -235,7 +250,6 @@ class CalendarPeriodsViewModel(
                     uiState.update { it.copy(isLoading = false, error = null) }
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -252,16 +266,38 @@ class CalendarPeriodsViewModel(
                 }
 
                 is Resource.Success<*> -> {
+
+                    val results = resource.data?.groupBy {
+                        listOf(
+                            it.label,
+                            it.startDayHourTime,
+                            it.endDayHourTime,
+                            it.schoolSectionConfigId
+                        )
+                    }
+                        ?.map { (_, values) ->
+
+                            val first = values.first()
+
+                            LearningTimeKey(
+                                label = first.label,
+                                startDayHourTime = first.startDayHourTime,
+                                endDayHourTime = first.endDayHourTime,
+                                schoolSectionConfigId = first.schoolSectionConfigId,
+                                daysWithIds = values.associate { it.dayOfWeek to it.id!! }
+                            )
+                        } ?: emptyList()
+
+
                     uiState.update {
                         it.copy(
-                            learningTimeConfigs = resource.data ?: emptyList(),
+                            learningTimeConfigs = results,
                             isLoading = false,
                             error = null
                         )
                     }
                 }
 
-                else -> {}
             }
         }.launchIn(viewModelScope)
     }
@@ -279,9 +315,31 @@ class CalendarPeriodsViewModel(
                     }
 
                     is Resource.Success<*> -> {
+
+                        val results = resource.data?.groupBy {
+                            listOf(
+                                it.label,
+                                it.startDayHourTime,
+                                it.endDayHourTime,
+                                it.schoolSectionConfigId
+                            )
+                        }
+                            ?.map { (_, values) ->
+
+                                val first = values.first()
+
+                                LearningTimeKey(
+                                    label = first.label,
+                                    startDayHourTime = first.startDayHourTime,
+                                    endDayHourTime = first.endDayHourTime,
+                                    schoolSectionConfigId = first.schoolSectionConfigId,
+                                    daysWithIds = values.associate { it.dayOfWeek to it.id!! }
+                                )
+                            } ?: emptyList()
+
                         uiState.update {
                             it.copy(
-                                learningTimeConfigs = resource.data ?: emptyList(),
+                                learningTimeConfigs = results,
                                 isLoading = false,
                                 error = null
                             )
@@ -349,7 +407,7 @@ class CalendarPeriodsViewModel(
         viewModelScope.launch {
             // Find the schoolSectionConfigId before deletion to reload correctly
             val schoolSectionConfigIdToReload =
-                uiState.value.learningTimeConfigs.firstOrNull { it.id == id }?.schoolSectionConfigId
+                uiState.value.learningTimeConfigs.firstOrNull { it.daysWithIds.values.contains(id) }?.schoolSectionConfigId
 
             schoolRepository.deleteLearningTimeConfig(id).onEach { resource ->
                 when (resource) {
@@ -383,7 +441,16 @@ data class CalendarPeriodsUiState(
     val schoolSections: List<SchoolSectionDTO> = emptyList(),
     val schoolSectionConfigs: List<SchoolSectionConfigDto> = emptyList(),
     val evaluationPeriods: List<EvaluationPeriodBySchoolDTO> = emptyList(),
-    val learningTimeConfigs: List<LearningTimeConfigDto> = emptyList(),
+    val learningTimeConfigs: List<LearningTimeKey> = emptyList(),
     val isLoading: Boolean = false,
+    val isLoadingSchoolSectionConfigDetails: Boolean = false,
     val error: String? = null,
+)
+
+data class LearningTimeKey(
+    val label: String,
+    val startDayHourTime: String,
+    val endDayHourTime: String,
+    val schoolSectionConfigId: Long,
+    val daysWithIds: Map<DayOfWeek, Long>
 )

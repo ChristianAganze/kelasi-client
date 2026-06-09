@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.data.repository.schools
 
 import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
@@ -12,7 +13,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.DayOfWeek
@@ -58,8 +59,8 @@ interface SchoolRepository {
     fun deleteLearningTimeConfig(id: Long): Flow<Resource<Unit>>
 
     // ScheduleEntry Endpoints
-    fun createScheduleEntry(entryDto: ScheduleEntryDto): Flow<Resource<ScheduleEntryDto>>
-    fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto): Flow<Resource<ScheduleEntryDto>>
+    fun createScheduleEntry(entryDto: CreateScheduleEntryDto): Flow<Resource<ScheduleEntryDto>>
+    fun updateScheduleEntry(id: Long, entryDto: CreateScheduleEntryDto): Flow<Resource<ScheduleEntryDto>>
     fun deleteScheduleEntry(id: Long): Flow<Resource<Unit>>
     fun getScheduleEntriesByWeekNumber(weekNumber: Int): Flow<Resource<List<ScheduleEntryDto>>>
     fun getScheduleEntriesByLearningTimeConfigDayOfWeekAndWeekNumber(

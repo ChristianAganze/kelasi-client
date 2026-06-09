@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.drcmind.kelasisuite.domain.util.dateFormatterOnlyDay
+import com.drcmind.kelasisuite.domain.util.toFrench
 import com.drcmind.kelasisuite.ui.schooladmin.component.SectionCard
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.component.TeacherHeaderSection
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.component.TeacherProfileTopBar
@@ -33,7 +35,6 @@ import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.now
 import com.kizitonwose.calendar.core.plusDays
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.format.Padding
 import org.koin.compose.viewmodel.koinViewModel
 
 data class TeacherProfileUiState(
@@ -400,11 +401,7 @@ private fun RecentActivitiesSection(
     }
 }
 
-private val dateFormatter by lazy {
-    LocalDate.Format {
-        day(padding = Padding.ZERO)
-    }
-}
+
 
 @Composable
 private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Unit) {
@@ -422,13 +419,13 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    text = dayOfWeekInFrench(date.dayOfWeek.ordinal),
+                    text = date.dayOfWeek.toFrench(),
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.Light,
                 )
                 Text(
-                    text = dateFormatter.format(date),
+                    text = dateFormatterOnlyDay.format(date),
                     fontSize = 14.sp,
                     color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold,
@@ -461,15 +458,3 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
 
 }
 
-fun dayOfWeekInFrench(numberOfDay : Int): String {
-    return when (numberOfDay) {
-        0 -> "Ln"
-        1 -> "Mar"
-        2 -> "Mer"
-        3 -> "Jeu"
-        4 -> "Ven"
-        5 -> "Sam"
-        6 -> "Dim"
-        else -> "Unknow"
-    }
-}

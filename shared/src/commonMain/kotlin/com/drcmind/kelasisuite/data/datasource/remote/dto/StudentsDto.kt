@@ -142,16 +142,34 @@ data class LearningTimeConfigDto(
 )
 
 @Serializable
-data class ScheduleEntryDto(
+data class CreateScheduleEntryDto(
     val id: Long?,
     val learningTimeConfigId: Long,
     val teachingAssignmentId: Long,
     val weekNumber: Int
 )
+
+@Serializable
+data class ScheduleEntryDto(
+    val id: Long?,
+    val learningTimeConfigId: Long,
+    val learningTimeConfiglabel: String,
+    val startDayHourTime: LocalTime,
+    val endDayHourTime: LocalTime,
+    val dayOfWeek: DayOfWeek,
+    val teachingAssignmentId: Long,
+    val schoolClassName : String,
+    val subjectName : String,
+    val teacherName : String,
+    val academicYearLabel : String,
+    val weekNumber: Int
+)
+
 @Serializable
 data class SchoolSectionConfigDto(
     val id: Long?,
     val dayStartTime: LocalTime,
     val dayEndTime: LocalTime,
-    val schoolSectionId: Long
+    val schoolSectionId: Long,
+    val schoolSectionName: String,
 )

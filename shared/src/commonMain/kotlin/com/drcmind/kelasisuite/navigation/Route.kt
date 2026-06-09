@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Architecture
-import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
@@ -31,6 +30,7 @@ import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 
 
@@ -114,10 +114,26 @@ sealed interface Route : NavKey {
             @Serializable
             data object CalendarPeriod : Route {
                 @Serializable
-                data object Main : Route
+                data object AcademicPeriod : Route
 
                 @Serializable
-                data object Supporting : Route
+                data object LearningTime : Route{
+                    @Serializable
+                    data object SchoolSectionConfig : Route
+                    @Serializable
+                    data class SchoolSectionConfigDetails(val id: Long?, val name: String, val startHour: LocalTime, val endHour: LocalTime) : Route
+                }
+
+                enum class TabDestination(
+                    val route: Route,
+                    val label: String,
+                    val icon: ImageVector,
+                    val contentDescription: String
+                ) {
+                    CALENDAR_PERIOD(AcademicPeriod, "Périodes d'évaluation & calendrier", Icons.AutoMirrored.Filled.Assignment, "clendar"),
+                    LEARNING_TIME(LearningTime, "Configuration des crénaux horraires", Icons.Default.School, "Crénaux"),
+                }
+
             }
 
             @Serializable

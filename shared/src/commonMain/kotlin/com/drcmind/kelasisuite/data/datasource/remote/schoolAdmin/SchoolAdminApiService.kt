@@ -3,6 +3,7 @@ package com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin
 import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateParentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
@@ -26,9 +27,9 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.UpdateEnrollmentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.UserDTO
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentRequest
-import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TemplateSubjectDTO
 import kotlinx.datetime.DayOfWeek
 
 interface SchoolAdminApiService {
@@ -116,8 +117,8 @@ interface SchoolAdminApiService {
     suspend fun deleteLearningTimeConfig(id: Long)
 
     // ScheduleEntry Endpoints
-    suspend fun createScheduleEntry(entryDto: ScheduleEntryDto): ScheduleEntryDto
-    suspend fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto): ScheduleEntryDto
+    suspend fun createScheduleEntry(entryDto: CreateScheduleEntryDto): ScheduleEntryDto
+    suspend fun updateScheduleEntry(id: Long, entryDto: CreateScheduleEntryDto): ScheduleEntryDto
     suspend fun deleteScheduleEntry(id: Long)
     suspend fun getScheduleEntriesByWeekNumber(weekNumber: Int): List<ScheduleEntryDto>
     suspend fun getScheduleEntriesByLearningTimeConfigDayOfWeekAndWeekNumber(

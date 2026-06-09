@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.NoFood
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.SearchBarDefaults.InputField
@@ -33,9 +34,10 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.components.EmptyDetailPlaceholder
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teachers.AddTeacherDialog
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -94,7 +96,15 @@ fun TeachingAssignmentScreen(
         sceneStrategies = listOf(listDetailsStrateggy, dialogStrategy),
         entryProvider = entryProvider {
             entry<Route.SchoolAdmin.Pedagogy.TeacherAssignments.TeachingAssignment.List>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.listPane(
+                    detailPlaceholder = {
+                        EmptyDetailPlaceholder(
+                            icon = Icons.Filled.NoFood,
+                            title = "Aucune affectation sélectionnée",
+                            subtitle = "Sélectionner une affectation",
+                        )
+                    }
+                )
             ) {
                 Scaffold(
                     topBar = {

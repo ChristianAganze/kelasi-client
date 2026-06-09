@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.NoFood
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.SearchBarDefaults.InputField
@@ -34,6 +35,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentDto
 import com.drcmind.kelasisuite.domain.util.toDdMmYyyyWithTime
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.components.EmptyDetailPlaceholder
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
@@ -73,7 +75,7 @@ fun EnrollmentScreen(
     }
     val listDetailsStrateggy = rememberListDetailSceneStrategy<NavKey>(
         backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
-        directive = directive
+        directive = directive,
     )
 
     NavDisplay(
@@ -83,7 +85,15 @@ fun EnrollmentScreen(
         sceneStrategies = listOf(listDetailsStrateggy),
         entryProvider = entryProvider {
             entry<Route.SchoolAdmin.Academics.StudentEnrollment.Enrollment.List>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.listPane(
+                    detailPlaceholder = {
+                        EmptyDetailPlaceholder(
+                            icon = Icons.Filled.NoFood,
+                            title = "Aucune inscription selectionnée",
+                            subtitle = "Sélectionner une inscription",
+                        )
+                    }
+                )
             ) {
                 Scaffold(
                     topBar = {

@@ -4,6 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -31,6 +32,7 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.*
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.components.EmptyDetailPlaceholder
 import com.drcmind.kelasisuite.ui.schooladmin.component.CircularProfile
 import com.drcmind.kelasisuite.ui.schooladmin.component.SectionCard
 import kotlinx.serialization.modules.SerializersModule
@@ -87,7 +89,15 @@ fun ParentsScreen(
         sceneStrategies = listOf(listDetailsStrateggy),
         entryProvider = entryProvider {
             entry<Route.SchoolAdmin.Parents.List>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.listPane(
+                    detailPlaceholder = {
+                        EmptyDetailPlaceholder(
+                            icon = Icons.Filled.NoFood,
+                            title = "Aucun parent selectionné",
+                            subtitle = "Sélectionner un parent",
+                        )
+                    }
+                )
             ) {
                 Scaffold(
                     containerColor = Color.Transparent,
@@ -207,7 +217,8 @@ fun ParentTable(
     viewModel: ParentsViewModel, onEditParent: (ParentDto) -> Unit,
 ) {
     OutlinedCard(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth().fillMaxHeight(),
+        shape = MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
     ) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),

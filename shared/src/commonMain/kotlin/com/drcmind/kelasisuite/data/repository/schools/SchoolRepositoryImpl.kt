@@ -3,7 +3,7 @@ package com.drcmind.kelasisuite.data.repository.schools
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.remote.dto.*
 import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -340,7 +340,7 @@ class SchoolRepositoryImpl(
     }
 
     // ScheduleEntry Endpoints
-    override fun createScheduleEntry(entryDto: ScheduleEntryDto): Flow<Resource<ScheduleEntryDto>> {
+    override fun createScheduleEntry(entryDto: CreateScheduleEntryDto): Flow<Resource<ScheduleEntryDto>> {
         return flow {
             emit(Resource.Loading())
             val response = apiService.createScheduleEntry(entryDto)
@@ -350,7 +350,7 @@ class SchoolRepositoryImpl(
         }
     }
 
-    override fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto): Flow<Resource<ScheduleEntryDto>> {
+    override fun updateScheduleEntry(id: Long, entryDto: CreateScheduleEntryDto): Flow<Resource<ScheduleEntryDto>> {
         return flow {
             emit(Resource.Loading())
             val response = apiService.updateScheduleEntry(id, entryDto)

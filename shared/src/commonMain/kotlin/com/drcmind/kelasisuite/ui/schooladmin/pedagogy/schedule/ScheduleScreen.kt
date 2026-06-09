@@ -1,21 +1,13 @@
 package com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,15 +18,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
-import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
-import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
-import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.domain.util.dateFormatterOnlyDay
+import com.drcmind.kelasisuite.domain.util.toFrench
 import com.drcmind.kelasisuite.ui.components.AppIcons
-import org.koin.compose.viewmodel.koinViewModel
-import kotlinx.datetime.DayOfWeek
+import com.kizitonwose.calendar.compose.WeekCalendar
+import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
+import com.kizitonwose.calendar.core.minusDays
+import com.kizitonwose.calendar.core.now
+import com.kizitonwose.calendar.core.plusDays
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format.DayOfWeekNames
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -49,6 +47,8 @@ fun ScheduleScreen(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showEntryOptionsDialog by remember { mutableStateOf(false) }
     var showQuickAddDialog by remember { mutableStateOf(false) }
+    var showDeleteWeekConfirm by remember { mutableStateOf(false) }
+    var showDuplicateWeekDialog by remember { mutableStateOf(false) }
     var selectedQuickSlot by remember { mutableStateOf<LearningTimeConfigDto?>(null) }
 
     Scaffold(
@@ -69,25 +69,32 @@ fun ScheduleScreen(
                         )
                     }
                 }, actions = {
-                    if (uiState.selectedClass != null && uiState.allLearningTimeConfigs.isNotEmpty()) {
-                        Button(
-                            onClick = {
-                                selectedEntryToEdit = null
-                                showQuickAddDialog = true
-                            },
-                        ) {
-                            Icon(AppIcons.add, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Planifier")
-                        }
-
+                    var expanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = {
+                        expanded = true
+                    }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
                     }
-                    if (uiState.selectedClass != null) {
-                        IconButton(onClick = {
-                            viewModel.clearWeek(uiState.selectedClass!!.id, uiState.currentWeekNumber)
-                        }) {
-                            Icon(Icons.Default.DeleteSweep, contentDescription = "Vider la semaine")
-                        }
+
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Dupliquer la semaine") },
+                            onClick = {
+                                expanded = false
+                                showDuplicateWeekDialog = true
+                            },
+                            leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
+                            enabled = uiState.selectedClass != null
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Supprimer la semaine") },
+                            onClick = {
+                                expanded = false
+                                showDeleteWeekConfirm = true
+                            },
+                            leadingIcon = { Icon(Icons.Default.DeleteSweep, contentDescription = null) },
+                            enabled = uiState.selectedClass != null
+                        )
                     }
                 }, colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
@@ -98,72 +105,67 @@ fun ScheduleScreen(
             modifier = Modifier.padding(paddingValues).padding(horizontal = 32.dp).fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // School Section Selector
-                StructureSelector(
-                    label = "Cycle",
-                    items = uiState.schoolSections,
-                    selectedItem = uiState.selectedSchoolSection,
-                    onItemSelected = viewModel::selectSchoolSection,
-                    itemDisplayName = { it.name },
-                    isLoading = uiState.isLoadingSchoolSections
+            OutlinedCard {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)
                 )
+                {
+                    // School Section Selector
 
-                // Section Selector
-                StructureSelector(
-                    label = "Section",
-                    items = uiState.sections,
-                    selectedItem = uiState.selectedSection,
-                    onItemSelected = viewModel::selectSection,
-                    itemDisplayName = { it.name },
-                    isLoading = uiState.isLoadingSections,
-                    enabled = uiState.selectedSchoolSection != null
-                )
+                    StructureSelector(
+                        label = "Cycle",
+                        items = uiState.schoolSections,
+                        selectedItem = uiState.selectedSchoolSection,
+                        onItemSelected = viewModel::selectSchoolSection,
+                        itemDisplayName = { it.name },
+                        isLoading = uiState.isLoadingSchoolSections,
+                    )
 
-                // Major Selector
-                StructureSelector(
-                    label = "Major",
-                    items = uiState.majors,
-                    selectedItem = uiState.selectedMajor,
-                    onItemSelected = viewModel::selectMajor,
-                    itemDisplayName = { it.name },
-                    isLoading = uiState.isLoadingMajors,
-                    enabled = uiState.selectedSection != null
-                )
+                    // Section Selector
+                    StructureSelector(
+                        label = "Section",
+                        items = uiState.sections,
+                        selectedItem = uiState.selectedSection,
+                        onItemSelected = viewModel::selectSection,
+                        itemDisplayName = { it.name },
+                        isLoading = uiState.isLoadingSections,
+                        enabled = uiState.selectedSchoolSection != null
+                    )
 
-                // Grade Level Selector
-                StructureSelector(
-                    label = "Grade Level",
-                    items = uiState.gradeLevels,
-                    selectedItem = uiState.selectedGradeLevel,
-                    onItemSelected = viewModel::selectGradeLevel,
-                    itemDisplayName = { it.name },
-                    isLoading = uiState.isLoadingGradeLevels,
-                    enabled = uiState.selectedMajor != null
-                )
+                    // Major Selector
+                    StructureSelector(
+                        label = "Option",
+                        items = uiState.majors,
+                        selectedItem = uiState.selectedMajor,
+                        onItemSelected = viewModel::selectMajor,
+                        itemDisplayName = { it.name },
+                        isLoading = uiState.isLoadingMajors,
+                        enabled = uiState.selectedSection != null
+                    )
 
-                // Class Selector
-                StructureSelector(
-                    label = "Class",
-                    items = uiState.classes,
-                    selectedItem = uiState.selectedClass,
-                    onItemSelected = viewModel::selectClass,
-                    itemDisplayName = { it.name },
-                    isLoading = uiState.isLoadingClasses,
-                    enabled = uiState.selectedGradeLevel != null
-                )
+                    // Grade Level Selector
+                    StructureSelector(
+                        label = "Niveau",
+                        items = uiState.gradeLevels,
+                        selectedItem = uiState.selectedGradeLevel,
+                        onItemSelected = viewModel::selectGradeLevel,
+                        itemDisplayName = { it.name },
+                        isLoading = uiState.isLoadingGradeLevels,
+                        enabled = uiState.selectedMajor != null
+                    )
 
-                // Week Navigation
-                WeekNavigator(
-                    currentWeekNumber = uiState.currentWeekNumber,
-                    onPreviousWeek = viewModel::goToPreviousWeek,
-                    onNextWeek = viewModel::goToNextWeek,
-                    isLoading = uiState.isLoadingSchedule
-                )
+                    // Class Selector
+                    StructureSelector(
+                        label = "Classe",
+                        items = uiState.classes,
+                        selectedItem = uiState.selectedClass,
+                        onItemSelected = viewModel::selectClass,
+                        itemDisplayName = { it.name },
+                        isLoading = uiState.isLoadingClasses,
+                        enabled = uiState.selectedGradeLevel != null
+                    )
+                }
             }
-
             // Schedule Display
             if (uiState.isLoadingClasses || uiState.isLoadingSchedule) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -189,29 +191,142 @@ fun ScheduleScreen(
                     color = MaterialTheme.colorScheme.error
                 )
             } else if (!uiState.isLoadingSchedule && uiState.error == null) {
-                ScheduleTable(
-                    learningTimeConfigs = uiState.allLearningTimeConfigs,
-                    scheduleEntries = uiState.schedule,
-                    onEntryClick = { entry ->
-                        selectedEntryToEdit = entry
-                        showEntryOptionsDialog = true
-                    },
-                    onEmptySlotClick = { day, start, end ->
-                        val config =
-                            uiState.allLearningTimeConfigs.find { it.dayOfWeek == day && it.startDayHourTime == start && it.endDayHourTime == end }
-                        selectedSlotConfigId = config?.id
-                        selectedEntryToEdit = null
-                        showAssignDialog = true
-                    })
+                val currentDate = remember { LocalDate.now() }
+                val startDate = remember { currentDate.minusDays(500) }
+                val endDate = remember { currentDate.plusDays(500) }
+                var selection by remember { mutableStateOf(currentDate) }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme .background),
+                ) {
+                    val state = rememberWeekCalendarState(
+                        startDate = startDate,
+                        endDate = endDate,
+                        firstVisibleWeekDate = currentDate,
+                    )
+
+                    LaunchedEffect(uiState.currentWeekNumber) {
+                        val daysToAdd = (uiState.currentWeekNumber - (currentDate.dayOfYear / 7 + 1)) * 7
+                        val targetDate = currentDate.plusDays(daysToAdd)
+                        state.animateScrollToWeek(targetDate)
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { viewModel.goToPreviousWeek() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Semaine précédente")
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Semaine ${uiState.currentWeekNumber}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            val firstDate = state.firstVisibleWeek.days.first().date
+                            val lastDate = state.firstVisibleWeek.days.last().date
+                            val monthText = if (firstDate.month == lastDate.month) {
+                                firstDate.month.toFrench()
+                            } else {
+                                "${firstDate.month.toFrench()} - ${lastDate.month.toFrench()}"
+                            }
+                            Text(
+                                text = monthText,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        IconButton(onClick = { viewModel.goToNextWeek() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Semaine suivante")
+                        }
+                    }
+
+                    Row {
+                        Column(modifier = Modifier.width(88.dp)) {
+                            Box(
+                                modifier = Modifier.height(59.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Crénaux",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Light,
+                                )
+                            }
+                            HorizontalDivider()
+                            uiState.allLearningTimeConfigs.distinctBy { it.label }.forEach {
+                                ListItem(
+                                    modifier = Modifier.height(80.dp),
+                                    headlineContent = {
+                                        Column {
+                                            Text(it.label, fontSize = 9.sp)
+                                            Text("${it.startDayHourTime} - ${it.endDayHourTime}", fontSize = 9.sp)
+                                        }
+                                    }
+                                )
+                                HorizontalDivider()
+                            }
+                        }
+                        WeekCalendar(
+                            modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                            state = state,
+                            dayContent = { day ->
+                                val dailyEntries = uiState.schedule.filter { it.scheduleEntry.dayOfWeek == day.date.dayOfWeek }
+
+                                Day(
+                                    date = day.date,
+                                    isSelected = selection == day.date,
+                                    dailyEntries = dailyEntries,
+                                    learningTimeConfigs = uiState.allLearningTimeConfigs,
+                                    onSlotClick = { configId ->
+                                        selectedSlotConfigId = configId
+                                        showAssignDialog = true
+                                    },
+                                    onEntryClick = { entry ->
+                                        selectedEntryToEdit = entry
+                                        showEntryOptionsDialog = true
+                                    }
+                                ) { clicked ->
+                                    if (selection != clicked) {
+                                        selection = clicked
+                                    }
+                                }
+                            },
+                        )
+                    }
+                }
+
+
             }
         }
     }
 
     // Dialog to choose between Edit and Delete
     if (showEntryOptionsDialog && selectedEntryToEdit != null) {
+        val selectedSlot = selectedEntryToEdit?.learningTimeConfig
         AlertDialog(
             onDismissRequest = { showEntryOptionsDialog = false },
-            title = { Text("Options du cours") },
+            title = {
+                Column {
+                    Text("Options du cours")
+                    selectedSlot?.let { slot ->
+                        Text(
+                            text = "Semaine ${uiState.currentWeekNumber} - ${slot.dayOfWeek.toFrench()}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${slot.label} : ${slot.startDayHourTime} - ${slot.endDayHourTime}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            },
             text = {
                 Column {
                     Text("Cours: ${selectedEntryToEdit?.teachingAssignment?.subjectName ?: "Inconnu"}")
@@ -250,9 +365,26 @@ fun ScheduleScreen(
     }
 
     if (showAssignDialog && selectedSlotConfigId != null) {
+        val selectedSlot = uiState.allLearningTimeConfigs.find { it.id == selectedSlotConfigId }
         AlertDialog(
             onDismissRequest = { showAssignDialog = false },
-            title = { Text(if (selectedEntryToEdit == null) "Attribuer un cours" else "Modifier l'attribution") },
+            title = {
+                Column {
+                    Text(if (selectedEntryToEdit == null) "Attribuer un cours" else "Modifier l'attribution")
+                    selectedSlot?.let { slot ->
+                        Text(
+                            text = "Semaine ${uiState.currentWeekNumber} - ${slot.dayOfWeek.toFrench()}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${slot.label} : ${slot.startDayHourTime} - ${slot.endDayHourTime}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            },
             text = {
                 LazyColumn {
                     items(uiState.assignments) { assignment ->
@@ -262,7 +394,7 @@ fun ScheduleScreen(
                             modifier = Modifier.clickable {
                                 if (selectedEntryToEdit == null) {
                                     viewModel.createScheduleEntry(
-                                        ScheduleEntryDto(
+                                        CreateScheduleEntryDto(
                                             id = null,
                                             learningTimeConfigId = selectedSlotConfigId!!,
                                             teachingAssignmentId = assignment.id,
@@ -271,7 +403,7 @@ fun ScheduleScreen(
                                     )
                                 } else {
                                     viewModel.updateScheduleEntry(
-                                        selectedEntryToEdit!!.scheduleEntry.id!!, ScheduleEntryDto(
+                                        selectedEntryToEdit!!.scheduleEntry.id!!, CreateScheduleEntryDto(
                                             id = selectedEntryToEdit!!.scheduleEntry.id,
                                             learningTimeConfigId = selectedSlotConfigId!!,
                                             teachingAssignmentId = assignment.id,
@@ -322,7 +454,23 @@ fun ScheduleScreen(
         var assignment by remember { mutableStateOf<TeachingAssignmentDTO?>(null) }
         AlertDialog(
             onDismissRequest = { showQuickAddDialog = false },
-            title = { Text("Planification rapide") },
+            title = {
+                Column {
+                    Text("Planification rapide")
+                    selectedQuickSlot?.let { slot ->
+                        Text(
+                            text = "Semaine ${uiState.currentWeekNumber} - ${slot.dayOfWeek.toFrench()}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${slot.label} : ${slot.startDayHourTime} - ${slot.endDayHourTime}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     ExposedDropdownMenuBox(
@@ -335,7 +483,7 @@ fun ScheduleScreen(
                             shape = MaterialTheme.shapes.large,
                             label = { Text("Créneau horaire") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSlots) },
-                            modifier = Modifier.fillMaxWidth().menuAnchor()
+                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
 
                         val expandedDropdownDays = remember { mutableStateMapOf<String, Boolean>() }
@@ -433,7 +581,7 @@ fun ScheduleScreen(
                 if (assignment != null && selectedQuickSlot != null) {
                     Button(onClick = {
                         viewModel.createScheduleEntry(
-                            ScheduleEntryDto(
+                            CreateScheduleEntryDto(
                                 id = 2,
                                 learningTimeConfigId = selectedQuickSlot!!.id!!,
                                 teachingAssignmentId = assignment!!.id,
@@ -452,6 +600,72 @@ fun ScheduleScreen(
                 }) { Text("Annuler") }
             })
     }
+
+    if (showDeleteWeekConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteWeekConfirm = false },
+            title = { Text("Supprimer la semaine ${uiState.currentWeekNumber} ?") },
+            text = { Text("Voulez-vous supprimer toutes les entrées de l'emploi du temps pour cette semaine ? Cette action est irréversible.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    uiState.selectedClass?.id?.let { classId ->
+                        viewModel.clearWeek(classId, uiState.currentWeekNumber)
+                    }
+                    showDeleteWeekConfirm = false
+                }) { Text("Supprimer", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteWeekConfirm = false }) { Text("Annuler") }
+            })
+    }
+
+    if (showDuplicateWeekDialog) {
+        var selectedWeeks by remember { mutableStateOf(setOf<Int>()) }
+        AlertDialog(
+            onDismissRequest = { showDuplicateWeekDialog = false },
+            title = { Text("Dupliquer la semaine ${uiState.currentWeekNumber}") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Vers quelles semaines voulez-vous copier ce planning ?")
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp).verticalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        (1..52).forEach { week ->
+                            FilterChip(
+                                selected = selectedWeeks.contains(week),
+                                onClick = {
+                                    selectedWeeks = if (selectedWeeks.contains(week)) {
+                                        selectedWeeks - week
+                                    } else {
+                                        selectedWeeks + week
+                                    }
+                                },
+                                label = { Text("S$week") }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        uiState.selectedClass?.id?.let { classId ->
+                            viewModel.duplicateWeek(
+                                sourceWeek = uiState.currentWeekNumber,
+                                classId = classId,
+                                targetWeeks = selectedWeeks.toList()
+                            )
+                        }
+                        showDuplicateWeekDialog = false
+                    },
+                    enabled = selectedWeeks.isNotEmpty()
+                ) { Text("Dupliquer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDuplicateWeekDialog = false }) { Text("Annuler") }
+            })
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -468,179 +682,52 @@ fun <T> StructureSelector(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { if (enabled) expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            value = selectedItem?.let(itemDisplayName) ?: "Sélectionner un $label",
-            onValueChange = {},
-            readOnly = true,
-            label = {
-                Text(label)
-            },
-            shape = MaterialTheme.shapes.large,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor(),
-            enabled = !isLoading && enabled
-        )
-        ExposedDropdownMenu(
-            expanded = expanded, onDismissRequest = { expanded = false }) {
-            if (isLoading) {
-                DropdownMenuItem(
-                    text = { Text("Chargement des $label...") },
-                    onClick = { /* Do nothing */ },
-                    enabled = false
-                )
-            } else if (items.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("Aucun $label disponible") },
-                    onClick = { /* Do nothing */ },
-                    enabled = false
-                )
-            } else {
-                items.forEach { item ->
-                    DropdownMenuItem(text = { Text(itemDisplayName(item)) }, onClick = {
-                        onItemSelected(item)
-                        expanded = false
-                    })
-                }
-            }
-        }
-    }
-}
+    Column {
+        Text(label, style = MaterialTheme.typography.labelSmall)
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { if (enabled) expanded = !expanded },
+            modifier = modifier,
+        ) {
+            AssistChip(
+                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+                label = {Text(selectedItem?.let(itemDisplayName) ?: "Sélectionner un $label")},
+                onClick = {},
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                enabled = !isLoading && enabled
+            )
 
-@Composable
-fun WeekNavigator(
-    currentWeekNumber: Int,
-    onPreviousWeek: () -> Unit,
-    onNextWeek: () -> Unit,
-    isLoading: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onPreviousWeek, enabled = !isLoading) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Semaine précédente")
-        }
-        Text(
-            text = "Semaine $currentWeekNumber",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-        IconButton(onClick = onNextWeek, enabled = !isLoading) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Semaine suivante")
-        }
-    }
-}
 
-@Composable
-fun ScheduleTable(
-    learningTimeConfigs: List<LearningTimeConfigDto>,
-    scheduleEntries: List<DetailedScheduleEntry>,
-    onEntryClick: (DetailedScheduleEntry) -> Unit,
-    onEmptySlotClick: (DayOfWeek, String, String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val daysOfWeek = DayOfWeek.entries // MONDAY to SUNDAY
-
-    // Sort learningTimeConfigs by start time
-    val sortedLearningTimeConfigs = remember(learningTimeConfigs) {
-        learningTimeConfigs.sortedWith(compareBy({ it.dayOfWeek }, { it.startDayHourTime }))
-    }
-
-    // Extract unique time slots across all days
-    val uniqueTimeSlots = remember(sortedLearningTimeConfigs) {
-        sortedLearningTimeConfigs.map { it.startDayHourTime to it.endDayHourTime }.distinct().sortedBy { it.first }
-    }
-
-    if (uniqueTimeSlots.isEmpty()) {
-        Text("Aucun créneau horaire configuré pour ce cycle.", modifier = Modifier.padding(16.dp))
-        return
-    }
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            Row(
-                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                // Empty corner for time slot header
-                Spacer(modifier = Modifier.width(100.dp).padding(vertical = 12.dp))
-                daysOfWeek.forEach { day ->
-                    Text(
-                        day.name.take(3), // Mon, Tue, etc.
-                        modifier = Modifier.weight(1f).padding(vertical = 12.dp),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.outline
+            ExposedDropdownMenu(
+                matchAnchorWidth = true,
+                expanded = expanded, onDismissRequest = { expanded = false }) {
+                if (isLoading) {
+                    DropdownMenuItem(
+                        text = { Text("Chargement des $label...") },
+                        onClick = { /* Do nothing */ },
+                        enabled = false
                     )
-                }
-            }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-
-            uniqueTimeSlots.forEachIndexed { slotIndex, (startTime, endTime) ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Time Slot Label
-                    Column(
-                        modifier = Modifier.width(100.dp).padding(horizontal = 8.dp),
-                        horizontalAlignment = Alignment.End
-                    ) {
-                        Text(
-                            text = startTime.substringBeforeLast(":"), // HH:mm
-                            style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = endTime.substringBeforeLast(":"), // HH:mm
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    VerticalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 1.dp
+                } else if (items.isEmpty()) {
+                    DropdownMenuItem(
+                        text = { Text("Aucun $label disponible") },
+                        onClick = { /* Do nothing */ },
+                        enabled = false
                     )
-
-                    daysOfWeek.forEach { day ->
-                        val entriesForSlot = scheduleEntries.filter { detailedEntry ->
-                            detailedEntry.learningTimeConfig?.dayOfWeek == day && detailedEntry.learningTimeConfig.startDayHourTime == startTime && detailedEntry.learningTimeConfig.endDayHourTime == endTime
-                        }
-
-                        Box(
-                            modifier = Modifier.weight(1f).fillMaxHeight().padding(2.dp).background(
-                                MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.small
-                            ).clickable {
-                                if (entriesForSlot.isEmpty()) {
-                                    onEmptySlotClick(day, startTime, endTime)
-                                }
-                            }, contentAlignment = Alignment.Center
-                        ) {
-                            if (entriesForSlot.isNotEmpty()) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    entriesForSlot.forEach { entry ->
-                                        ScheduleEntryCell(entry = entry, onClick = { onEntryClick(entry) })
-                                    }
-                                }
-                            }
-                        }
-                        VerticalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 1.dp
-                        )
+                } else {
+                    items.forEach { item ->
+                        DropdownMenuItem(text = { Text(itemDisplayName(item)) }, onClick = {
+                            onItemSelected(item)
+                            expanded = false
+                        })
                     }
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             }
         }
     }
+
+
 }
 
 @Composable
@@ -651,24 +738,119 @@ fun ScheduleEntryCell(entry: DetailedScheduleEntry, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(4.dp), 
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = entry.teachingAssignment?.subjectName ?: "Matière inconnue",
+                text = entry.teachingAssignment?.subjectName ?: entry.scheduleEntry.subjectName,
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
             )
-            entry.teachingAssignment?.teacherName?.let {
+            val teacherName = entry.teachingAssignment?.teacherName ?: entry.scheduleEntry.teacherName
+            if (teacherName.isNotBlank()) {
                 Text(
-                    text = it,
+                    text = teacherName,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Day(
+    date: LocalDate,
+    isSelected: Boolean,
+    dailyEntries: List<DetailedScheduleEntry>,
+    learningTimeConfigs: List<LearningTimeConfigDto>,
+    onSlotClick: (Long) -> Unit,
+    onEntryClick: (DetailedScheduleEntry) -> Unit,
+    onClick: (LocalDate) -> Unit
+) {
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .clickable { onClick(date) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                modifier = Modifier.padding(vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = date.dayOfWeek.toFrench().take(2),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontWeight = FontWeight.Light,
+                )
+                Text(
+                    text = dateFormatterOnlyDay.format(date),
+                    fontSize = 14.sp,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .background(MaterialTheme.colorScheme.onPrimaryContainer)
+                        .align(Alignment.BottomCenter),
+                )
+
+            }
+            HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
+
+        }
+        learningTimeConfigs.distinctBy { it.label }.forEach { slotLabel ->
+            val actualConfig = learningTimeConfigs.find { it.label == slotLabel.label && it.dayOfWeek == date.dayOfWeek }
+            val entry = dailyEntries.find { it.scheduleEntry.learningTimeConfigId == actualConfig?.id }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.05f) else Color.Transparent)
+                    .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            ) {
+                if (entry != null) {
+                    ScheduleEntryCell(entry = entry) {
+                        onEntryClick(entry)
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { actualConfig?.id?.let { onSlotClick(it) } },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        )
+                        Text(
+                            text = "Ajouter",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 8.sp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        )
+                    }
+                }
             }
         }
     }

@@ -3,12 +3,12 @@ package com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
-import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -28,7 +28,6 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SectionDTO
-import io.ktor.util.logging.Logger
 
 class ScheduleViewModel(
     private val schoolRepository: SchoolRepository,
@@ -272,7 +271,7 @@ class ScheduleViewModel(
         }.launchIn(viewModelScope)
     }
 
-    fun createScheduleEntry(entryDto: ScheduleEntryDto) {
+    fun createScheduleEntry(entryDto: CreateScheduleEntryDto) {
         schoolRepository.createScheduleEntry(entryDto).onEach { resource ->
             when (resource) {
                 is Resource.Success -> {
@@ -289,7 +288,7 @@ class ScheduleViewModel(
         }.launchIn(viewModelScope)
     }
 
-    fun updateScheduleEntry(id: Long, entryDto: ScheduleEntryDto) {
+    fun updateScheduleEntry(id: Long, entryDto: CreateScheduleEntryDto) {
         schoolRepository.updateScheduleEntry(id, entryDto).onEach { resource ->
             when (resource) {
                 is Resource.Success -> {

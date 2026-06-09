@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.SearchBarDefaults.InputField
@@ -39,9 +38,9 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
-import com.drcmind.kelasisuite.domain.dto.AssignmentStatus
-import com.drcmind.kelasisuite.domain.dto.CombinedAssignmentModel
-import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AssignmentStatus
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CombinedAssignmentModel
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TemplateSubjectDTO
 import com.drcmind.kelasisuite.domain.util.UtilsFunctions
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
