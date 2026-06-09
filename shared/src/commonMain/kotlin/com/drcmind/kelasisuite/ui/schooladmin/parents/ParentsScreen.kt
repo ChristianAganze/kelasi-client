@@ -4,6 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -31,6 +32,7 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.*
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.components.EmptyDetailPlaceholder
 import com.drcmind.kelasisuite.ui.schooladmin.component.CircularProfile
 import com.drcmind.kelasisuite.ui.schooladmin.component.SectionCard
 import kotlinx.serialization.modules.SerializersModule
@@ -49,7 +51,6 @@ fun ParentsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showAddParentDialog by remember { mutableStateOf(false) }
     var parentToEdit by remember { mutableStateOf<ParentDto?>(null) }
-
     val backStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {
@@ -70,7 +71,11 @@ fun ParentsScreen(
     val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val directive = remember(windowAdaptiveInfo) {
         calculatePaneScaffoldDirective(windowAdaptiveInfo)
-            .copy(horizontalPartitionSpacerSize = 0.dp, verticalPartitionSpacerSize = 0.dp, defaultPanePreferredWidth = 800.dp)
+            .copy(
+                horizontalPartitionSpacerSize = 0.dp,
+                verticalPartitionSpacerSize = 0.dp,
+                defaultPanePreferredWidth = 800.dp
+            )
     }
     val listDetailsStrateggy = rememberListDetailSceneStrategy<NavKey>(
         backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
@@ -84,7 +89,15 @@ fun ParentsScreen(
         sceneStrategies = listOf(listDetailsStrateggy),
         entryProvider = entryProvider {
             entry<Route.SchoolAdmin.Parents.List>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.listPane(
+                    detailPlaceholder = {
+                        EmptyDetailPlaceholder(
+                            icon = Icons.Filled.NoFood,
+                            title = "Aucun parent selectionné",
+                            subtitle = "Sélectionner un parent",
+                        )
+                    }
+                )
             ) {
                 Scaffold(
                     containerColor = Color.Transparent,
@@ -124,7 +137,8 @@ fun ParentsScreen(
                                 }
                                 IconButton(onClick = {
                                     parentToEdit = null
-                                    showAddParentDialog = true }
+                                    showAddParentDialog = true
+                                }
                                 ) {
                                     Icon(Icons.Filled.Add, contentDescription = null)
                                 }
@@ -145,7 +159,9 @@ fun ParentsScreen(
                         ParentTable(
                             viewModel = viewModel,
                             modifier = Modifier.padding(it).padding(horizontal = 16.dp),
-                            parents = uiState.list,
+                            parents = uiState.list.filter { filter ->
+                                filter.fullName.contains(uiState.searchQuery, true)
+                            },
                             onNavigateToParentProfile = { id ->
                                 backStack.add(Route.SchoolAdmin.Parents.Profile(id))
                             },
@@ -201,7 +217,8 @@ fun ParentTable(
     viewModel: ParentsViewModel, onEditParent: (ParentDto) -> Unit,
 ) {
     OutlinedCard(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth().fillMaxHeight(),
+        shape = MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
     ) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
@@ -452,14 +469,14 @@ fun ParentDetailPane(
                     title = "Elèves liés",
                     icon = Icons.Filled.AccountTree,
                     actions = {
-                        IconButton(onClick = {showLinkDialog = true}){
+                        IconButton(onClick = { showLinkDialog = true }) {
                             Icon(
                                 imageVector = Icons.Filled.AddLink,
                                 contentDescription = null
                             )
                         }
                     }
-                ){
+                ) {
                     if (parent.linkages.isEmpty()) {
                         Box(
                             Modifier.fillMaxWidth().height(200.dp),
@@ -470,6 +487,7 @@ fun ParentDetailPane(
                         }
                     } else {
                         parent.linkages.forEach { linkage ->
+                            HorizontalDivider()
                             LinkageRow(
                                 linkage,
                                 onUnlink = {
@@ -577,7 +595,6 @@ fun LinkageRow(linkage: ParentStudentLinkageDto, onUnlink: () -> Unit) {
             }
         }
     )
-    HorizontalDivider()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

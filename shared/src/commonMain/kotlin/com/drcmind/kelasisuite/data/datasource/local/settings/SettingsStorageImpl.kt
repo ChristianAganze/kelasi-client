@@ -12,9 +12,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.domain.model.JwtPayload
 import com.drcmind.kelasisuite.domain.model.UserInfo
 import com.russhwolf.settings.Settings
-import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
-import kotlin.Long
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Clock
@@ -24,7 +22,6 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
     override fun saveUserInfo(
         token: String, username: String, role: String, userId: Long?, schoolId: Long?
     ) {
-        println("SettingsStorageImpl: Saving userinfo - Token: [HIDDEN], Username: $username, Role: $role, UserId: $userId, SchoolId: $schoolId")
         settings.putString(KEY_TOKEN, token)
         settings.putString(KEY_USERNAME, username)
         settings.putString(KEY_ROLE, role)
@@ -38,18 +35,15 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
         val storedRole = settings.getString(KEY_ROLE, "Role")
         val storedUserId = settings.getLongOrNull(KEY_USER_ID)
         val storedSchoolId = settings.getLongOrNull(KEY_SCHOOL_ID)
-        println("SettingsStorageImpl: Retrieved UserInfo - Token: ${if (storedToken != null) "Exists" else "Null"}, Username: $storedUsername, Role: $storedRole, UserId: $storedUserId, SchoolId: $storedSchoolId")
         return UserInfo(storedToken, storedUsername, storedRole, storedUserId, storedSchoolId)
     }
 
     override fun getToken(): String? {
         val token = settings.getStringOrNull(KEY_TOKEN)
-        println("SettingsStorageImpl: getToken() - ${if (token != null) "Found Token (length: ${token.length})" else "Token Not Found (null)"}")
         return token
     }
 
     override fun clearUserInfo() {
-        println("Clearing all tokens from settings...")
         settings.remove(KEY_TOKEN)
         settings.remove(KEY_USERNAME)
         settings.remove(KEY_ROLE)
@@ -70,23 +64,11 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
     }
 
     override fun getTokenExpirationDate(): Instant? {
-        val token = getToken()
-        if (token == null) {
-            println("SettingsStorageImpl: getTokenExpirationDate() - No token found, returning null.")
-            return null
-        }
+        val token = getToken() ?: return null
 
-        val payload = decodePayload(token)
-        if (payload == null) {
-            println("SettingsStorageImpl: getTokenExpirationDate() - Failed to decode payload, returning null.")
-            return null
-        }
+        val payload = decodePayload(token) ?: return null
 
-        val expSeconds = payload.exp
-        if (expSeconds == null) {
-            println("SettingsStorageImpl: getTokenExpirationDate() - 'exp' claim is null in payload, returning null.")
-            return null
-        }
+        val expSeconds = payload.exp ?: return null
 
         val expirationInstant = Instant.fromEpochSeconds(expSeconds)
         return expirationInstant
@@ -97,7 +79,6 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
         return try {
             val parts = token.split(".")
             if (parts.size < 2) {
-                println("SettingsStorageImpl: decodePayload() - JWT token has less than 2 parts (header, payload, signature). Invalid format. Token: $token")
                 return null
             }
 
@@ -125,7 +106,6 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
         try {
             val schoolJson = Json.encodeToString(school)
             settings.putString(KEY_SCHOOL_DATA, schoolJson)
-            println("SettingsStorageImpl: Saved SchoolDTO locally for school ID: ${school.id}")
         } catch (e: Exception) {
             println("SettingsStorageImpl: Error saving SchoolDTO: ${e.message}")
         }
@@ -136,10 +116,8 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
             val schoolJson = settings.getStringOrNull(KEY_SCHOOL_DATA)
             if (schoolJson != null) {
                 val school = Json.decodeFromString<SchoolDTO>(schoolJson)
-                println("SettingsStorageImpl: Retrieved SchoolDTO locally for school ID: ${school.id}")
                 school
             } else {
-                println("SettingsStorageImpl: No SchoolDTO found locally.")
                 null
             }
         } catch (e: Exception) {
@@ -152,7 +130,6 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
         try {
             val schoolJson = Json.encodeToString(academicYearDTO)
             settings.putString(KEY_ACTIVE_ACADEMIC_YEAR, schoolJson)
-            println("SettingsStorageImpl: Saved Academic Year locally with ID : ${academicYearDTO.id}")
         } catch (e: Exception) {
             println("SettingsStorageImpl: Error saving academcic year: ${e.message}")
         }
@@ -163,10 +140,8 @@ class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
             val academicYearJson = settings.getStringOrNull(KEY_ACTIVE_ACADEMIC_YEAR)
             if (academicYearJson != null) {
                 val academicYearJson = Json.decodeFromString<AcademicYearDTO>(academicYearJson)
-                println("SettingsStorageImpl: Retrieved academicYearDTO locally")
                 academicYearJson
             } else {
-                println("SettingsStorageImpl: No Academic Year found locally.")
                 null
             }
         } catch (e: Exception) {

@@ -3,7 +3,7 @@ package com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teac
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.repository.teaching_assignments.AssignmentRepository
-import com.drcmind.kelasisuite.domain.dto.TeachingAssignmentDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teachers.ActivityType
 import kotlinx.coroutines.flow.MutableStateFlow

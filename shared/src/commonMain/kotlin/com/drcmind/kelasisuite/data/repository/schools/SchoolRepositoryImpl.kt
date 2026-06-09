@@ -3,10 +3,12 @@ package com.drcmind.kelasisuite.data.repository.schools
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.remote.dto.*
 import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.datetime.DayOfWeek
 
 class SchoolRepositoryImpl(
     private val apiService: SchoolAdminApiService,
@@ -189,6 +191,333 @@ class SchoolRepositoryImpl(
         return flow {
             emit(Resource.Loading())
             apiService.deleteClass(classId)
+            emit(Resource.Success(Unit))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getAssignmentsForClass(
+        classId: Long,
+        academicYearId: Long
+    ): Flow<Resource<List<TeachingAssignmentDTO>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getAssignmentsForClass(classId, academicYearId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    // SchoolSectionConfig Endpoints
+    override fun createSchoolSectionConfig(configDto: SchoolSectionConfigDto): Flow<Resource<SchoolSectionConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.createSchoolSectionConfig(configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getSchoolSectionConfigById(id: Long): Flow<Resource<SchoolSectionConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getSchoolSectionConfigById(id)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getAllSchoolSectionConfigsBySchool(): Flow<Resource<List<SchoolSectionConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val schoolId = settingsStorage.getUserInfo().schoolId
+            val response = apiService.getAllSchoolSectionConfigsBySchool(schoolId!!)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun updateSchoolSectionConfig(
+        id: Long,
+        configDto: SchoolSectionConfigDto
+    ): Flow<Resource<SchoolSectionConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.updateSchoolSectionConfig(id, configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun deleteSchoolSectionConfig(id: Long): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            apiService.deleteSchoolSectionConfig(id)
+            emit(Resource.Success(Unit))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    // LearningTimeConfig Endpoints
+    override fun createLearningTimeConfig(configDto: LearningTimeConfigDto): Flow<Resource<LearningTimeConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.createLearningTimeConfig(configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getLearningTimeConfigById(id: Long): Flow<Resource<LearningTimeConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getLearningTimeConfigById(id)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getAllLearningTimeConfigs(): Flow<Resource<List<LearningTimeConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getAllLearningTimeConfigs()
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId: Long): Flow<Resource<List<LearningTimeConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getLearningTimeConfigsByDayOfWeekAndSchoolSectionConfigId(
+        dayOfWeek: DayOfWeek,
+        schoolSectionConfigId: Long
+    ): Flow<Resource<List<LearningTimeConfigDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getLearningTimeConfigsByDayOfWeekAndSchoolSectionConfigId(dayOfWeek.name, schoolSectionConfigId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun updateLearningTimeConfig(id: Long, configDto: LearningTimeConfigDto): Flow<Resource<LearningTimeConfigDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.updateLearningTimeConfig(id, configDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun deleteLearningTimeConfig(id: Long): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            apiService.deleteLearningTimeConfig(id)
+            emit(Resource.Success(Unit))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    // ScheduleEntry Endpoints
+    override fun createScheduleEntry(entryDto: CreateScheduleEntryDto): Flow<Resource<ScheduleEntryDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.createScheduleEntry(entryDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun updateScheduleEntry(id: Long, entryDto: CreateScheduleEntryDto): Flow<Resource<ScheduleEntryDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.updateScheduleEntry(id, entryDto)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun deleteScheduleEntry(id: Long): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            apiService.deleteScheduleEntry(id)
+            emit(Resource.Success(Unit))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesByWeekNumber(weekNumber: Int): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesByWeekNumber(weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesByLearningTimeConfigDayOfWeekAndWeekNumber(
+        dayOfWeek: DayOfWeek,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesByLearningTimeConfigDayOfWeekAndWeekNumber(dayOfWeek, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesByTeachingAssignmentIdAndWeekNumber(
+        teachingAssignmentId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesByTeachingAssignmentIdAndWeekNumber(teachingAssignmentId, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesBySchoolIdAndWeekNumber(
+        schoolId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesBySchoolIdAndWeekNumber(schoolId, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesBySchoolSectionIdAndWeekNumber(
+        schoolSectionId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesBySchoolSectionIdAndWeekNumber(schoolSectionId, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesByTemplateSchoolSectionIdAndWeekNumber(
+        templateSchoolSectionId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesByTemplateSchoolSectionIdAndWeekNumber(templateSchoolSectionId, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesByTemplateSectionIdAndWeekNumber(
+        templateSectionId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesByTemplateSectionIdAndWeekNumber(templateSectionId, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesByGradeLevelIdAndWeekNumber(
+        gradeLevelId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesByGradeLevelIdAndWeekNumber(gradeLevelId, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getScheduleEntriesBySchoolClassIdAndWeekNumber(
+        schoolClassId: Long,
+        weekNumber: Int
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getScheduleEntriesBySchoolClassIdAndWeekNumber(schoolClassId, weekNumber)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun duplicateScheduleEntries(
+        sourceWeek: Int,
+        classId: Long,
+        targetWeeks: List<Int>
+    ): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            apiService.duplicateScheduleEntries(sourceWeek, classId, targetWeeks)
+            emit(Resource.Success(Unit))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getWeeklySchedule(
+        weekNumber: Int,
+        classId: Long
+    ): Flow<Resource<List<ScheduleEntryDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.getWeeklySchedule(weekNumber, classId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun clearWeek(
+        weekNumber: Int,
+        classId: Long
+    ): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            apiService.clearWeek(weekNumber, classId)
             emit(Resource.Success(Unit))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))

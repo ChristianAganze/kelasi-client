@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.SearchBarDefaults.InputField
@@ -39,9 +38,10 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.StudentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
-import com.drcmind.kelasisuite.domain.dto.AssignmentStatus
-import com.drcmind.kelasisuite.domain.dto.CombinedAssignmentModel
-import com.drcmind.kelasisuite.domain.dto.TemplateSubjectDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.AssignmentStatus
+import com.drcmind.kelasisuite.data.datasource.remote.dto.CombinedAssignmentModel
+import com.drcmind.kelasisuite.data.datasource.remote.dto.TemplateSubjectDTO
+import com.drcmind.kelasisuite.domain.util.UtilsFunctions
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentStatus
@@ -161,6 +161,7 @@ fun ClassDetailsScreen(
                                         onNavigateToStudentDetail = onNavigateToStudentDetail
                                     )
                                 }
+
                                 1 -> {
                                     SubjectAssignmentsList(
                                         teachers = uiState.teachers,
@@ -176,10 +177,18 @@ fun ClassDetailsScreen(
                                         combinedAssignment = uiState.filteredCombinedAssignmentAndPendings,
                                         isLoadingAssignments = uiState.isLoadingAssignments,
                                         onFilterClicked = {
-                                            if(it==0){viewModel.getAllAllSubjectsForClass()} else if(it==1){
-                                                viewModel.getAssignedSubjectsForClass()
-                                            }else if(it==2){
-                                                viewModel.getPendingSubjectsForClass()
+                                            when (it) {
+                                                0 -> {
+                                                    viewModel.getAllAllSubjectsForClass()
+                                                }
+
+                                                1 -> {
+                                                    viewModel.getAssignedSubjectsForClass()
+                                                }
+
+                                                2 -> {
+                                                    viewModel.getPendingSubjectsForClass()
+                                                }
                                             }
                                         },
                                     )
@@ -224,8 +233,7 @@ fun ClassDetailsScreen(
             homeroomAssignment = uiState.homeroomAssignment,
             isAssigning = uiState.isAssigningHomeroomTeacher,
             assignHomeroomTeacher = { viewModel.assignHomeroomTeacher(it, classId) },
-            onDismiss = { showAssignTeacherDialog = false }
-        )
+            onDismiss = { showAssignTeacherDialog = false })
     }
 }
 
@@ -233,10 +241,10 @@ fun ClassDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeroomTeacherAssignmentDialog(
-    teachers : List<TeacherProfileDTO>,
+    teachers: List<TeacherProfileDTO>,
     homeroomAssignment: HomeroomAssignmentDTO?,
-    isAssigning : Boolean,
-    assignHomeroomTeacher: (teacherId : Long) -> Unit,
+    isAssigning: Boolean,
+    assignHomeroomTeacher: (teacherId: Long) -> Unit,
     onDismiss: () -> Unit
 ) {
 
@@ -290,9 +298,7 @@ fun HomeroomTeacherAssignmentDialog(
 
 @Composable
 fun StudentsList(
-    classStudents: List<StudentDTO>,
-    isLoadingClassStudents : Boolean,
-    onNavigateToStudentDetail: (id: Long) -> Unit
+    classStudents: List<StudentDTO>, isLoadingClassStudents: Boolean, onNavigateToStudentDetail: (id: Long) -> Unit
 ) {
     Column(modifier = Modifier.padding(top = 8.dp).fillMaxWidth()) {
 
@@ -441,42 +447,40 @@ fun TeachersList(
 
 @Composable
 fun TeacherRowItem(teacher: CombinedAssignmentModel) {
-    ListItem(
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = {
-            Text(
-                teacher.teacherName!!,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        },
-        supportingContent = {
-            Text(
-                "ID: ${teacher.teacherId}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline
-            )
-        },
-        leadingContent = {
-            CircularProfile(text = teacher.teacherName!!.take(1))
-        })
+    ListItem(colors = ListItemDefaults.colors(containerColor = Color.Transparent), headlineContent = {
+        Text(
+            teacher.teacherName!!,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }, supportingContent = {
+        Text(
+            "ID: ${teacher.teacherId}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
+    }, leadingContent = {
+        CircularProfile(text = teacher.teacherName!!.take(1))
+    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubjectAssignmentsList(
-    combinedAssignment : List<CombinedAssignmentModel>,
-    isLoadingAssignments : Boolean,
-    teachers : List<TeacherProfileDTO>,
-    isAssigning : Boolean,
-    assignTeacherToSubject : (subjectId : Long, teacherId : Long)->Unit,
-    deleteTeachingAssignment : (id: Long) -> Unit,
-    isDeleting : Boolean,
-    onNavigateToTeacherDetail : (id: Long) -> Unit,
-    onFilterClicked : (Int) -> Unit
+    combinedAssignment: List<CombinedAssignmentModel>,
+    isLoadingAssignments: Boolean,
+    teachers: List<TeacherProfileDTO>,
+    isAssigning: Boolean,
+    assignTeacherToSubject: (subjectId: Long, teacherId: Long) -> Unit,
+    deleteTeachingAssignment: (id: Long) -> Unit,
+    isDeleting: Boolean,
+    onNavigateToTeacherDetail: (id: Long) -> Unit,
+    onFilterClicked: (Int) -> Unit
 ) {
+    var showConfirmDeletationDialog by remember { mutableStateOf(false) }
     var showAssignDialog by remember { mutableStateOf(false) }
+    var isSubmitting by remember { mutableStateOf(false) }
     var selectedSubject by remember { mutableStateOf<TemplateSubjectDTO?>(null) }
 
     val subjectFilterOptions = listOf("Tous", "Assignés", "En attennte")
@@ -498,7 +502,7 @@ fun SubjectAssignmentsList(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             SearchBar(modifier = Modifier.weight(1f).padding(end = 8.dp), inputField = {
@@ -519,25 +523,20 @@ fun SubjectAssignmentsList(
 
             SingleChoiceSegmentedButtonRow(modifier = Modifier.weight(1f)) {
                 subjectFilterOptions.forEachIndexed { index, label ->
-
                     SegmentedButton(
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index, count = subjectFilterOptions.size
-                        ),
-                        onClick = {
+                        ), onClick = {
                             selectedSubjectFilterOption = index
                             onFilterClicked(index)
-                        },
-                        selected = index == selectedSubjectFilterOption,
-                        label = { Text(label) })
+                        }, selected = index == selectedSubjectFilterOption, label = { Text(label) })
                 }
             }
         }
         OutlinedCard(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(),
             shape = MaterialTheme.shapes.medium.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp))
-        )
-        {
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Tous les cours (${combinedAssignment.size})",
@@ -570,12 +569,26 @@ fun SubjectAssignmentsList(
                                 ClassSubjectRow(
                                     subject,
                                     onDelete = {
-                                        deleteTeachingAssignment(subject.id)
+                                        showConfirmDeletationDialog = true
+                                        selectedSubject = TemplateSubjectDTO(
+                                            id = subject.id,
+                                            code = subject.subjectCode,
+                                            name = subject.subjectName,
+                                            domain = subject.domain,
+                                            subDomain = subject.subDomain,
+                                        )
                                     },
                                     deleteEnabled = !isDeleting,
                                     onNavigateToTeacherDetail = onNavigateToTeacherDetail,
                                     onAssignTeacherClicked = {
-                                        //assignTeacherToSubject(subject.id)
+                                        selectedSubject = TemplateSubjectDTO(
+                                            id = subject.id,
+                                            code = subject.subjectCode,
+                                            name = subject.subjectName,
+                                            domain = subject.domain,
+                                            subDomain = subject.subDomain,
+                                        )
+                                        showAssignDialog = true
                                     },
                                 )
                             }
@@ -586,16 +599,26 @@ fun SubjectAssignmentsList(
         }
 
     }
-
+    if (showConfirmDeletationDialog && selectedSubject != null) {
+        UtilsFunctions.ConfirmationDialog(
+            onDismissRequest = { showConfirmDeletationDialog = false },
+            onConfirm = {
+                deleteTeachingAssignment(selectedSubject!!.id)
+            },
+            title = "Desassignement",
+            text = "Voulez-vous vraiment désassigner ce cours ?",
+        )
+    }
     if (showAssignDialog && selectedSubject != null) {
         TeachingAssignmentDialog(
             subject = selectedSubject!!,
             teachers = teachers,
-            isSubmitting = isAssigning,
+            isSubmitting = isSubmitting,
             onConfirm = { teacherId ->
                 assignTeacherToSubject(selectedSubject!!.id, teacherId)
                 selectedSubject = null
                 showAssignDialog = false
+                isSubmitting = false
             },
             onDismiss = {
                 selectedSubject = null
@@ -614,14 +637,10 @@ fun ClassSubjectRow(
     deleteEnabled: Boolean
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-
-
         Text(
             subject.subjectName,
             modifier = Modifier.weight(2f),
@@ -632,8 +651,8 @@ fun ClassSubjectRow(
 
         Box(
             modifier = Modifier.weight(1f).padding(end = 8.dp), contentAlignment = Alignment.Center
-        ){
-        if(subject.status== AssignmentStatus.ASSIGNED){
+        ) {
+            if (subject.status == AssignmentStatus.ASSIGNED) {
 
                 CircularProfile(
                     modifier = Modifier.clickable(
@@ -642,38 +661,26 @@ fun ClassSubjectRow(
                     text = subject.teacherName?.take(1)?.uppercase() ?: "",
                 )
 
-        }else{
-            AssistChip(
-                modifier = Modifier,
-                onClick = {},
-                label = {
-                    Text( "En attente")
-                },
-                leadingIcon = {
+            } else {
+                AssistChip(modifier = Modifier, onClick = {}, label = {
+                    Text("En attente")
+                }, leadingIcon = {
 
                     Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.outline)
+                        modifier = Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.outline)
                     )
-                }
-            )
+                })
+            }
         }
-        }
-
-
-
 
         Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.CenterEnd
-        ){
-            if(subject.status == AssignmentStatus.PENDING) {
+            modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd
+        ) {
+            if (subject.status == AssignmentStatus.PENDING) {
                 IconButton(onClick = { onAssignTeacherClicked(subject.subjectId) }) {
-                    Icon(Icons.Default.PersonAddAlt1, null)
+                    Icon(AppIcons.personAdd, null)
                 }
-            }else{
+            } else {
                 IconButton(onClick = onDelete, enabled = deleteEnabled) {
                     Icon(
                         imageVector = Icons.Default.Delete,

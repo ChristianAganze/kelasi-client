@@ -55,7 +55,6 @@ class ParentsViewModel(
                             error = null
                         )
                     }
-                    println("HHHHHHHHHH" + result.message)
 
                 }
 
@@ -66,16 +65,15 @@ class ParentsViewModel(
                             error = result.message
                         )
                     }
-                    println("HHHHHHHHHH" + result.message)
 
                 }
 
                 is Resource.Loading -> {
                     _uiState.update { it.copy(isLoading = true, error = null) }
                 }
-
-
             }
+            println("Parents fetching : " + result.message)
+
         }.launchIn(viewModelScope)
     }
 

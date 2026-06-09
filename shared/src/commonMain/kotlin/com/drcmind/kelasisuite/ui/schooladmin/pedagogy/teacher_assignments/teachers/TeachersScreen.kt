@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.NoFood
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,6 +61,7 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeacherProfileDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
+import com.drcmind.kelasisuite.ui.components.EmptyDetailPlaceholder
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
@@ -119,7 +121,15 @@ fun TeachersScreen(
             sceneStrategies = listOf(listDetailsStrateggy, dialogStrategy),
             entryProvider = entryProvider {
                 entry<Route.SchoolAdmin.Pedagogy.TeacherAssignments.Teachers.List>(
-                    metadata = ListDetailSceneStrategy.listPane()
+                    metadata = ListDetailSceneStrategy.listPane(
+                        detailPlaceholder = {
+                            EmptyDetailPlaceholder(
+                                icon = Icons.Filled.NoFood,
+                                title = "Aucun enseignant selectionné",
+                                subtitle = "Sélectionner un enseignant",
+                            )
+                        }
+                    )
                 ) {
                     Scaffold(
                         topBar = {

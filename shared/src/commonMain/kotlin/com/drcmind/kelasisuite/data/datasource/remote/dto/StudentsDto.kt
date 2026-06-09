@@ -1,7 +1,9 @@
 package com.drcmind.kelasisuite.data.datasource.remote.dto
 
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentStatus
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
@@ -58,11 +60,12 @@ data class EnrollmentRequest(
 data class UpdateEnrollmentRequest(
     val newClassId: Long
 )
+
 @Serializable
 data class CreateParentRequest(
-    val userId : Long,
-    val address : String,
-    val occupation : String
+    val userId: Long,
+    val address: String,
+    val occupation: String
 )
 
 @Serializable
@@ -84,6 +87,7 @@ data class ParentDto(
     val occupation: String?,
     val linkages: List<ParentStudentLinkageDto>,
 )
+
 @Serializable
 data class ParentStudentLinkageDto(
     val id: Long?,
@@ -124,4 +128,48 @@ data class SchoolClassSummaryDto(
 data class AcademicYearSummaryDto(
     val id: Long?,
     val label: String
+)
+
+
+@Serializable
+data class LearningTimeConfigDto(
+    val id: Long?,
+    val label: String,
+    val startDayHourTime: String,
+    val endDayHourTime: String,
+    val dayOfWeek: DayOfWeek,
+    val schoolSectionConfigId: Long
+)
+
+@Serializable
+data class CreateScheduleEntryDto(
+    val id: Long?,
+    val learningTimeConfigId: Long,
+    val teachingAssignmentId: Long,
+    val weekNumber: Int
+)
+
+@Serializable
+data class ScheduleEntryDto(
+    val id: Long?,
+    val learningTimeConfigId: Long,
+    val learningTimeConfiglabel: String,
+    val startDayHourTime: LocalTime,
+    val endDayHourTime: LocalTime,
+    val dayOfWeek: DayOfWeek,
+    val teachingAssignmentId: Long,
+    val schoolClassName : String,
+    val subjectName : String,
+    val teacherName : String,
+    val academicYearLabel : String,
+    val weekNumber: Int
+)
+
+@Serializable
+data class SchoolSectionConfigDto(
+    val id: Long?,
+    val dayStartTime: LocalTime,
+    val dayEndTime: LocalTime,
+    val schoolSectionId: Long,
+    val schoolSectionName: String,
 )

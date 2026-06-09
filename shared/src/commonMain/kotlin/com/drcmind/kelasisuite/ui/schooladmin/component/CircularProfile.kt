@@ -23,7 +23,7 @@ fun CircularProfile(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(48.dp)
+            .size(38.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .border(1.dp, Color.White, CircleShape)
@@ -32,7 +32,7 @@ fun CircularProfile(
             text = text,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.displaySmallEmphasized
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
