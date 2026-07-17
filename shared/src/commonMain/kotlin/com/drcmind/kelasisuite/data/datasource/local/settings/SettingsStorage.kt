@@ -6,7 +6,13 @@ import com.drcmind.kelasisuite.domain.model.UserInfo
 import kotlin.time.Instant
 
 interface SettingsStorage {
-    fun saveUserInfo(token: String, username: String, role: String, userId: Long? = null, schoolId: Long? = null)
+    fun saveUserInfo(
+        token: String,
+        username: String,
+        role: String,
+        userId: Long? = null,
+        schoolId: Long? = null
+    )
     fun getUserInfo(): UserInfo
     fun getToken(): String?
     fun clearUserInfo()

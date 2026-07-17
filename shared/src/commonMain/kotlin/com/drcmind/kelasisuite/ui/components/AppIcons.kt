@@ -3,12 +3,13 @@ package com.drcmind.kelasisuite.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.*
 
 object AppIcons {
 
     val dashboard = Icons.Rounded.Dashboard
-    val curriculum = Icons.Rounded.MenuBook
+    val curriculum = Icons.AutoMirrored.Rounded.MenuBook
     val enrollment = Icons.Rounded.PersonAdd
     val financial = Icons.Rounded.Payments
     val communication = Icons.Rounded.Chat

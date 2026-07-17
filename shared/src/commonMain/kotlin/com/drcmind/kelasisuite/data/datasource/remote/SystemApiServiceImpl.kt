@@ -11,7 +11,9 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
-class SystemApiServiceImpl(private val httpClient: HttpClient) : SystemApiService {
+class SystemApiServiceImpl(
+    private val httpClient: HttpClient
+) : SystemApiService {
     override suspend fun login(loginRequest: LoginRequest): LoginResponse {
         return httpClient.post("auth/login") {
             setBody(loginRequest)

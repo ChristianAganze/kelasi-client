@@ -19,14 +19,12 @@ dependencies {
     implementation(libs.kotlinx.coroutinesSwing)
     implementation(libs.ktor.client.okhttp)
 
-    implementation(compose.desktop.currentOs)
-
     implementation(libs.compose.uiToolingPreview)
 }
 
 compose.desktop {
     application {
-        mainClass = "com.drcmind.kelasisuite.MainKt"
+        mainClass = "com.drcmind.kelasisuite.DesktopLauncher"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

@@ -2,6 +2,7 @@ package com.drcmind.kelasisuite.navigation
 
 import com.drcmind.kelasisuite.ui.schooladmin.SchoolAdminAppScreen
 import com.drcmind.kelasisuite.ui.systemadmin.SystemAdminAppScreen
+import com.drcmind.kelasisuite.ui.teacheradmin.TeacherAdminAppScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -75,11 +76,18 @@ fun NavigationRoot(
                 AuthScreen(
                     onAuthSuccess = { role ->
                         val nextRoute = when {
-                            role.contains("ROLE_SUPER_USER", ignoreCase = true) -> Route.SystemAdmin
+                            role.contains(
+                                "ROLE_SUPER_USER",
+                                ignoreCase = true
+                            ) -> Route.SystemAdmin
                             role.contains(
                                 "ROLE_SCHOOL_ADMIN",
                                 ignoreCase = true
                             ) -> Route.SchoolAdmin
+                            role.contains(
+                                "ROLE_TEACHER",
+                                ignoreCase = true
+                            ) -> Route.TeacherAdmin
 
                             else -> Route.SchoolAdmin
                         }
@@ -97,6 +105,11 @@ fun NavigationRoot(
             }
             entry<Route.SchoolAdmin> {
                 SchoolAdminAppScreen(
+                    onLogout = {appViewModel.logout()}
+                )
+            }
+            entry<Route.TeacherAdmin> {
+                TeacherAdminAppScreen(
                     onLogout = {appViewModel.logout()}
                 )
             }

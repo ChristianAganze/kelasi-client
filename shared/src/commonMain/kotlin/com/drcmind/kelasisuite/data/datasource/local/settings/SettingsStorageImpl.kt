@@ -18,7 +18,9 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-class SettingsStorageImpl(private val settings: Settings) : SettingsStorage {
+class SettingsStorageImpl(
+    private val settings: Settings
+) : SettingsStorage {
     override fun saveUserInfo(
         token: String, username: String, role: String, userId: Long?, schoolId: Long?
     ) {

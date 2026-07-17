@@ -1,5 +1,6 @@
 package com.drcmind.kelasisuite.ui.auth
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -20,6 +22,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,10 +54,8 @@ fun AuthScreen(
     onAuthSuccess: (String) -> Unit,
     viewModel: AuthViewModel = koinViewModel()
 ) {
-
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val isExpanded =
-        adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(state.authState) {
@@ -61,40 +63,87 @@ fun AuthScreen(
             onAuthSuccess((state.authState as AuthState.Success).role)
         }
     }
-    Surface(Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.85f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AuthFormSection(
-                    state = state,
-                    onRememberMeChange = viewModel::updateRememberMe,
-                    onLogin = viewModel::login,
-                    modifier = Modifier.weight(1f),
-                    isExpanded = isExpanded
-                )
-                if (isExpanded) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(1f)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary, // visual-card-bg
-                                shape = RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp)
-                            )
-                            .padding(48.dp)
-                    ) {
-                        VisualBrandingContent()
-                    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        if (isExpanded) {
+            // Desktop Layout: Full split screen
+            Row(modifier = Modifier.fillMaxSize()) {
+                // Left Side: Solid primary color with branding
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    VisualBrandingContent(
+                        isExpanded = true,
+                        modifier = Modifier.padding(64.dp)
+                    )
                 }
 
+                // Right Side: Form centered
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .width(450.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AuthFormSection(
+                            state = state,
+                            onRememberMeChange = viewModel::updateRememberMe,
+                            onLogin = viewModel::login,
+                            isExpanded = true
+                        )
+                        Spacer(modifier = Modifier.height(32.dp))
+                        AuthFooter(isDark = false)
+                    }
+                }
+            }
+        } else {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        VisualBrandingContent(isExpanded = false)
+                        
+                        Spacer(modifier = Modifier.height(32.dp))
+                        
+                        AuthFormSection(
+                            state = state,
+                            onRememberMeChange = viewModel::updateRememberMe,
+                            onLogin = viewModel::login,
+                            isExpanded = false,
+                            modifier = Modifier.fillMaxWidth() // Already handled by widthIn above
+                        )
+                        
+                        Spacer(modifier = Modifier.height(32.dp))
+                        
+                        AuthFooter(isDark = false)
+                    }
             }
         }
     }
@@ -102,52 +151,72 @@ fun AuthScreen(
 
 @Composable
 fun VisualBrandingContent(
+    isExpanded: Boolean,
+    modifier: Modifier = Modifier
 ) {
+    val textColor = if (isExpanded) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = if (isExpanded) Alignment.Start else Alignment.CenterHorizontally
     ) {
-        // Label du haut
+        // Logo Section
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(32.dp)
                     .background(
-                        Color.White.copy(alpha = 0.2f),
-                        RoundedCornerShape(50)
-                    )
-            )
+                        if (isExpanded) MaterialTheme
+                            .colorScheme.onPrimary.copy(alpha = 0.2f)
+                        else MaterialTheme.colorScheme.primaryContainer,
+                        RoundedCornerShape(8.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "K",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isExpanded) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Kelasi Suite",
-                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                color = MaterialTheme.colorScheme.onPrimary
+                text = "Kelasi",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = textColor,
+                letterSpacing = (-0.5).sp
             )
         }
 
-        // Contenu Central
-        Column {
-            Text(
-                text = "Bienvenue chez Kelasi",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = MaterialTheme.typography.displayLargeEmphasized.fontSize,
-                lineHeight = 44.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Kelasi aide les institution scolaire et académique à s'organiser et digitaliser la gestion de leur établissement.",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 18.sp
-            )
+        Spacer(modifier = Modifier.height(if (isExpanded) 48.dp else 24.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+        Text(
+            text = "Bienvenue chez Kelasi",
+            color = textColor,
+            fontSize = if (isExpanded) 40.sp else 24.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = if (isExpanded) TextAlign.Start else TextAlign.Center,
+            lineHeight = if (isExpanded) 48.sp else 32.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "L'excellence au service de la digitalisation scolaire moderne et intuitive.",
+            color = textColor.copy(alpha = 0.8f),
+            fontSize = if (isExpanded) 18.sp else 14.sp,
+            textAlign = if (isExpanded) TextAlign.Start else TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(if (isExpanded) 1f else 0.8f)
+        )
 
-            // Simulation de la "Glass Card"
+        if (isExpanded) {
+            Spacer(modifier = Modifier.height(48.dp))
+            // Glass Card (Only for desktop branding side)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        Color.White.copy(alpha = 0.05f),
+                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f),
                         RoundedCornerShape(20.dp)
                     )
                     .padding(24.dp)
@@ -155,34 +224,39 @@ fun VisualBrandingContent(
                 Text(
                     "Trouvez votre rythme d'apprentissage dès maintenant",
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
         }
+    }
+}
 
-        // Footer
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+@Composable
+fun AuthFooter(
+    isDark: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val textColor = if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) 
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            "© 2026 DrcMind",
+            color = textColor,
+            fontSize = 12.sp
+        )
+        TextButton(onClick = {
 
+        }) {
             Text(
-                "© 2026 DrcMind",
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                "A propos",
+                color = textColor,
                 fontSize = 12.sp
             )
-            TextButton(
-                onClick = {}
-
-            ) {
-                Text(
-                    "A propos",
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-                    fontSize = 12.sp
-                )
-            }
         }
     }
 }
@@ -195,155 +269,128 @@ fun AuthFormSection(
     modifier: Modifier = Modifier,
     isExpanded: Boolean = false
 ) {
+    val emailState = rememberTextFieldState("")
+    val passwordState = rememberTextFieldState("")
 
     Column(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .background(
-                MaterialTheme.colorScheme.surfaceContainerHighest,
-                RoundedCornerShape(
-                    topStart = 32.dp,
-                    bottomStart = 32.dp,
-                    topEnd = if (!isExpanded) 32.dp else 0.dp,
-                    bottomEnd = if (!isExpanded) 32.dp else 0.dp
-                )
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                RoundedCornerShape(24.dp)
             )
-            .padding(32.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        val emailState = rememberTextFieldState("")
-        val passwordState = rememberTextFieldState("")
-
-        // Logo Section
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.shapes.small
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "K",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Kelasi",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.5).sp
-            )
-        }
-
         // Title & Subtitle
         Text(
             text = "Connexion",
-            fontSize = 28.sp,
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
 
         Text(
             text = "Veuillez entrer vos coordonnées pour accéder à votre compte.",
-            fontSize = 14.sp,
-            modifier = Modifier.padding(bottom = 24.dp)
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            textAlign = TextAlign.Center
         )
 
         // Email Input
-
-        OutlinedTextField(
-            state = emailState,
-            label = { Text("Adresse e-mail") },
-            placeholder = { Text("nom@exemple.com") },
-            leadingIcon = { Icon(Icons.Default.Mail, contentDescription = "Email") },
-            isError = state.emailError != null,
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium
-        )
-        if (state.emailError != null) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = state.emailError,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.error,
+                "EMAIL",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+            OutlinedTextField(
+                state = emailState,
+                placeholder = { Text("nom@exemple.com", fontSize = 14.sp) },
+                leadingIcon = { Icon(Icons.Default.Mail, contentDescription = "Email", modifier = Modifier.size(20.dp)) },
+                isError = state.emailError != null,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent
+                )
+            )
+            if (state.emailError != null) {
+                Text(
+                    text = state.emailError,
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
 
-        OutlinedSecureTextField(
-            state = passwordState,
-            label = { Text("Password") },
-            placeholder = { Text("••••••••") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
-            isError = state.passwordError != null,
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium
+        Spacer(modifier = Modifier.height(16.dp))
 
-        )
-
-        if (state.passwordError != null) {
+        // Password Input
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = state.passwordError,
-                color = MaterialTheme.colorScheme.error,
+                "MOT DE PASSE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+            OutlinedSecureTextField(
+                state = passwordState,
+                placeholder = { Text("••••••••", fontSize = 14.sp) },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", modifier = Modifier.size(20.dp)) },
+                isError = state.passwordError != null,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent
+                )
+            )
+            if (state.passwordError != null) {
+                Text(
+                    text = state.passwordError,
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
 
         // Remember Me & Forgot Password
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp),
+                .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = state.rememberMe,
                     onCheckedChange = onRememberMeChange,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(24.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Se souvenir de moi")
+                Text(text = "Se souvenir de moi", fontSize = 12.sp)
             }
-            TextButton(
-                onClick = {}
-            ) {
+            TextButton(onClick = {}, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
                 Text(
                     text = "Mot de passe oublié ?",
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                )
-            }
-        }
-
-        // Error State Display
-        if (state.authState is AuthState.Error) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(8.dp))
-                    .padding(12.dp)
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = state.authState.message,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
@@ -351,18 +398,65 @@ fun AuthFormSection(
         // Login Button
         Button(
             onClick = { onLogin(emailState.text.toString(), passwordState.text.toString()) },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
             if (state.authState is AuthState.Loading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
                     strokeWidth = 2.dp
                 )
             } else {
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Se connecter")
+                Text(text = "Se connecter", fontWeight = FontWeight.Bold)
             }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Social Login
+        Text(
+            text = "Ou continuer avec",
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            SocialButton(icon = Icons.Rounded.Layers)
+            Spacer(modifier = Modifier.width(16.dp))
+            SocialButton(icon = Icons.Rounded.GridView)
+        }
+    }
+}
+
+@Composable
+fun SocialButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit = {}
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.size(44.dp),
+        shape = RoundedCornerShape(50),
+        color = Color.White,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

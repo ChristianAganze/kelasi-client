@@ -4,10 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drcmind.kelasisuite.ui.components.AppIcons
@@ -30,106 +32,118 @@ fun SchoolDashboardScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    Column(
+    LazyVerticalGrid(
+        // S'adapte automatiquement à la largeur disponible (min 300dp par colonne)
+        columns = GridCells.Adaptive(minSize = 200.dp),
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-            .padding(horizontal = 48.dp, vertical = 64.dp)
-            .verticalScroll(rememberScrollState())
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        // Header
-        HeaderSection(state.username)
+        // Header Section (Prend toute la largeur)
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            HeaderSection(state.username)
+        }
 
-        Spacer(modifier = Modifier.height(64.dp))
 
-        // Bento Grid
-        BentoGrid(onAcademicClick = onAcademicClick)
+        item(span = { GridItemSpan(if (maxLineSpan >= 2) 2 else 1) }) {
+            BentoCard(
+                title = "Gestion Académique",
+                description = "Données élèves, affectations des classes et structure organisationnelle de l'établissement.",
+                icon = AppIcons.school,
+                modifier = Modifier.height(120.dp),
+                isDark = false,
+                onClick = onAcademicClick
+            )
+        }
+        item {
+            BentoCard(
+                title = "Curriculum & Notes",
+                description = "Grilles d'évaluation, gestion des matières et suivi des performances.",
+                icon = AppIcons.curriculum,
+                modifier = Modifier.height(140.dp),
+                isDark = true
+            )
+        }
 
-        Spacer(modifier = Modifier.weight(1f))
-        Spacer(modifier = Modifier.height(64.dp))
 
-        // Footer
-        FooterSection(state.systemStatus, state.lastConnection)
+
+        item {
+            BentoCard(
+                title = "Inscriptions",
+                description = "Gérez les nouvelles admissions et les profils numériques.",
+                icon = AppIcons.personAdd,
+                modifier = Modifier.height(140.dp),
+                isDark = false
+            )
+        }
+
+        item {
+            BentoCard(
+                title = "Finances",
+                description = "Suivi des paiements, frais de scolarité et cycles de facturation.",
+                icon = AppIcons.payments,
+                modifier = Modifier.height(140.dp),
+                isDark = false
+            )
+        }
+
+        item {
+            BentoCard(
+                title = "Communication",
+                description = "Mises à jour en temps réel, annonces et messagerie parents.",
+                icon = AppIcons.communication,
+                modifier = Modifier.height(140.dp),
+                isDark = false
+            )
+        }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Column {
+                Spacer(modifier = Modifier.height(32.dp))
+                FooterSection(state.systemStatus, state.lastConnection)
+            }
+        }
     }
 }
 
 @Composable
 fun HeaderSection(username: String) {
-    Column {
-        Text(
-            text = "Bienvenue, $username",
-            fontSize = 36.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            letterSpacing = (-0.5).sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Sélectionnez un module pour commencer la gestion de votre établissement.",
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-fun BentoGrid(
-    onAcademicClick: () -> Unit = {}
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        Row(
-            modifier = Modifier.height(320.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 16.dp)
+    ) {
+        // Avatar circulaire avec initiale
+        Surface(
+            modifier = Modifier.size(64.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primary
         ) {
-            // Gestion Académique (Large)
-            BentoCard(
-                title = "Gestion Académique",
-                description = "Focus on student data, classroom assignments, and the overarching school organizational structure.",
-                icon = AppIcons.school,
-                modifier = Modifier.weight(2f),
-                isDark = false,
-                onClick = onAcademicClick
-            )
-
-            // Curriculum & Notes (Tall/Dark)
-            BentoCard(
-                title = "Curriculum & Notes",
-                description = "Access the grading matrix, subject management, and student performance tracking.",
-                icon = AppIcons.curriculum,
-                modifier = Modifier.weight(1f),
-                isDark = true
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = username.take(1).uppercase(),
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
-
-        Row(
-            modifier = Modifier.height(240.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            // Inscriptions
-            BentoCard(
-                title = "Inscriptions",
-                description = "Manage new student enrollments and digital student profiles.",
-                icon = AppIcons.personAdd,
-                modifier = Modifier.weight(1f),
-                isDark = false
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        Column {
+            Text(
+                text = "Bonjour, $username",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                letterSpacing = (-0.5).sp
             )
-
-            // Finances
-            BentoCard(
-                title = "Finances & Facturation",
-                description = "Track payments, tuition fees, and institutional billing cycles.",
-                icon = AppIcons.payments,
-                modifier = Modifier.weight(1f),
-                isDark = false
-            )
-
-            // Communication
-            BentoCard(
-                title = "Communication",
-                description = "Real-time updates, announcements, and parent-teacher messaging.",
-                icon = AppIcons.communication,
-                modifier = Modifier.weight(1f),
-                isDark = false
+            Text(
+                text = "Gérez votre établissement efficacement.",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -154,62 +168,66 @@ fun BentoCard(
 
     Box(
         modifier = modifier
-            .clip(MaterialTheme.shapes.extraExtraLarge)
+            .clip(MaterialTheme.shapes.extraLarge)
             .background(backgroundColor)
             .border(
                 width = 1.dp,
                 color = if (isDark) Color.Transparent else MaterialTheme.colorScheme.outlineVariant,
-                shape = MaterialTheme.shapes.extraExtraLarge
+                shape = MaterialTheme.shapes.extraLarge
             )
             .clickable { onClick() }
-            .padding(32.dp)
+            .padding(20.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(
-                            color = if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center
+                // Icône dans un conteneur arrondi
+                Surface(
+                    modifier = Modifier.size(44.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (isDark) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.primaryContainer
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = if (isDark) Color.White else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
+                Text(
+                    text = title,
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
                 Icon(
                     imageVector = AppIcons.arrowFWD,
                     contentDescription = null,
-                    tint = if (isDark) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(24.dp)
+                    tint = if (isDark) Color.White.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(20.dp)
                 )
             }
-
-            Column {
-                Text(
-                    text = title,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = contentColor
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = description,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     color = secondaryContentColor,
-                    lineHeight = 20.sp
+                    lineHeight = 18.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
+
         }
     }
 }
@@ -222,24 +240,24 @@ fun FooterSection(status: String, lastConnection: String) {
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.outlineVariant
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 Column {
                     Text(
                         text = "STATUS SYSTÈME",
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.outline,
                         letterSpacing = 1.sp
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Box(
                             modifier = Modifier
@@ -248,34 +266,31 @@ fun FooterSection(status: String, lastConnection: String) {
                         )
                         Text(
                             text = status,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
                 Column {
                     Text(
-                        text = "DERNIÈRE CONNEXION",
-                        fontSize = 10.sp,
+                        text = "CONNEXION",
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.outline,
                         letterSpacing = 1.sp
                     )
                     Text(
                         text = lastConnection,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
 
             Text(
-                text = "© 2026 KELASI SUITE. DrcMind.",
+                text = "© 2026 KELASI SUITE",
                 fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.outline,
-                letterSpacing = 0.5.sp
+                color = MaterialTheme.colorScheme.outline
             )
         }
     }

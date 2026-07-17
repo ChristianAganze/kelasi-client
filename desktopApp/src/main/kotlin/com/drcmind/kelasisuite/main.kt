@@ -1,3 +1,4 @@
+@file:JvmName("DesktopLauncher")
 package com.drcmind.kelasisuite
 
 import androidx.compose.ui.window.Window

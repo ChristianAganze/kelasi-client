@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Architecture
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
@@ -332,22 +333,55 @@ sealed interface Route : NavKey {
     @Serializable
     data object TeacherAdmin : Route {
         @Serializable
-        data object Project : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Home
-            override val label: String = "Project"
+        data object Dashboard : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Dashboard
+            override val label: String = "Tableau de bord"
         }
 
         @Serializable
-        data object Profile : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Person
-            override val label: String = "Profile"
+        data object Preparation : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.WorkspacePremium
+            override val label: String = "Préparations"
         }
 
         @Serializable
-        data object Settings : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Settings
-            override val label: String = "Settings"
+        data object ClassLog : NavigationBarRoute {
+            override val icon: ImageVector = Icons.AutoMirrored.Filled.Notes
+            override val label: String = "Journal de classe"
         }
+
+        @Serializable
+        data object Schedule : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.CalendarMonth
+            override val label: String = "Horaire"
+        }
+
+        @Serializable
+        data object Classes : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.School
+            override val label: String = "Mes Classes"
+        }
+
+        @Serializable
+        data object Communication : NavigationBarRoute {
+            override val icon: ImageVector = Icons.AutoMirrored.Filled.Chat
+            override val label: String = "Messages"
+        }
+
+        @Serializable
+        data object Reports : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Assessment
+            override val label: String = "Bulletins"
+        }
+
+        val items = listOf(Dashboard, Preparation, ClassLog, Schedule, Classes, Communication, Reports)
+
+        val stateSaver = Saver<NavigationBarRoute, String>(
+            save = { it::class.qualifiedName ?: "" },
+            restore = { qualifiedClass ->
+                items.firstOrNull { it::class.qualifiedName == qualifiedClass } ?: Dashboard
+            }
+        )
     }
 
     @Serializable

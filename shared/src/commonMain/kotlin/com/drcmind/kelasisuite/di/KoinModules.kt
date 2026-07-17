@@ -5,10 +5,18 @@ import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorageImpl
 import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiService
 import com.drcmind.kelasisuite.data.datasource.remote.schoolAdmin.SchoolAdminApiServiceImpl
+import com.drcmind.kelasisuite.data.datasource.remote.communication.CommunicationApiService
+import com.drcmind.kelasisuite.data.datasource.remote.communication.CommunicationApiServiceImpl
 import com.drcmind.kelasisuite.data.datasource.remote.SystemApiService
 import com.drcmind.kelasisuite.data.datasource.remote.SystemApiServiceImpl
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepository
 import com.drcmind.kelasisuite.data.repository.auth.AuthRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.communication.CommunicationRepository
+import com.drcmind.kelasisuite.data.repository.communication.CommunicationRepositoryImpl
+import com.drcmind.kelasisuite.data.repository.teacher.ReportsRepository
+import com.drcmind.kelasisuite.data.repository.teacher.ReportsRepositoryImpl
+import com.drcmind.kelasisuite.domain.util.PdfExporter
+import com.drcmind.kelasisuite.domain.util.PdfExporterImpl
 import com.drcmind.kelasisuite.data.repository.enrollment.EnrollmentRepository
 import com.drcmind.kelasisuite.data.repository.enrollment.EnrollmentRepositoryImpl
 import com.drcmind.kelasisuite.data.repository.parents.ParentsRepository
@@ -38,6 +46,13 @@ import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teach
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentsViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule.ScheduleViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teaching_assignment.TeachingAssignmentViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.classlog.ClassLogViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.dashboard.TeacherDashboardViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.preparation.PreparationViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.classes.ClassesViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.communication.CommunicationViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.reports.ReportsViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.schedule.TeacherScheduleViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.*
 import io.ktor.client.plugins.*
@@ -64,8 +79,10 @@ expect val platformModule: Module
 
 val networkModule = module {
     single { createKtorHttpClient(get()) }
+    single<CommunicationApiService> { CommunicationApiServiceImpl(get()) }
     single<SystemApiService> { SystemApiServiceImpl(get()) }
     single<SchoolAdminApiService> { SchoolAdminApiServiceImpl(get()) }
+    single<com.drcmind.kelasisuite.data.datasource.remote.teacher.TeacherApiService> { com.drcmind.kelasisuite.data.datasource.remote.teacher.TeacherApiServiceImpl(get()) }
 }
 
 val localStorageModule = module {
@@ -93,6 +110,12 @@ val repositoryModule = module {
     single <EnrollmentRepository>{ EnrollmentRepositoryImpl(get(),get()) }
     single<ParentsRepository> { ParentsRepositoryImp(get(), get()) }
     single<AssignmentRepository> { AssignmentRepositoryImpl(get(), get()) }
+    single<com.drcmind.kelasisuite.data.repository.teacher.PreparationRepository> { com.drcmind.kelasisuite.data.repository.teacher.PreparationRepositoryImpl(get()) }
+    single<com.drcmind.kelasisuite.data.repository.teacher.ClassLogRepository> { com.drcmind.kelasisuite.data.repository.teacher.ClassLogRepositoryImpl(get()) }
+    single<com.drcmind.kelasisuite.data.repository.teacher.EvaluationRepository> { com.drcmind.kelasisuite.data.repository.teacher.EvaluationRepositoryImpl(get()) }
+    single<CommunicationRepository> { CommunicationRepositoryImpl(get()) }
+    single<ReportsRepository> { ReportsRepositoryImpl(get()) }
+    single<PdfExporter> { PdfExporterImpl() }
 }
 
 val viewModelModule = module {
@@ -109,6 +132,13 @@ val viewModelModule = module {
     viewModelOf(::SchoolAdminViewModel)
     viewModelOf(::TeachingAssignmentViewModel)
     viewModelOf(::ScheduleViewModel)
+    viewModelOf(::TeacherDashboardViewModel)
+    viewModelOf(::TeacherScheduleViewModel)
+    viewModelOf(::CommunicationViewModel)
+    viewModelOf(::ReportsViewModel)
+    viewModelOf(::PreparationViewModel)
+    viewModelOf(::ClassLogViewModel)
+    viewModelOf(::ClassesViewModel)
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {
