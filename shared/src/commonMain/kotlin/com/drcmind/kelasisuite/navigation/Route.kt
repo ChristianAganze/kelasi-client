@@ -17,12 +17,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ControlPointDuplicate
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GroupWork
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PeopleAlt
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
@@ -88,12 +86,18 @@ sealed interface Route : NavKey {
             override val label: String = "Settings"
         }
 
-        val items = listOf(Dashboard, Curriculum, Subjects, Schools, Templates, Settings)
-
+        val items: List<NavigationBarRoute> = listOf(
+            Dashboard,
+            Curriculum,
+            Subjects,
+            Schools,
+            Templates,
+            Settings
+        )
         val stateSaver = Saver<NavigationBarRoute, String>(
-            save = { it::class.qualifiedName ?: "" },
-            restore = { qualifiedClass ->
-                items.firstOrNull { it::class.qualifiedName == qualifiedClass } ?: Dashboard
+            save = { it.label },
+            restore = { savedLabel ->
+                items.firstOrNull { it.label == savedLabel } ?: Dashboard
             }
         )
     }
@@ -179,11 +183,18 @@ sealed interface Route : NavKey {
                 }
 
             }
-            @Serializable
-            data object EvaluationGrading : Route
 
             @Serializable
-            data object DeliberationsConduct : Route
+            data object EvaluationGrading : Route {
+                @Serializable data object List : Route
+                @Serializable data class Detail(val studentId: Long) : Route
+            }
+
+            @Serializable
+            data object DeliberationsConduct : Route {
+                @Serializable data object List : Route
+                @Serializable data class Detail(val studentId: Long) : Route
+            }
 
             @Serializable
             data object ReportCards : Route
@@ -309,7 +320,7 @@ sealed interface Route : NavKey {
             override val label: String = "Paramètres"
         }
 
-        val items = listOf(
+        val items: List<NavigationBarRoute> = listOf(
             SchoolDashboard,
             Academics,
             Pedagogy,
@@ -322,9 +333,9 @@ sealed interface Route : NavKey {
         )
 
         val stateSaver = Saver<NavigationBarRoute, String>(
-            save = { it::class.qualifiedName ?: "" },
-            restore = { qualifiedClass ->
-                items.firstOrNull { it::class.qualifiedName == qualifiedClass } ?: SchoolDashboard
+            save = { it.label },
+            restore = { savedLabel ->
+                items.firstOrNull { it.label == savedLabel } ?: SchoolDashboard
             }
         )
 
@@ -374,12 +385,12 @@ sealed interface Route : NavKey {
             override val label: String = "Bulletins"
         }
 
-        val items = listOf(Dashboard, Preparation, ClassLog, Schedule, Classes, Communication, Reports)
+        val items: List<NavigationBarRoute> = listOf(Dashboard, Preparation, ClassLog, Schedule, Classes, Communication, Reports)
 
         val stateSaver = Saver<NavigationBarRoute, String>(
-            save = { it::class.qualifiedName ?: "" },
-            restore = { qualifiedClass ->
-                items.firstOrNull { it::class.qualifiedName == qualifiedClass } ?: Dashboard
+            save = { it.label },
+            restore = { savedLabel ->
+                items.firstOrNull { it.label == savedLabel } ?: Dashboard
             }
         )
     }
@@ -387,29 +398,37 @@ sealed interface Route : NavKey {
     @Serializable
     data object ParentAdmin : Route {
         @Serializable
-        data object Project : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Home
-            override val label: String = "Project"
-
-            @Serializable
-            data object ProjectList : Route
-
-            @Serializable
-            data class ProjectDetail(val id: Int) : Route
-
+        data object Dashboard : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Dashboard
+            override val label: String = "Accueil"
         }
 
         @Serializable
-        data object Profile : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Person
-            override val label: String = "Profile"
+        data object Children : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.People
+            override val label: String = "Mes Enfants"
         }
 
         @Serializable
-        data object Settings : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Settings
-            override val label: String = "Settings"
+        data object Finance : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Money
+            override val label: String = "Finances"
         }
+
+        @Serializable
+        data object Communication : NavigationBarRoute {
+            override val icon: ImageVector = Icons.AutoMirrored.Filled.Chat
+            override val label: String = "Messages"
+        }
+
+        val items: List<NavigationBarRoute> = listOf(Dashboard, Children, Finance, Communication)
+
+        val stateSaver = Saver<NavigationBarRoute, String>(
+            save = { it.label },
+            restore = { savedLabel ->
+                items.firstOrNull { it.label == savedLabel } ?: Dashboard
+            }
+        )
     }
 
 }

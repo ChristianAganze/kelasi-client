@@ -5,14 +5,18 @@ import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ClassLogDTO
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
+import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.data.repository.teacher.ClassLogRepository
 import com.drcmind.kelasisuite.data.repository.teacher.PreparationRepository
+import com.drcmind.kelasisuite.data.repository.teacher.toLessonPreparation
 import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
 import com.drcmind.kelasisuite.data.repository.teaching_assignments.AssignmentRepository
 import com.drcmind.kelasisuite.domain.model.teacher.ClassLogEntry
 import com.drcmind.kelasisuite.domain.model.teacher.LessonPreparation
 import com.drcmind.kelasisuite.domain.model.teacher.LogStatus
+import com.drcmind.kelasisuite.domain.model.teacher.StudentEval
 import com.drcmind.kelasisuite.domain.util.Resource
+import com.drcmind.kelasisuite.domain.util.currentSchoolWeekNumber
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,9 +33,13 @@ data class ClassLogState(
     val errorMessage: String? = null,
     val isSaving: Boolean = false,
     val saveSuccess: Boolean = false,
+    val saveError: String? = null,
     val selectedEntryId: String? = null,
     val showStatusDialog: Boolean = false,
-    val showLinkDialog: Boolean = false
+    val showLinkDialog: Boolean = false,
+    val showPresenceDialog: Boolean = false,
+    val presenceStudents: List<StudentEval> = emptyList(),
+    val presenceStudentIds: Set<Long> = emptySet()
 )
 
 class ClassLogViewModel(
@@ -40,12 +48,17 @@ class ClassLogViewModel(
     private val assignmentRepository: AssignmentRepository,
     private val schoolRepository: SchoolRepository,
     private val classLogRepository: ClassLogRepository,
-    private val preparationRepository: PreparationRepository
+    private val preparationRepository: PreparationRepository,
+    private val studentsRepository: StudentsRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(ClassLogState())
     val state: StateFlow<ClassLogState> = _state.asStateFlow()
 
     init {
+        fetchTodaySchedule()
+    }
+
+    fun retry() {
         fetchTodaySchedule()
     }
 
@@ -77,17 +90,27 @@ class ClassLogViewModel(
         // Get today's date
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val dayOfWeek = today.dayOfWeek
-        val currentWeek = 1 // Mocking week 1 for MVP
+        val currentWeek = currentSchoolWeekNumber()
 
         assignmentRepository.getAssignmentsForSchool().collect { assignmentsResource ->
             if (assignmentsResource is Resource.Success) {
                 val myAssignments = assignmentsResource.data?.filter { it.teacherId == teacherProfileId } ?: emptyList()
                 val entries = mutableListOf<ClassLogEntry>()
-                
+                val preparations = mutableListOf<LessonPreparation>()
+
                 for (assignment in myAssignments) {
-                    // Fetch preparations to link
-                    preparationRepository.getPreparations(assignment.id).collect {
-                        // In a real app, we'd map and add these to availablePreparations
+                    // Collect preparations to link (best-effort, ignore errors per assignment)
+                    preparationRepository.getPreparations(assignment.id).collect { prepRes ->
+                        if (prepRes is Resource.Success) {
+                            prepRes.data?.forEach { dto ->
+                                preparations.add(
+                                    dto.toLessonPreparation(
+                                        branch = assignment.subjectName,
+                                        className = assignment.className
+                                    )
+                                )
+                            }
+                        }
                     }
 
                     // Fetch schedule
@@ -101,6 +124,9 @@ class ClassLogViewModel(
                                         timeSlot = "${schedDto.startDayHourTime} - ${schedDto.endDayHourTime}",
                                         className = schedDto.schoolClassName,
                                         subject = schedDto.subjectName,
+                                        teachingAssignmentId = schedDto.teachingAssignmentId,
+                                        scheduleEntryId = schedDto.id,
+                                        classId = assignment.classId,
                                         status = LogStatus.NOT_STARTED,
                                         teacherNote = ""
                                     )
@@ -113,7 +139,8 @@ class ClassLogViewModel(
                 _state.update { 
                     it.copy(
                         isLoading = false, 
-                        scheduleToday = entries.sortedBy { e -> e.timeSlot }
+                        scheduleToday = entries.sortedBy { e -> e.timeSlot },
+                        availablePreparations = preparations
                     ) 
                 }
             } else if (assignmentsResource is Resource.Error) {
@@ -131,11 +158,83 @@ class ClassLogViewModel(
     }
 
     fun dismissDialogs() {
-        _state.update { it.copy(selectedEntryId = null, showStatusDialog = false, showLinkDialog = false) }
+        _state.update {
+            it.copy(
+                selectedEntryId = null,
+                showStatusDialog = false,
+                showLinkDialog = false,
+                showPresenceDialog = false,
+                presenceStudents = emptyList(),
+                presenceStudentIds = emptySet()
+            )
+        }
     }
 
     fun dismissSnackbar() {
-        _state.update { it.copy(saveSuccess = false, errorMessage = null) }
+        _state.update { it.copy(saveSuccess = false, saveError = null) }
+    }
+
+    fun selectEntryForPresence(id: String) {
+        val entry = _state.value.scheduleToday.find { it.id == id } ?: return
+        val classId = entry.classId ?: return
+        _state.update { it.copy(selectedEntryId = id, showPresenceDialog = true) }
+        viewModelScope.launch {
+            studentsRepository.getStudentsForClass(classId).collect { res ->
+                if (res is Resource.Success) {
+                    val students = (res.data ?: emptyList()).map { dto ->
+                        StudentEval(
+                            id = dto.id.toString(),
+                            firstName = dto.firstName,
+                            lastName = dto.lastName
+                        )
+                    }
+                    val present = entry.presentStudentIds
+                    _state.update {
+                        it.copy(
+                            presenceStudents = students,
+                            presenceStudentIds = present.ifEmpty { students.map { s -> s.id.toLong() }.toSet() }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun togglePresence(studentId: Long) {
+        _state.update { state ->
+            val ids = if (studentId in state.presenceStudentIds) {
+                state.presenceStudentIds - studentId
+            } else {
+                state.presenceStudentIds + studentId
+            }
+            state.copy(presenceStudentIds = ids)
+        }
+    }
+
+    fun confirmPresence() {
+        val entryId = _state.value.selectedEntryId ?: return
+        val present = _state.value.presenceStudentIds
+        _state.update { state ->
+            val updatedSchedule = state.scheduleToday.map {
+                if (it.id == entryId) it.copy(presentStudentIds = present) else it
+            }
+            state.copy(
+                scheduleToday = updatedSchedule,
+                showPresenceDialog = false,
+                selectedEntryId = null,
+                presenceStudents = emptyList(),
+                presenceStudentIds = emptySet()
+            )
+        }
+    }
+
+    fun submitEntry(id: String) {
+        _state.update { state ->
+            val updatedSchedule = state.scheduleToday.map {
+                if (it.id == id) it.copy(submitted = true) else it
+            }
+            state.copy(scheduleToday = updatedSchedule)
+        }
     }
 
     fun updateStatus(status: LogStatus, note: String, homework: String) {
@@ -176,13 +275,17 @@ class ClassLogViewModel(
             
             for (entry in _state.value.scheduleToday) {
                 if (entry.status == LogStatus.COMPLETED) {
+                    val teachingAssignmentId = entry.teachingAssignmentId
+                    if (teachingAssignmentId == null) continue
                     val dto = ClassLogDTO(
-                        teachingAssignmentId = entry.id.toLongOrNull() ?: 0L, // Should map correctly in real app
+                        teachingAssignmentId = teachingAssignmentId,
+                        scheduleEntryId = entry.scheduleEntryId,
                         date = currentDate,
                         taughtSubject = entry.subject,
                         homework = entry.homework,
                         teacherSignature = true,
-                        adminSignature = false
+                        adminSignature = entry.submitted,
+                        presentStudentIds = entry.presentStudentIds.toList()
                     )
                     classLogRepository.createClassLog(dto).collect { res ->
                         if (res is Resource.Error) hasError = true
@@ -194,7 +297,7 @@ class ClassLogViewModel(
                 it.copy(
                     isSaving = false, 
                     saveSuccess = !hasError,
-                    errorMessage = if (hasError) "Certains journaux n'ont pas pu être sauvegardés." else null
+                    saveError = if (hasError) "Certains journaux n'ont pas pu être sauvegardés." else null
                 ) 
             }
         }

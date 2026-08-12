@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface PreparationRepository {
     fun createPreparation(request: LessonPreparationDTO): Flow<Resource<LessonPreparationDTO>>
     fun getPreparations(teachingAssignmentId: Long): Flow<Resource<List<LessonPreparationDTO>>>
+    fun submitPreparation(preparationId: Long): Flow<Resource<LessonPreparationDTO>>
 }

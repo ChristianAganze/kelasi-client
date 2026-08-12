@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,87 +27,35 @@ import androidx.compose.ui.unit.sp
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.koinInject
 
+@Suppress("SuspiciousIndentation")
 @Composable
 fun SchoolDashboardScreen(
     viewModel: SchoolDashboardViewModel = koinInject(),
     onAcademicClick: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
 
-    LazyVerticalGrid(
-        // S'adapte automatiquement à la largeur disponible (min 300dp par colonne)
-        columns = GridCells.Adaptive(minSize = 200.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Header Section (Prend toute la largeur)
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            HeaderSection(state.username)
-        }
+        ) {
+            Icon(Icons.Default.School, contentDescription = null)
+           Text(
+               text = "Cet Ecran sera Bientot implementer",
+               fontSize = 16.sp,
+               fontWeight = FontWeight.Bold,
+               color = MaterialTheme.colorScheme.onSurface,
+               letterSpacing = (-0.5).sp
+           )
 
-
-        item(span = { GridItemSpan(if (maxLineSpan >= 2) 2 else 1) }) {
-            BentoCard(
-                title = "Gestion Académique",
-                description = "Données élèves, affectations des classes et structure organisationnelle de l'établissement.",
-                icon = AppIcons.school,
-                modifier = Modifier.height(120.dp),
-                isDark = false,
-                onClick = onAcademicClick
-            )
-        }
-        item {
-            BentoCard(
-                title = "Curriculum & Notes",
-                description = "Grilles d'évaluation, gestion des matières et suivi des performances.",
-                icon = AppIcons.curriculum,
-                modifier = Modifier.height(140.dp),
-                isDark = true
-            )
         }
 
 
 
-        item {
-            BentoCard(
-                title = "Inscriptions",
-                description = "Gérez les nouvelles admissions et les profils numériques.",
-                icon = AppIcons.personAdd,
-                modifier = Modifier.height(140.dp),
-                isDark = false
-            )
-        }
 
-        item {
-            BentoCard(
-                title = "Finances",
-                description = "Suivi des paiements, frais de scolarité et cycles de facturation.",
-                icon = AppIcons.payments,
-                modifier = Modifier.height(140.dp),
-                isDark = false
-            )
-        }
-
-        item {
-            BentoCard(
-                title = "Communication",
-                description = "Mises à jour en temps réel, annonces et messagerie parents.",
-                icon = AppIcons.communication,
-                modifier = Modifier.height(140.dp),
-                isDark = false
-            )
-        }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Column {
-                Spacer(modifier = Modifier.height(32.dp))
-                FooterSection(state.systemStatus, state.lastConnection)
-            }
-        }
-    }
 }
 
 @Composable

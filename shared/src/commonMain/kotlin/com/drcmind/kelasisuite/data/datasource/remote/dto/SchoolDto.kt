@@ -105,16 +105,9 @@ data class AcademicYearDTO(
 )
 
 @Serializable
-data class EvaluationPeriodBySchoolDTO(
-    val schoolSectionName : String,
-    val evaluationPeriods : List<EvaluationPeriodDTO>
-)
-
-
-@Serializable
 data class EvaluationPeriodDTO(
     val id: Long? = null,
-    val label: String,
+    val label: String = "",
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
     val schoolSectionName: String? = null

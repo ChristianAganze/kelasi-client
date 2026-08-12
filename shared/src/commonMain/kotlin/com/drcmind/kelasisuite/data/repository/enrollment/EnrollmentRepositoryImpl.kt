@@ -27,11 +27,13 @@ class EnrollmentRepositoryImpl(
     override fun getEnrolledStudents(): Flow<Resource<List<EnrollmentDto>>> {
         return flow {
             emit(Resource.Loading())
-            val schoolId = settingsStorage.getUserInfo().schoolId ?: return@flow
+            val schoolId = settingsStorage.getUserInfo().schoolId
+                ?: run {
+                    emit(Resource.Error(message = "École non identifiée."))
+                    return@flow
+                }
             val academicYearId = settingsStorage.getActiveAcademicYear()?.id
 
-            println("AAAAAAAAAAAAA : $schoolId")
-            println("BBBBBBBBBBBBB : $academicYearId")
             if (academicYearId == null) {
                 emit(Resource.Error(message = "Aucune année académique active disponible."))
                 return@flow

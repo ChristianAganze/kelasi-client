@@ -13,6 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
+import com.drcmind.kelasisuite.ui.components.EmptyStateCard
+import com.drcmind.kelasisuite.ui.components.ErrorStateCard
+import com.drcmind.kelasisuite.ui.components.LoadingState
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,18 +43,18 @@ fun TeacherScheduleScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                LoadingState(modifier = Modifier.fillMaxSize())
             } else if (state.errorMessage != null) {
-                Text(
-                    text = state.errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.error,
+                ErrorStateCard(
+                    message = state.errorMessage,
+                    onRetry = viewModel::retry,
                     modifier = Modifier.align(Alignment.Center).padding(16.dp)
                 )
             } else if (state.scheduleEntries.isEmpty()) {
-                Text(
-                    text = "Aucun cours prévu pour la semaine ${state.currentWeekNumber}",
-                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
-                    style = MaterialTheme.typography.bodyLarge
+                EmptyStateCard(
+                    title = "Aucun cours pour la semaine ${state.currentWeekNumber}",
+                    subtitle = "L'horaire de cette semaine est vide. Revenez plus tard pour consulter votre planning.",
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
                 )
             } else {
                 LazyColumn(

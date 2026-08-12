@@ -4,9 +4,10 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateParentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateScheduleEntryDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ClassLogReviewDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
-import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentRequest
@@ -15,6 +16,9 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.PreparationReviewDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.PreparationReviewUpdateRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ProgramRadarDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
@@ -54,7 +58,16 @@ interface SchoolAdminApiService {
     suspend fun updateClass(classId: Long, request: CreateClassFromTemplateRequest): SchoolClassDTO
     suspend fun deleteClass(classId: Long)
     suspend fun getAcademicYears(): List<AcademicYearDTO>
-    suspend fun getEvaluationPeriodsBySchool(schoolId: Long): List<EvaluationPeriodBySchoolDTO>
+    suspend fun getEvaluationPeriodsBySchool(schoolId: Long): Map<String, List<EvaluationPeriodDTO>>
+
+    suspend fun getProgramRadar(schoolId: Long, academicYearId: Long): ProgramRadarDto
+
+    suspend fun getPreparationsForReview(schoolId: Long, academicYearId: Long): List<PreparationReviewDto>
+    suspend fun validatePreparation(preparationId: Long, request: PreparationReviewUpdateRequest): PreparationReviewDto
+    suspend fun rejectPreparation(preparationId: Long, request: PreparationReviewUpdateRequest): PreparationReviewDto
+
+    suspend fun getClassLogsForReview(schoolId: Long, academicYearId: Long): List<ClassLogReviewDto>
+    suspend fun signClassLog(classLogId: Long): ClassLogReviewDto
 
     suspend fun createStudent(creationRequest: StudentCreationRequest): StudentDTO
     suspend fun updateStudent(studentId: Long, updateRequest: StudentCreationRequest): StudentDTO

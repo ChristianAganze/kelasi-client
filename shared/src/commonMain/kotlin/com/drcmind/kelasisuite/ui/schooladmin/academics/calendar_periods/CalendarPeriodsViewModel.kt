@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
-import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
@@ -188,7 +188,7 @@ class CalendarPeriodsViewModel(
                 }
 
                 is Resource.Success<*> -> {
-                    uiState.update { it.copy(evaluationPeriods = ressource.data ?: emptyList()) }
+                    uiState.update { it.copy(evaluationPeriods = ressource.data ?: emptyMap()) }
                 }
 
             }
@@ -440,7 +440,7 @@ data class CalendarPeriodsUiState(
     val majors: List<MajorDto> = emptyList(),
     val schoolSections: List<SchoolSectionDTO> = emptyList(),
     val schoolSectionConfigs: List<SchoolSectionConfigDto> = emptyList(),
-    val evaluationPeriods: List<EvaluationPeriodBySchoolDTO> = emptyList(),
+    val evaluationPeriods: Map<String, List<EvaluationPeriodDTO>> = emptyMap(),
     val learningTimeConfigs: List<LearningTimeKey> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingSchoolSectionConfigDetails: Boolean = false,

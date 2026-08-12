@@ -19,7 +19,9 @@ data class CommunicationState(
     val conversations: List<ConversationDTO> = emptyList(),
     val selectedConversation: ConversationDTO? = null,
     val messages: List<MessageDTO> = emptyList(),
-    val errorMessage: String? = null
+    val conversationError: String? = null,
+    val messageError: String? = null,
+    val sendError: String? = null
 )
 
 class CommunicationViewModel(
@@ -36,16 +38,32 @@ class CommunicationViewModel(
             _state.update { it.copy(currentUserId = userId) }
             fetchConversations(userId)
         } else {
-            _state.update { it.copy(errorMessage = "Utilisateur non connecté") }
+            _state.update { it.copy(conversationError = "Utilisateur non connecté") }
         }
+    }
+
+    fun retryConversations() {
+        _state.update { it.copy(conversationError = null) }
+        val userId = settingsStorage.getUserInfo().userId ?: return
+        fetchConversations(userId)
+    }
+
+    fun retryMessages() {
+        _state.update { it.copy(messageError = null) }
+        val conversationId = _state.value.selectedConversation?.id ?: return
+        fetchMessages(conversationId)
+    }
+
+    fun dismissSendError() {
+        _state.update { it.copy(sendError = null) }
     }
 
     private fun fetchConversations(userId: Long) {
         viewModelScope.launch {
             communicationRepository.getConversations(userId).collect { resource ->
                 when (resource) {
-                    is Resource.Error -> _state.update { it.copy(isLoading = false, errorMessage = resource.message) }
-                    is Resource.Loading -> _state.update { it.copy(isLoading = true, errorMessage = null) }
+                    is Resource.Error -> _state.update { it.copy(isLoading = false, conversationError = resource.message) }
+                    is Resource.Loading -> _state.update { it.copy(isLoading = true, conversationError = null) }
                     is Resource.Success -> _state.update { it.copy(isLoading = false, conversations = resource.data ?: emptyList()) }
                 }
             }
@@ -61,9 +79,9 @@ class CommunicationViewModel(
         viewModelScope.launch {
             communicationRepository.getMessages(conversationId).collect { resource ->
                 when (resource) {
-                    is Resource.Error -> _state.update { it.copy(isLoading = false, errorMessage = resource.message) }
-                    is Resource.Loading -> _state.update { it.copy(isLoading = true, errorMessage = null) }
-                    is Resource.Success -> _state.update { it.copy(isLoading = false, messages = resource.data ?: emptyList()) }
+                    is Resource.Error -> _state.update { it.copy(messageError = resource.message) }
+                    is Resource.Loading -> _state.update { it.copy(messageError = null) }
+                    is Resource.Success -> _state.update { it.copy(messages = resource.data ?: emptyList()) }
                 }
             }
         }
@@ -84,7 +102,7 @@ class CommunicationViewModel(
         viewModelScope.launch {
             communicationRepository.sendMessage(newMessage).collect { resource ->
                 when (resource) {
-                    is Resource.Error -> _state.update { it.copy(errorMessage = resource.message) }
+                    is Resource.Error -> _state.update { it.copy(sendError = resource.message) }
                     is Resource.Loading -> { /* Do nothing visually to keep it fast */ }
                     is Resource.Success -> {
                         resource.data?.let { sentMessage ->

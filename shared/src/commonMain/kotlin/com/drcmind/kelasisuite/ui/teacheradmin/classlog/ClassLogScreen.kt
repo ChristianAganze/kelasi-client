@@ -8,8 +8,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.WatchLater
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.drcmind.kelasisuite.domain.model.teacher.ClassLogEntry
 import com.drcmind.kelasisuite.domain.model.teacher.LogStatus
+import com.drcmind.kelasisuite.domain.model.teacher.PreparationStatus
+import com.drcmind.kelasisuite.ui.components.EmptyStateCard
+import com.drcmind.kelasisuite.ui.components.ErrorStateCard
+import com.drcmind.kelasisuite.ui.components.LoadingState
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,13 +38,16 @@ fun ClassLogScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(state.saveSuccess, state.errorMessage) {
+    LaunchedEffect(state.saveSuccess, state.saveError) {
         if (state.saveSuccess) {
             snackbarHostState.showSnackbar("Journaux de classe sauvegardés avec succès.")
             viewModel.dismissSnackbar()
-        } else if (state.errorMessage != null) {
-            snackbarHostState.showSnackbar(state.errorMessage ?: "Erreur.")
-            viewModel.dismissSnackbar()
+        } else {
+            val saveError = state.saveError
+            if (saveError != null) {
+                snackbarHostState.showSnackbar(saveError)
+                viewModel.dismissSnackbar()
+            }
         }
     }
 
@@ -74,22 +83,30 @@ fun ClassLogScreen(
 
             if (state.isLoading) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    LoadingState(modifier = Modifier.fillMaxWidth().height(200.dp))
+                }
+            } else if (state.errorMessage != null) {
+                item {
+                    ErrorStateCard(
+                        message = state.errorMessage,
+                        onRetry = viewModel::retry
+                    )
                 }
             } else if (state.scheduleToday.isEmpty()) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Text("Aucun cours n'est prévu pour vous aujourd'hui.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    EmptyStateCard(
+                        title = "Aucun cours aujourd'hui",
+                        subtitle = "Vous n'avez aucun cours prévu pour aujourd'hui."
+                    )
                 }
             } else {
                 items(state.scheduleToday) { entry ->
                     ClassLogCard(
                         entry = entry,
                         onLinkClick = { viewModel.selectEntryForLinking(entry.id) },
-                        onStatusClick = { viewModel.selectEntryForStatusUpdate(entry.id) }
+                        onStatusClick = { viewModel.selectEntryForStatusUpdate(entry.id) },
+                        onPresenceClick = { viewModel.selectEntryForPresence(entry.id) },
+                        onSubmitClick = { viewModel.submitEntry(entry.id) }
                     )
                 }
             }
@@ -110,13 +127,24 @@ fun ClassLogScreen(
             onConfirm = { prepId -> viewModel.linkPreparation(prepId) }
         )
     }
+
+    if (state.showPresenceDialog) {
+        PresenceDialog(
+            state = state,
+            onDismiss = { viewModel.dismissDialogs() },
+            onToggle = { studentId -> viewModel.togglePresence(studentId) },
+            onConfirm = { viewModel.confirmPresence() }
+        )
+    }
 }
 
 @Composable
 fun ClassLogCard(
     entry: ClassLogEntry,
     onLinkClick: () -> Unit,
-    onStatusClick: () -> Unit
+    onStatusClick: () -> Unit,
+    onPresenceClick: () -> Unit,
+    onSubmitClick: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -200,11 +228,40 @@ fun ClassLogCard(
                 if (entry.teacherNote.isNotBlank()) {
                     Text(text = "Note: ${entry.teacherNote}", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
                 }
+                if (entry.presentStudentIds.isNotEmpty()) {
+                    Text(
+                        text = "${entry.presentStudentIds.size} élève(s) présent(s)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
-            
-            // Action
-            Button(onClick = onStatusClick) {
-                Text(if (entry.status == LogStatus.NOT_STARTED) "Démarrer" else "Bilan")
+
+            Column(horizontalAlignment = Alignment.End) {
+                if (entry.submitted) {
+                    Badge(modifier = Modifier.align(Alignment.End)) {
+                        Text("Soumis")
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = onStatusClick) {
+                    Text(if (entry.status == LogStatus.NOT_STARTED) "Démarrer" else "Bilan")
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedButton(onClick = onPresenceClick) {
+                    Icon(Icons.Default.People, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Présences")
+                }
+                if (!entry.submitted) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    TextButton(onClick = onSubmitClick, enabled = entry.status == LogStatus.COMPLETED) {
+                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Soumettre pour signature")
+                    }
+                }
             }
         }
     }
@@ -279,22 +336,75 @@ fun LinkPreparationDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
+    val approvedPreparations = state.availablePreparations.filter { it.status == PreparationStatus.APPROVED }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Lier une préparation") },
+        title = { Text("Lier une préparation validée") },
         text = {
-            LazyColumn {
-                items(state.availablePreparations) { prep ->
-                    ListItem(
-                        headlineContent = { Text(prep.header.lessonSubject) },
-                        supportingContent = { Text("${prep.header.branch} - ${prep.header.className}") },
-                        modifier = Modifier.clickable { onConfirm(prep.id) }
+            if (approvedPreparations.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Aucune préparation approuvée disponible. Créez et soumettez d'abord une préparation.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
-                    HorizontalDivider()
+                }
+            } else {
+                LazyColumn {
+                    items(approvedPreparations) { prep ->
+                        ListItem(
+                            headlineContent = { Text(prep.header.lessonSubject) },
+                            supportingContent = { Text("${prep.header.branch} - ${prep.header.className}") },
+                            modifier = Modifier.clickable { onConfirm(prep.id) }
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         },
         confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Annuler")
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PresenceDialog(
+    state: ClassLogState,
+    onDismiss: () -> Unit,
+    onToggle: (Long) -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Élèves présents") },
+        text = {
+            LazyColumn {
+                items(state.presenceStudents) { student ->
+                    ListItem(
+                        headlineContent = { Text("${student.firstName} ${student.lastName}") },
+                        leadingContent = {
+                            Checkbox(
+                                checked = student.id.toLong() in state.presenceStudentIds,
+                                onCheckedChange = { onToggle(student.id.toLong()) }
+                            )
+                        }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Valider")
+            }
+        },
+        dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Annuler")
             }

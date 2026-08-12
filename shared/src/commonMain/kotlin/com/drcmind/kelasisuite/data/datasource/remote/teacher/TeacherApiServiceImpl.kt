@@ -22,6 +22,10 @@ class TeacherApiServiceImpl(
         return httpClient.get("teacher/preparations/assignment/$teachingAssignmentId").body()
     }
 
+    override suspend fun submitPreparation(preparationId: Long): LessonPreparationDTO {
+        return httpClient.put("teacher/preparations/$preparationId/submit").body()
+    }
+
     override suspend fun createClassLog(request: ClassLogDTO): ClassLogDTO {
         return httpClient.post("teacher/class-logs") {
             setBody(request)

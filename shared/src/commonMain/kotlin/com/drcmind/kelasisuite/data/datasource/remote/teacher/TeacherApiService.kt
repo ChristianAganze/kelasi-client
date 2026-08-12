@@ -9,6 +9,7 @@ interface TeacherApiService {
     // Lesson Preparations
     suspend fun createPreparation(request: LessonPreparationDTO): LessonPreparationDTO
     suspend fun getPreparations(teachingAssignmentId: Long): List<LessonPreparationDTO>
+    suspend fun submitPreparation(preparationId: Long): LessonPreparationDTO
     
     // Class Logs
     suspend fun createClassLog(request: ClassLogDTO): ClassLogDTO

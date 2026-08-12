@@ -6,9 +6,11 @@ import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LessonPreparationDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.data.repository.teacher.PreparationRepository
+import com.drcmind.kelasisuite.data.repository.teacher.toLessonPreparation
 import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
 import com.drcmind.kelasisuite.data.repository.teaching_assignments.AssignmentRepository
 import com.drcmind.kelasisuite.domain.model.teacher.*
+import com.drcmind.kelasisuite.domain.model.teacher.PreparationStatus
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +29,7 @@ data class PreparationState(
     val errorMessage: String? = null,
     val isSaving: Boolean = false,
     val saveSuccess: Boolean = false,
+    val saveError: String? = null,
     val isCreating: Boolean = false,
     
     // Header Draft
@@ -73,9 +76,20 @@ class PreparationViewModel(
         fetchAssignments()
     }
 
+    fun retry() {
+        _state.update { it.copy(errorMessage = null) }
+        fetchAssignments()
+    }
+
     private fun fetchAssignments() {
-        val schoolId = settingsStorage.getSchool()?.id ?: return
-        val userId = settingsStorage.getUserInfo().userId ?: return
+        val schoolId = settingsStorage.getSchool()?.id
+        val userId = settingsStorage.getUserInfo().userId
+        if (schoolId == null || userId == null) {
+            _state.update {
+                it.copy(isLoading = false, errorMessage = "Connexion incomplète : impossible de charger les préparations.")
+            }
+            return
+        }
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
@@ -136,26 +150,9 @@ class PreparationViewModel(
                     is Resource.Success -> {
                         val dtos = resource.data ?: emptyList()
                         val mapped = dtos.map { dto ->
-                            LessonPreparation(
-                                id = dto.id.toString(),
-                                header = PrepHeader(
-                                    branch = _state.value.draftBranch,
-                                    subBranch = "", // Can parse from dto if needed
-                                    className = _state.value.draftClass,
-                                    revisionSubject = "",
-                                    lessonSubject = dto.subject,
-                                    operationalObjective = dto.operationalObjective,
-                                    didacticMaterial = "",
-                                    bibliography = dto.reference
-                                ),
-                                steps = PrepSteps(
-                                    introduction = StepDetails("", "", dto.introPhase),
-                                    development = StepDetails("", "", dto.developmentPhase),
-                                    synthesis = StepDetails("", "", dto.synthesisPhase),
-                                    application = StepDetails("", "", dto.applicationPhase)
-                                ),
-                                status = PreparationStatus.READY,
-                                dateCreated = dto.date
+                            dto.toLessonPreparation(
+                                branch = _state.value.draftBranch,
+                                className = _state.value.draftClass
                             )
                         }
                         _state.update { it.copy(isLoading = false, preparations = mapped) }
@@ -208,7 +205,29 @@ class PreparationViewModel(
     fun updateAppContent(v: String) = _state.update { it.copy(draftAppContent = v) }
 
     fun dismissSnackbar() {
-        _state.update { it.copy(saveSuccess = false, errorMessage = null) }
+        _state.update { it.copy(saveSuccess = false, saveError = null) }
+    }
+
+    fun submitPreparation(prepId: String) {
+        val id = prepId.toLongOrNull() ?: return
+        viewModelScope.launch {
+            preparationRepository.submitPreparation(id).collect { res ->
+                when (res) {
+                    is Resource.Success -> {
+                        _state.update { state ->
+                            val updated = state.preparations.map {
+                                if (it.id == prepId) it.copy(status = PreparationStatus.SUBMITTED) else it
+                            }
+                            state.copy(preparations = updated, saveSuccess = true, saveError = null)
+                        }
+                    }
+
+                    is Resource.Error -> _state.update { it.copy(saveError = res.message) }
+
+                    is Resource.Loading -> {}
+                }
+            }
+        }
     }
 
     fun savePreparation() {
@@ -246,7 +265,7 @@ class PreparationViewModel(
                     _state.update { 
                         it.copy(
                             isSaving = false, 
-                            errorMessage = res.message
+                            saveError = res.message
                         ) 
                     }
                 }

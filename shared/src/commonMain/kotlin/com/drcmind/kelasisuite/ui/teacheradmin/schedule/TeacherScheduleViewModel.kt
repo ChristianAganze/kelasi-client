@@ -8,15 +8,13 @@ import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.data.repository.teaching_assignments.AssignmentRepository
 import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
 import com.drcmind.kelasisuite.domain.util.Resource
+import com.drcmind.kelasisuite.domain.util.currentSchoolWeekNumber
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 data class TeacherScheduleState(
     val isLoading: Boolean = false,
@@ -36,13 +34,14 @@ class TeacherScheduleViewModel(
     val state: StateFlow<TeacherScheduleState> = _state.asStateFlow()
 
     init {
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        // Calcul simple pour le numéro de semaine de l'année
-        // Simple calculation for the week number of the year
-        val currentWeek = now.dayOfYear / 7 + 1
+        val currentWeek = currentSchoolWeekNumber()
         _state.update { it.copy(currentWeekNumber = currentWeek) }
 
         loadTeacherSchedule(currentWeek)
+    }
+
+    fun retry() {
+        loadTeacherSchedule(_state.value.currentWeekNumber)
     }
 
     private fun loadTeacherSchedule(weekNumber: Int) {

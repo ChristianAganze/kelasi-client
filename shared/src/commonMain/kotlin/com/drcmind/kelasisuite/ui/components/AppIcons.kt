@@ -7,7 +7,6 @@ import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.*
 
 object AppIcons {
-
     val dashboard = Icons.Rounded.Dashboard
     val curriculum = Icons.AutoMirrored.Rounded.MenuBook
     val enrollment = Icons.Rounded.PersonAdd

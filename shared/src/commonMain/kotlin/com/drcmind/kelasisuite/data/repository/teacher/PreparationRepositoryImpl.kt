@@ -30,4 +30,14 @@ class PreparationRepositoryImpl(
             emit(Resource.Error(message = it.message.toString()))
         }
     }
+
+    override fun submitPreparation(preparationId: Long): Flow<Resource<LessonPreparationDTO>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.submitPreparation(preparationId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
 }

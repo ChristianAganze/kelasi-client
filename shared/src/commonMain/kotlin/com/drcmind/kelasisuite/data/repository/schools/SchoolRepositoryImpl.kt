@@ -154,11 +154,113 @@ class SchoolRepositoryImpl(
         return settingsStorage.getActiveAcademicYear()
     }
 
-    override fun getEvaluationPeriodsBySchool(): Flow<Resource<List<EvaluationPeriodBySchoolDTO>>> {
+    override fun getEvaluationPeriodsBySchool(): Flow<Resource<Map<String, List<EvaluationPeriodDTO>>>> {
         return flow {
             emit(Resource.Loading())
             val schoolId = settingsStorage.getUserInfo().schoolId
             val response = apiService.getEvaluationPeriodsBySchool(schoolId!!)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getProgramRadar(): Flow<Resource<ProgramRadarDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val schoolId = settingsStorage.getUserInfo().schoolId
+            val academicYearId = settingsStorage.getActiveAcademicYear()?.id
+            if (schoolId == null) {
+                emit(Resource.Error(message = "École introuvable dans la session."))
+                return@flow
+            }
+            if (academicYearId == null) {
+                emit(Resource.Error(message = "Aucune année académique active."))
+                return@flow
+            }
+            val response = apiService.getProgramRadar(schoolId, academicYearId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getPreparationsForReview(): Flow<Resource<List<PreparationReviewDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val schoolId = settingsStorage.getUserInfo().schoolId
+            val academicYearId = settingsStorage.getActiveAcademicYear()?.id
+            if (schoolId == null) {
+                emit(Resource.Error(message = "École introuvable dans la session."))
+                return@flow
+            }
+            if (academicYearId == null) {
+                emit(Resource.Error(message = "Aucune année académique active."))
+                return@flow
+            }
+            val response = apiService.getPreparationsForReview(schoolId, academicYearId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun validatePreparation(
+        preparationId: Long,
+        comment: String?
+    ): Flow<Resource<PreparationReviewDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.validatePreparation(
+                preparationId,
+                PreparationReviewUpdateRequest(comment = comment)
+            )
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun rejectPreparation(
+        preparationId: Long,
+        comment: String?
+    ): Flow<Resource<PreparationReviewDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.rejectPreparation(
+                preparationId,
+                PreparationReviewUpdateRequest(comment = comment)
+            )
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun getClassLogsForReview(): Flow<Resource<List<ClassLogReviewDto>>> {
+        return flow {
+            emit(Resource.Loading())
+            val schoolId = settingsStorage.getUserInfo().schoolId
+            val academicYearId = settingsStorage.getActiveAcademicYear()?.id
+            if (schoolId == null) {
+                emit(Resource.Error(message = "École introuvable dans la session."))
+                return@flow
+            }
+            if (academicYearId == null) {
+                emit(Resource.Error(message = "Aucune année académique active."))
+                return@flow
+            }
+            val response = apiService.getClassLogsForReview(schoolId, academicYearId)
+            emit(Resource.Success(response))
+        }.catch {
+            emit(Resource.Error(message = it.message.toString()))
+        }
+    }
+
+    override fun signClassLog(classLogId: Long): Flow<Resource<ClassLogReviewDto>> {
+        return flow {
+            emit(Resource.Loading())
+            val response = apiService.signClassLog(classLogId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))

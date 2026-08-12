@@ -38,6 +38,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import com.drcmind.kelasisuite.ui.components.EmptyDetailPlaceholder
+import com.drcmind.kelasisuite.ui.components.ErrorStateCard
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teachers.AddTeacherDialog
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -149,6 +150,19 @@ fun TeachingAssignmentScreen(
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator()
                         }
+                    } else if (uiState.error != null && uiState.teachingAssignments.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            ErrorStateCard(
+                                message = uiState.error,
+                                onRetry = viewModel::loadSchoolTeachingAssignments
+                            )
+                        }
                     } else {
                         OutlinedCard(
                             modifier = Modifier
@@ -197,7 +211,19 @@ fun TeachingAssignmentScreen(
                                     ) {
                                         Icon(AppIcons.peoples, contentDescription = null, Modifier.size(100.dp))
                                         Spacer(Modifier.height(10.dp))
-                                        Text("Aucun élève/étudiant trouvé")
+                                        Text(
+                                            "Aucun cours affecté pour le moment.",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(
+                                            "Les affectations de cours de cette année académique apparaîtront ici.",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(horizontal = 24.dp)
+                                        )
                                     }
                                     false -> LazyColumn {
                                         items(uiState.teachingAssignments) { assignment ->

@@ -54,6 +54,7 @@ fun StudentsScreen(
     viewModel: StudentsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.listState.collectAsState()
+    var isAddStudentDialogOpen by remember { mutableStateOf(false) }
     var isUpdateStudentDialogOpen by remember { mutableStateOf(false) }
 
         val backStack = rememberNavBackStack(
@@ -134,7 +135,7 @@ fun StudentsScreen(
                                     ) {}
                                 },
                                 actions = {
-                                    IconButton(onClick = { isUpdateStudentDialogOpen = true }) {
+                                    IconButton(onClick = { isAddStudentDialogOpen = true }) {
                                         Icon(Icons.Default.Add, contentDescription = null)
                                     }
                                     IconButton(onClick = {}){
@@ -220,7 +221,7 @@ fun StudentsScreen(
                     StudentDetailScreen(
                         student = uiState.activeStudent,
                         onBack = { backStack.removeLastOrNull() },
-                        onEdit = {},
+                        onEdit = { isUpdateStudentDialogOpen = true },
                         isLoading = uiState.isLoading,
                         error = uiState.error
                     )
@@ -228,11 +229,26 @@ fun StudentsScreen(
             }
         )
 
-        if(isUpdateStudentDialogOpen){
+        if (isAddStudentDialogOpen) {
+            AddStudentDialog(
+                studentId = null,
+                onDismiss = { isAddStudentDialogOpen = false },
+                onStudentAdded = {
+                    viewModel.loadStudents()
+                    isAddStudentDialogOpen = false
+                },
+                viewModel = viewModel
+            )
+        }
+
+        if (isUpdateStudentDialogOpen) {
             AddStudentDialog(
                 studentId = uiState.activeStudent?.id,
-                onDismiss = {isUpdateStudentDialogOpen = false},
-                onStudentAdded = {},
+                onDismiss = { isUpdateStudentDialogOpen = false },
+                onStudentAdded = {
+                    viewModel.loadStudents()
+                    isUpdateStudentDialogOpen = false
+                },
                 viewModel = viewModel
             )
         }

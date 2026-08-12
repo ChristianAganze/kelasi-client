@@ -3,6 +3,7 @@ package com.drcmind.kelasisuite.ui.teacheradmin.classes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.TeachingAssignmentDTO
 import com.drcmind.kelasisuite.data.repository.teachers.TeachersRepository
 import com.drcmind.kelasisuite.data.repository.teaching_assignments.AssignmentRepository
@@ -19,12 +20,15 @@ import kotlin.time.Clock
 data class ClassesState(
     val availableClasses: List<TeachingAssignmentDTO> = emptyList(),
     val selectedClass: TeachingAssignmentDTO? = null,
+    val evaluationPeriods: List<EvaluationPeriodDTO> = emptyList(),
+    val selectedPeriod: EvaluationPeriodDTO? = null,
     val isLoadingClasses: Boolean = false,
     val errorMessage: String? = null,
     val isLoadingStudents: Boolean = false,
     val studentErrorMessage: String? = null,
     val isSaving: Boolean = false,
     val saveSuccess: Boolean = false,
+    val saveError: String? = null,
     val evaluationType: EvaluationType = EvaluationType.ATTENDANCE,
     val students: List<StudentEval> = emptyList()
 )
@@ -38,18 +42,55 @@ class ClassesViewModel(
     private val teachersRepository: TeachersRepository,
     private val assignmentRepository: AssignmentRepository,
     private val studentsRepository: com.drcmind.kelasisuite.data.repository.students.StudentsRepository,
-    private val evaluationRepository: com.drcmind.kelasisuite.data.repository.teacher.EvaluationRepository
+    private val evaluationRepository: com.drcmind.kelasisuite.data.repository.teacher.EvaluationRepository,
+    private val schoolRepository: com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(ClassesState())
     val state: StateFlow<ClassesState> = _state.asStateFlow()
 
     init {
         fetchMyClasses()
+        fetchEvaluationPeriods()
+    }
+
+    fun retryClasses() {
+        _state.update { it.copy(errorMessage = null) }
+        fetchMyClasses()
+    }
+
+    fun retryStudents() {
+        _state.update { it.copy(studentErrorMessage = null) }
+        fetchStudentsForClass(_state.value.selectedClass?.classId)
+    }
+
+    private fun fetchEvaluationPeriods() {
+        viewModelScope.launch {
+            schoolRepository.getEvaluationPeriodsBySchool().collect { resource ->
+                when (resource) {
+                    is Resource.Error -> _state.update { it.copy(studentErrorMessage = resource.message) }
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {
+                        val periods = resource.data?.values?.flatten() ?: emptyList()
+                        _state.update { it.copy(evaluationPeriods = periods) }
+                    }
+                }
+            }
+        }
+    }
+
+    fun selectPeriod(period: EvaluationPeriodDTO) {
+        _state.update { it.copy(selectedPeriod = period) }
     }
 
     private fun fetchMyClasses() {
-        val schoolId = settingsStorage.getSchool()?.id ?: return
-        val userId = settingsStorage.getUserInfo().userId ?: return
+        val schoolId = settingsStorage.getSchool()?.id
+        val userId = settingsStorage.getUserInfo().userId
+        if (schoolId == null || userId == null) {
+            _state.update {
+                it.copy(isLoadingClasses = false, errorMessage = "Connexion incomplète : impossible de charger vos classes.")
+            }
+            return
+        }
 
         viewModelScope.launch {
             teachersRepository.getTeachers(schoolId).collect { teachersResource ->
@@ -100,7 +141,11 @@ class ClassesViewModel(
         }
     }
 
-    private fun fetchStudentsForClass(classId: Long) {
+    private fun fetchStudentsForClass(classId: Long?) {
+        if (classId == null) {
+            _state.update { it.copy(isLoadingStudents = false) }
+            return
+        }
         viewModelScope.launch {
             studentsRepository.getStudentsForClass(classId).collect { studentsResource ->
                 when (studentsResource) {
@@ -153,7 +198,7 @@ class ClassesViewModel(
     }
 
     fun dismissSnackbar() {
-        _state.update { it.copy(saveSuccess = false, errorMessage = null, studentErrorMessage = null) }
+        _state.update { it.copy(saveSuccess = false, saveError = null) }
     }
 
     fun saveEvaluations() {
@@ -174,7 +219,8 @@ class ClassesViewModel(
                                com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationTypeDTO.ATTENDANCE 
                            else com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationTypeDTO.GRADE,
                     value = if (currentState.evaluationType == EvaluationType.ATTENDANCE) student.attendance.name else student.grade,
-                    date = currentDate
+                    date = currentDate,
+                    evaluationPeriodId = currentState.selectedPeriod?.id
                 )
                 
                 // Submit one by one for now (ideally bulk endpoint)
@@ -187,7 +233,7 @@ class ClassesViewModel(
                 it.copy(
                     isSaving = false, 
                     saveSuccess = !hasError,
-                    errorMessage = if (hasError) "Certaines évaluations n'ont pas pu être sauvegardées." else null
+                    saveError = if (hasError) "Certaines évaluations n'ont pas pu être sauvegardées." else null
                 ) 
             }
         }

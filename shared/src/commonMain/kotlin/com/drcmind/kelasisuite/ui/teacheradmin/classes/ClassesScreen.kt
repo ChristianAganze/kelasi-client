@@ -19,6 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.drcmind.kelasisuite.domain.model.teacher.AttendanceStatus
+import com.drcmind.kelasisuite.ui.components.EmptyStateCard
+import com.drcmind.kelasisuite.ui.components.ErrorStateCard
+import com.drcmind.kelasisuite.ui.components.LoadingState
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,13 +33,16 @@ fun ClassesScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(state.saveSuccess, state.errorMessage) {
+    LaunchedEffect(state.saveSuccess, state.saveError) {
         if (state.saveSuccess) {
             snackbarHostState.showSnackbar("Évaluations sauvegardées avec succès.")
             viewModel.dismissSnackbar()
-        } else if (state.errorMessage != null) {
-            snackbarHostState.showSnackbar(state.errorMessage ?: "Erreur.")
-            viewModel.dismissSnackbar()
+        } else {
+            val saveError = state.saveError
+            if (saveError != null) {
+                snackbarHostState.showSnackbar(saveError)
+                viewModel.dismissSnackbar()
+            }
         }
     }
 
@@ -69,13 +75,16 @@ fun ClassesScreen(
 
             // Class selection
             if (state.isLoadingClasses) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                LoadingState(modifier = Modifier.fillMaxWidth())
             } else if (state.errorMessage != null) {
-                Text("Erreur: ${state.errorMessage}", color = MaterialTheme.colorScheme.error)
+                ErrorStateCard(
+                    message = state.errorMessage,
+                    onRetry = viewModel::retryClasses
+                )
             } else if (state.availableClasses.isEmpty()) {
-                Text(
-                    "Aucune classe assignée pour le moment.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                EmptyStateCard(
+                    title = "Aucune classe assignée",
+                    subtitle = "Aucune classe ne vous est attribuée pour le moment."
                 )
             } else {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -84,6 +93,24 @@ fun ClassesScreen(
                             selected = state.selectedClass?.id == assignment.id,
                             onClick = { viewModel.selectClass(assignment) },
                             label = { Text("${assignment.className} - ${assignment.subjectName}") }
+                        )
+                    }
+                }
+            }
+
+            // Period selection (only meaningful for grades)
+            if (state.evaluationPeriods.isNotEmpty() && state.evaluationType == EvaluationType.GRADES) {
+                Text(
+                    text = "Période d'évaluation",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(state.evaluationPeriods) { period ->
+                        FilterChip(
+                            selected = state.selectedPeriod?.id == period.id,
+                            onClick = { viewModel.selectPeriod(period) },
+                            label = { Text(period.label.ifEmpty { "Période ${period.id}" }) }
                         )
                     }
                 }
@@ -115,32 +142,27 @@ fun ClassesScreen(
 
             // Student List
             if (state.isLoadingStudents) {
-                Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                LoadingState(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
             } else if (state.studentErrorMessage != null) {
-                Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Erreur: ${state.studentErrorMessage}",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+                ErrorStateCard(
+                    message = state.studentErrorMessage,
+                    onRetry = viewModel::retryStudents,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
             } else if (state.students.isEmpty() && state.selectedClass != null) {
-                Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Aucun étudiant inscrit dans cette classe.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                EmptyStateCard(
+                    title = "Aucun étudiant",
+                    subtitle = "Aucun étudiant n'est inscrit dans cette classe.",
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f),

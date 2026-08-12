@@ -2,5 +2,8 @@ package com.drcmind.kelasisuite.di
 
 import org.koin.core.module.Module
 
-actual val platformModule: Module
-    get() = TODO("Not yet implemented")
+import org.koin.dsl.module
+
+actual val platformModule: Module = module {
+
+}

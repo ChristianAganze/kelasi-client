@@ -33,6 +33,7 @@ fun StructureScreen(
     schoolStructureBackStack: NavBackStack<NavKey>
 ) {
     val visibleNodes by viewModel.visibleNodes
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -61,6 +62,7 @@ fun StructureScreen(
                         visibleNode = visibleNode,
                         onToggle = { viewModel.onToggle(it) },
                         onAction = { node, action -> viewModel.onAction(node, action) },
+                        onCreateClass = { request -> viewModel.createClassFromTemplate(request) },
                         onNavigateToClassDetails = {
                             viewModel.loadClassTeachingAssignments(visibleNode.node.originalId)
                             schoolStructureBackStack.add(
@@ -85,11 +87,26 @@ fun StructureScreen(
                             .padding(48.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator()
+                        } else {
+                            Text(
+                                text = "Aucune structure disponible.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+
+    uiState.infoNode?.let { node ->
+        NodeInfoDialog(
+            node = node,
+            onDismiss = { viewModel.dismissInfoNode() }
+        )
     }
 }
 
@@ -98,6 +115,7 @@ fun TreeNodeRow(
     visibleNode: VisibleNode,
     onToggle: (SchoolTreeNode) -> Unit,
     onAction: (SchoolTreeNode, NodeAction) -> Unit,
+    onCreateClass: (CreateClassFromTemplateRequest) -> Unit,
     onNavigateToClassDetails: () -> Unit,
 ) {
     var isUpdateSchoolClassDialogOpen by remember { mutableStateOf(false) }
@@ -218,8 +236,8 @@ fun TreeNodeRow(
     if (isUpdateSchoolClassDialogOpen) {
         UpdateSchoolClassDialog(
             schoolTreeNode = node,
-            onCreateClass = { _ ->
-                onAction(node, NodeAction.ADD_CLASS)
+            onCreateClass = { request ->
+                onCreateClass(request)
                 isUpdateSchoolClassDialogOpen = false
             },
             onDismiss = { isUpdateSchoolClassDialogOpen = false }
@@ -346,5 +364,73 @@ fun UpdateSchoolClassDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun NodeInfoDialog(
+    node: SchoolTreeNode,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnClickOutside = true)
+    ) {
+        Card(
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(32.dp)
+                    .width(IntrinsicSize.Min)
+            ) {
+                Text(
+                    text = "Informations",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                InfoRow(label = "Nom", value = node.title)
+                InfoRow(label = "Type", value = node.type.name)
+                InfoRow(label = "Identifiant", value = node.originalId.toString())
+                if (node.parentTitle != null) {
+                    InfoRow(label = "Parent", value = node.parentTitle)
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onDismiss,
+                        shape = MaterialTheme.shapes.large
+                    ) {
+                        Text("Fermer")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium
+        )
     }
 }

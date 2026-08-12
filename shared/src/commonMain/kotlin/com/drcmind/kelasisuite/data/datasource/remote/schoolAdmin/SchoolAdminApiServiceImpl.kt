@@ -4,9 +4,10 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateParentRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateScheduleEntryDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ClassLogReviewDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.EnrollmentRequest
-import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.HomeroomAssignmentRequest
@@ -15,6 +16,9 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.PreparationReviewDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.PreparationReviewUpdateRequest
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ProgramRadarDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
@@ -39,8 +43,15 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import kotlinx.datetime.DayOfWeek
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 
 class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdminApiService {
+
+    private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun getParentsBySchool(schoolId: Long): List<ParentDto> {
         return httpClient.get("parents/schools/$schoolId").body()
@@ -72,7 +83,7 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
     }
 
     override suspend fun deleteParent(parentId: Long) {
-        return httpClient.get("parents/$parentId").body()
+        return httpClient.delete("parents/$parentId").body()
     }
 
     override suspend fun getParentById(parentId: Long): ParentDto {
@@ -147,8 +158,68 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
         return httpClient.get("templates/academic-years").body()
     }
 
-    override suspend fun getEvaluationPeriodsBySchool(schoolId: Long): List<EvaluationPeriodBySchoolDTO> {
-        return httpClient.get("schools/$schoolId/evaluation-periods").body()
+    override suspend fun getEvaluationPeriodsBySchool(schoolId: Long): Map<String, List<EvaluationPeriodDTO>> {
+        val element: JsonElement = httpClient.get("schools/$schoolId/evaluation-periods").body()
+        return when (element) {
+            is JsonObject -> element.mapValues { (_, value) ->
+                json.decodeFromJsonElement<List<EvaluationPeriodDTO>>(value)
+            }
+            is JsonArray -> json.decodeFromJsonElement<List<EvaluationPeriodDTO>>(element)
+                .groupBy { it.schoolSectionName ?: "Default" }
+            else -> emptyMap()
+        }
+    }
+
+    override suspend fun getProgramRadar(schoolId: Long, academicYearId: Long): ProgramRadarDto {
+        return httpClient.get("schools/$schoolId/program-radar") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun getPreparationsForReview(
+        schoolId: Long,
+        academicYearId: Long
+    ): List<PreparationReviewDto> {
+        return httpClient.get("schools/$schoolId/preparations") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun validatePreparation(
+        preparationId: Long,
+        request: PreparationReviewUpdateRequest
+    ): PreparationReviewDto {
+        return httpClient.put("preparations/$preparationId/validate") {
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun rejectPreparation(
+        preparationId: Long,
+        request: PreparationReviewUpdateRequest
+    ): PreparationReviewDto {
+        return httpClient.put("preparations/$preparationId/reject") {
+            setBody(request)
+        }.body()
+    }
+
+    override suspend fun getClassLogsForReview(
+        schoolId: Long,
+        academicYearId: Long
+    ): List<ClassLogReviewDto> {
+        return httpClient.get("schools/$schoolId/class-logs") {
+            url {
+                parameter("academicYearId", academicYearId)
+            }
+        }.body()
+    }
+
+    override suspend fun signClassLog(classLogId: Long): ClassLogReviewDto {
+        return httpClient.put("class-logs/$classLogId/sign").body()
     }
 
     override suspend fun createStudent(creationRequest: StudentCreationRequest): StudentDTO {
@@ -227,11 +298,10 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
         schoolId: Long,
         academicYearId: Long
     ): List<TeachingAssignmentDTO> {
-        return httpClient.get("classes/$schoolId/assignments") {
-            url {
-                parameter("academicYearId", academicYearId)
-            }
-        }.body()
+        val classes = getClassesForSchool(schoolId)
+        return classes.flatMap { schoolClass ->
+            getAssignmentsForClass(schoolClass.id, academicYearId)
+        }
     }
 
     override suspend fun getPendingAssignmentsForClass(classId: Long, academicYearId: Long): List<TemplateSubjectDTO> {

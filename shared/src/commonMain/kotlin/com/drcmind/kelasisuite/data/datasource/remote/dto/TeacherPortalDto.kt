@@ -14,7 +14,8 @@ data class LessonPreparationDTO(
     val introPhase: String,
     val developmentPhase: String,
     val synthesisPhase: String,
-    val applicationPhase: String
+    val applicationPhase: String,
+    val status: String = "DRAFT" // DRAFT | SUBMITTED | APPROVED | REJECTED | ARCHIVED
 )
 
 @Serializable
@@ -26,7 +27,8 @@ data class ClassLogDTO(
     val taughtSubject: String,
     val homework: String,
     val teacherSignature: Boolean,
-    val adminSignature: Boolean
+    val adminSignature: Boolean,
+    val presentStudentIds: List<Long> = emptyList()
 )
 
 @Serializable
@@ -42,5 +44,6 @@ data class StudentEvaluationDTO(
     val teachingAssignmentId: Long,
     val type: EvaluationTypeDTO,
     val value: String, // e.g., "PRESENT", "ABSENT", "15"
-    val date: String // ISO-8601 date string
+    val date: String, // ISO-8601 date string
+    val evaluationPeriodId: Long? = null
 )

@@ -182,7 +182,7 @@ fun EnrollmentScreen(
                                     )
                                 }
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                                when (uiState.students.isEmpty()) {
+                                when (uiState.enrollments.isEmpty()) {
                                     true -> Column(
                                         modifier = Modifier.fillMaxSize().padding(vertical = 40.dp),
                                         verticalArrangement = Arrangement.Center,
@@ -276,7 +276,7 @@ fun EnrollmentRow(
                 }
             }
             Text(
-                enrollment.student.id.toString() + "-SER094",
+                enrollment.student.id?.toString() ?: "-",
                 modifier = Modifier.weight(1f),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

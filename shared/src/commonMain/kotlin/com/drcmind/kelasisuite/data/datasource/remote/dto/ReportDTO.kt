@@ -21,5 +21,6 @@ data class ReportCardDTO(
     val maxScore: Double,
     val average: Double,
     val teacherRemarks: String? = null,
+    val studentConduct: String? = null,
     val isPublished: Boolean = false
 )

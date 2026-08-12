@@ -11,6 +11,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.classlog.ClassLogsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.preparation.PreparationsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.program_radar.ProgramRadarScreen
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule.ScheduleScreen
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.TeacherAssignmentsScreen
 
@@ -30,9 +33,7 @@ fun PedagogyNavigation(
                 ScheduleScreen()
             }
             entry<Route.SchoolAdmin.Pedagogy.ProgramRadar> {
-                Column {
-                    Text("Le tableau de bord visuel comparant le Programme National au Réalisé.")
-                }
+                ProgramRadarScreen()
             }
 
             entry<Route.SchoolAdmin.Pedagogy.TeacherAssignments> {
@@ -40,15 +41,11 @@ fun PedagogyNavigation(
             }
 
             entry<Route.SchoolAdmin.Pedagogy.Preparation> {
-                Column {
-                    Text("Boîte de réception des fiches de préparation pour validation par le Préfet.")
-                }
+                PreparationsScreen()
             }
 
             entry<Route.SchoolAdmin.Pedagogy.ClassLog> {
-                Column {
-                    Text("Audit des journaux générés automatiquement (basés sur l'Horaire des Cours défini plus haut).")
-                }
+                ClassLogsScreen()
             }
 
             entry<Route.SchoolAdmin.Pedagogy.Inspections> {

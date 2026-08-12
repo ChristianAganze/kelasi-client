@@ -326,11 +326,11 @@ fun EvaluationPeriodsCard(uiState: CalendarPeriodsUiState) {
                 )
             }
 
-            uiState.evaluationPeriods.forEach { sectionGroup ->
-                EvaluationSectionHeader(sectionName = sectionGroup.schoolSectionName)
-                sectionGroup.evaluationPeriods.forEachIndexed { index, period ->
+            uiState.evaluationPeriods.forEach { (sectionName, periods) ->
+                EvaluationSectionHeader(sectionName = sectionName)
+                periods.forEachIndexed { index, period ->
                     EvaluationPeriodRow(period = period, onStartDateChange = {}, onEndDateChange = {})
-                    if (index < sectionGroup.evaluationPeriods.size - 1) {
+                    if (index < periods.size - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 24.dp),
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)

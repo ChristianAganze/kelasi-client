@@ -193,7 +193,7 @@ fun SchoolAdminAppScreen(
                     IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Help,
-                            contentDescription = "Notifications",
+                            contentDescription = "Facilitation",
                             modifier = Modifier.size(32.dp)
                         )
                     }

@@ -563,7 +563,7 @@ class EnrollmentViewModel(
             )
         }
 
-        filterStudents()
+        filterEnrollments()
     }
 
     private fun filterStudents() {
@@ -663,6 +663,8 @@ class EnrollmentViewModel(
                                 submissionSuccess = true
                             )
                         }
+
+                        loadEnrollments()
                     }
 
                     is Resource.Error -> {

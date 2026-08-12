@@ -50,18 +50,24 @@ class TeachingAssignmentViewModel(
     }
 
     fun loadSchoolTeachingAssignments() {
-        uiState.update { it.copy(isLoading = true) }
+        uiState.update { it.copy(isLoading = true, error = null) }
         teachingAssignmentRepository.getAssignmentsForSchool().onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isLoading = true) }
+                is Resource.Loading -> uiState.update { it.copy(isLoading = true, error = null) }
                 is Resource.Success -> {
-                    uiState.update { it.copy(isLoading = false, teachingAssignments = resource.data ?: listOf()) }
+                    val data = resource.data ?: listOf()
+                    uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            teachingAssignments = data,
+                            allTeachingAssignments = data
+                        )
+                    }
                 }
                 is Resource.Error -> {
                     uiState.update { it.copy(isLoading = false, teachingAssignments = listOf(), error = resource.message) }
                 }
             }
-            print(resource.toString())
         }.launchIn(viewModelScope)
     }
 

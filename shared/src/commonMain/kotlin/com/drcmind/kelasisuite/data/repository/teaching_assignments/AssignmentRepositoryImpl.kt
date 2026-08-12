@@ -34,12 +34,16 @@ class AssignmentRepositoryImpl(
         return flow {
             emit(Resource.Loading())
             val schoolId = settingsStorage.getSchool()?.id
+                ?: run {
+                    emit(Resource.Error(message = "École non identifiée."))
+                    return@flow
+                }
             val academicYearId = settingsStorage.getActiveAcademicYear()?.id
             if (academicYearId == null) {
                 emit(Resource.Error(message = "Aucune année académique active disponible."))
                 return@flow
             }
-            val response = apiService.getAssignmentsForSchool(schoolId!!, academicYearId)
+            val response = apiService.getAssignmentsForSchool(schoolId, academicYearId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))

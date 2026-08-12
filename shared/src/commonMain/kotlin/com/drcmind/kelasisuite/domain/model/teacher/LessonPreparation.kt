@@ -33,5 +33,13 @@ data class StepDetails(
 )
 
 enum class PreparationStatus {
-    DRAFT, READY, ARCHIVED
+    DRAFT, SUBMITTED, APPROVED, REJECTED, ARCHIVED
+}
+
+fun PreparationStatus.labelFr(): String = when (this) {
+    PreparationStatus.DRAFT -> "Brouillon"
+    PreparationStatus.SUBMITTED -> "En attente"
+    PreparationStatus.APPROVED -> "Approuvée"
+    PreparationStatus.REJECTED -> "Rejetée"
+    PreparationStatus.ARCHIVED -> "Archivée"
 }

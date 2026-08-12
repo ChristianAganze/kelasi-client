@@ -11,15 +11,39 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.drcmind.kelasisuite.domain.model.teacher.LessonPreparation
 import com.drcmind.kelasisuite.domain.model.teacher.PreparationStatus
+import com.drcmind.kelasisuite.domain.model.teacher.labelFr
+import com.drcmind.kelasisuite.ui.components.EmptyStateCard
+import com.drcmind.kelasisuite.ui.components.ErrorStateCard
+import com.drcmind.kelasisuite.ui.components.LoadingState
 import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+private fun preparationStatusColor(status: PreparationStatus): Color = when (status) {
+    PreparationStatus.DRAFT -> MaterialTheme.colorScheme.secondary
+    PreparationStatus.SUBMITTED -> MaterialTheme.colorScheme.tertiary
+    PreparationStatus.APPROVED -> MaterialTheme.colorScheme.primary
+    PreparationStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer
+    PreparationStatus.ARCHIVED -> MaterialTheme.colorScheme.surfaceVariant
+}
+
+@Composable
+private fun preparationStatusContentColor(status: PreparationStatus): Color = when (status) {
+    PreparationStatus.DRAFT -> MaterialTheme.colorScheme.onSecondary
+    PreparationStatus.SUBMITTED -> MaterialTheme.colorScheme.onTertiary
+    PreparationStatus.APPROVED -> MaterialTheme.colorScheme.onPrimary
+    PreparationStatus.REJECTED -> MaterialTheme.colorScheme.onErrorContainer
+    PreparationStatus.ARCHIVED -> MaterialTheme.colorScheme.onSurfaceVariant
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,13 +54,16 @@ fun PreparationScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(state.saveSuccess, state.errorMessage) {
+    LaunchedEffect(state.saveSuccess, state.saveError) {
         if (state.saveSuccess) {
             snackbarHostState.showSnackbar("Préparation sauvegardée avec succès.")
             viewModel.dismissSnackbar()
-        } else if (state.errorMessage != null) {
-            snackbarHostState.showSnackbar(state.errorMessage ?: "Erreur.")
-            viewModel.dismissSnackbar()
+        } else {
+            val saveError = state.saveError
+            if (saveError != null) {
+                snackbarHostState.showSnackbar(saveError)
+                viewModel.dismissSnackbar()
+            }
         }
     }
 
@@ -112,15 +139,21 @@ fun PreparationListScreen(
 
             if (state.isLoading) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    LoadingState(modifier = Modifier.fillMaxWidth().height(200.dp))
+                }
+            } else if (state.errorMessage != null) {
+                item {
+                    ErrorStateCard(
+                        message = state.errorMessage,
+                        onRetry = viewModel::retry
+                    )
                 }
             } else if (state.preparations.isEmpty()) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Text("Aucune fiche de préparation pour cette classe.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    EmptyStateCard(
+                        title = "Aucune fiche de préparation",
+                        subtitle = "Créez votre première fiche pour cette classe avec le bouton +."
+                    )
                 }
             } else {
                 items(state.preparations) { prep ->
@@ -133,18 +166,37 @@ fun PreparationListScreen(
                             ) {
                                 Text(prep.header.lessonSubject,
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.weight(1f)
                                 )
-                                Badge(
-                                    containerColor = if (prep.status == PreparationStatus.READY)
-                                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                Surface(
+                                    color = preparationStatusColor(prep.status),
+                                    shape = MaterialTheme.shapes.small,
+                                    contentColor = preparationStatusContentColor(prep.status)
                                 ) {
-                                    Text(prep.status.name)
+                                    Text(
+                                        text = prep.status.labelFr(),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("${prep.header.branch} - ${prep.header.className}", style = MaterialTheme.typography.bodyMedium)
                             Text("Obj: ${prep.header.operationalObjective.take(50)}...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                            if (prep.status == PreparationStatus.DRAFT) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                TextButton(
+                                    onClick = { viewModel.submitPreparation(prep.id) },
+                                    modifier = Modifier.align(Alignment.End)
+                                ) {
+                                    Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Soumettre pour validation")
+                                }
+                            }
                         }
                     }
                 }

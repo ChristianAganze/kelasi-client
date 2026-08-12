@@ -58,7 +58,10 @@ data class SchoolStructureState(
     val filteredCombinedAssignmentAndPendings: List<CombinedAssignmentModel> = emptyList(),
 
     // Tree nodes
-    val nodes: SnapshotStateList<SchoolTreeNode> = mutableStateListOf()
+    val nodes: SnapshotStateList<SchoolTreeNode> = mutableStateListOf(),
+
+    // Node info dialog
+    val infoNode: SchoolTreeNode? = null
 )
 
 
@@ -533,20 +536,75 @@ class SchoolStructureViewModel(
 
         when (action) {
             NodeAction.ADD_CLASS -> {
-                println("Add class to ${node.title}")
+                // Creation is handled by UpdateSchoolClassDialog -> createClassFromTemplate
             }
 
             NodeAction.DELETE_CLASS -> {
-                println("Delete class from ${node.title}")
+                if (node.type == NodeType.CLASSROOM) {
+                    deleteClass(node.originalId)
+                }
             }
 
-            NodeAction.INFO_CYCLE -> TODO()
-            NodeAction.INFO_SECTION -> TODO()
-            NodeAction.INFO_MAJOR -> TODO()
-            NodeAction.INFO_GRADE_LEVEL -> TODO()
-            NodeAction.INFO_CLASS -> TODO()
-            NodeAction.EDIT_CLASS -> TODO()
+            NodeAction.INFO_CYCLE,
+            NodeAction.INFO_SECTION,
+            NodeAction.INFO_MAJOR,
+            NodeAction.INFO_GRADE_LEVEL,
+            NodeAction.INFO_CLASS,
+            NodeAction.EDIT_CLASS -> {
+                uiState.update { it.copy(infoNode = node) }
+            }
         }
+    }
+
+    fun dismissInfoNode() {
+        uiState.update { it.copy(infoNode = null) }
+    }
+
+    fun createClassFromTemplate(request: CreateClassFromTemplateRequest) {
+        uiState.update { it.copy(isLoading = true) }
+        schoolRepository.createClass(request).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> Unit
+                is Resource.Success -> {
+                    uiState.update { it.copy(isLoading = false) }
+                    refreshGradeLevelChildren(request.templateGradeLevelId)
+                }
+
+                is Resource.Error -> uiState.update {
+                    it.copy(isLoading = false, errorMessage = resource.message)
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun deleteClass(classId: Long) {
+        uiState.update { it.copy(isDeleting = true) }
+        schoolRepository.deleteClass(classId).onEach { resource ->
+            when (resource) {
+                is Resource.Loading -> Unit
+                is Resource.Success -> {
+                    uiState.update { it.copy(isDeleting = false) }
+                    uiState.value.nodes.removeAll { it.originalId == classId && it.type == NodeType.CLASSROOM }
+                }
+
+                is Resource.Error -> uiState.update {
+                    it.copy(isDeleting = false, errorMessage = resource.message)
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun refreshGradeLevelChildren(gradeLevelId: Long) {
+        schoolRepository.getClassesBySchoolAndGradeLevel(gradeLevelId).onEach { schoolClass ->
+            if (schoolClass is Resource.Success) {
+                val newChildren = schoolClass.data?.map { it.toSchoolTreeNode() } ?: emptyList()
+                val existingNodeKeys = uiState.value.nodes.map { "${it.id}-${it.type}" }.toSet()
+                val nodesToAdd = newChildren.filter { "${it.id}-${it.type}" !in existingNodeKeys }
+                if (nodesToAdd.isNotEmpty()) {
+                    uiState.value.nodes.addAll(nodesToAdd)
+                }
+            }
+        }.launchIn(viewModelScope)
     }
 }
 

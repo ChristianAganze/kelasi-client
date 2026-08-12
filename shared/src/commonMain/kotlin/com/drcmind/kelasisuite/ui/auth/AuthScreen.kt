@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.window.core.layout.WindowSizeClass
@@ -313,7 +315,7 @@ fun AuthFormSection(
             )
             OutlinedTextField(
                 state = emailState,
-                placeholder = { Text("nom@exemple.com", fontSize = 14.sp) },
+                placeholder = { Text("nom@gmail.com", fontSize = 14.sp) },
                 leadingIcon = { Icon(Icons.Default.Mail, contentDescription = "Email", modifier = Modifier.size(20.dp)) },
                 isError = state.emailError != null,
                 modifier = Modifier.fillMaxWidth(),
@@ -384,12 +386,20 @@ fun AuthFormSection(
                     onCheckedChange = onRememberMeChange,
                     modifier = Modifier.size(24.dp)
                 )
-                Text(text = "Se souvenir de moi", fontSize = 12.sp)
+                Text(
+                    text = "Se souvenir de moi",
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 12.sp
+                )
             }
-            TextButton(onClick = {}, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+            TextButton(onClick = {
+                //TODO: implementer la logique si l'utilisateur a deja oublier son mot de passe
+            },
+                contentPadding =PaddingValues(0.dp)) {
                 Text(
                     text = "Mot de passe oublié ?",
                     fontSize = 12.sp,
+                    overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -397,10 +407,13 @@ fun AuthFormSection(
 
         // Login Button
         Button(
-            onClick = { onLogin(emailState.text.toString(), passwordState.text.toString()) },
+            onClick = {
+                onLogin(emailState.text.toString(),
+                passwordState.text.toString())
+            },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
+                .fillMaxWidth(),
+               // .height(48.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
             if (state.authState is AuthState.Loading) {
@@ -416,47 +429,5 @@ fun AuthFormSection(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Social Login
-        Text(
-            text = "Ou continuer avec",
-            fontSize = 11.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            textAlign = TextAlign.Center
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            SocialButton(icon = Icons.Rounded.Layers)
-            Spacer(modifier = Modifier.width(16.dp))
-            SocialButton(icon = Icons.Rounded.GridView)
-        }
-    }
-}
-
-@Composable
-fun SocialButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit = {}
-) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.size(44.dp),
-        shape = RoundedCornerShape(50),
-        color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
     }
 }

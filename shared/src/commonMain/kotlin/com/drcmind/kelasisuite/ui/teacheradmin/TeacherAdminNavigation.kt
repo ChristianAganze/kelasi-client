@@ -13,7 +13,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.teacheradmin.classlog.ClassLogScreen
 import com.drcmind.kelasisuite.ui.teacheradmin.dashboard.TeacherDashboardScreen
-import com.drcmind.kelasisuite.ui.teacheradmin.dashboard.TeacherDashboardScreen
 import com.drcmind.kelasisuite.ui.teacheradmin.schedule.TeacherScheduleScreen
 import com.drcmind.kelasisuite.ui.teacheradmin.classes.ClassesScreen
 import com.drcmind.kelasisuite.ui.teacheradmin.communication.CommunicationScreen

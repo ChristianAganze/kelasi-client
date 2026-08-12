@@ -1,12 +1,15 @@
 package com.drcmind.kelasisuite.data.repository.schools
 
 import com.drcmind.kelasisuite.data.datasource.remote.dto.AcademicYearDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ClassLogReviewDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateClassFromTemplateRequest
 import com.drcmind.kelasisuite.data.datasource.remote.dto.CreateScheduleEntryDto
-import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodBySchoolDTO
+import com.drcmind.kelasisuite.data.datasource.remote.dto.EvaluationPeriodDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.LearningTimeConfigDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.PreparationReviewDto
+import com.drcmind.kelasisuite.data.datasource.remote.dto.ProgramRadarDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ScheduleEntryDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolClassDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
@@ -32,7 +35,15 @@ interface SchoolRepository {
     fun getClassesBySchoolAndGradeLevel(gradeLevelId: Long): Flow<Resource<List<SchoolClassDTO>>>
     fun getAcademicYears(): Flow<Resource<List<AcademicYearDTO>>>
     fun getActiveAcademicYear(): AcademicYearDTO?
-    fun getEvaluationPeriodsBySchool(): Flow<Resource<List<EvaluationPeriodBySchoolDTO>>>
+    fun getEvaluationPeriodsBySchool(): Flow<Resource<Map<String, List<EvaluationPeriodDTO>>>>
+    fun getProgramRadar(): Flow<Resource<ProgramRadarDto>>
+
+    fun getPreparationsForReview(): Flow<Resource<List<PreparationReviewDto>>>
+    fun validatePreparation(preparationId: Long, comment: String?): Flow<Resource<PreparationReviewDto>>
+    fun rejectPreparation(preparationId: Long, comment: String?): Flow<Resource<PreparationReviewDto>>
+
+    fun getClassLogsForReview(): Flow<Resource<List<ClassLogReviewDto>>>
+    fun signClassLog(classLogId: Long): Flow<Resource<ClassLogReviewDto>>
     fun createClass(request: CreateClassFromTemplateRequest): Flow<Resource<SchoolClassDTO>>
     fun updateClass(classId: Long, request: CreateClassFromTemplateRequest): Flow<Resource<SchoolClassDTO>>
     fun deleteClass(classId: Long): Flow<Resource<Unit>>

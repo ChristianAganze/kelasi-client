@@ -69,7 +69,9 @@ class StudentsViewModel(
     private fun filterStudents() {
         val query = _listState.value.searchQuery.lowercase()
         val filtered = allStudents.filter { student ->
-            student.fullName.lowercase().contains(query)
+            student.fullName.lowercase().contains(query) ||
+                    student.studentIdNumber.lowercase().contains(query) ||
+                    (student.sernieNumber?.lowercase()?.contains(query) == true)
         }
         _listState.update {
             it.copy(

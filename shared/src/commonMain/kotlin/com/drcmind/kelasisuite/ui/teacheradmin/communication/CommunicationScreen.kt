@@ -15,10 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.drcmind.kelasisuite.data.datasource.remote.dto.ConversationDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MessageDTO
+import com.drcmind.kelasisuite.ui.components.EmptyStateCard
+import com.drcmind.kelasisuite.ui.components.ErrorStateCard
+import com.drcmind.kelasisuite.ui.components.LoadingState
+import com.drcmind.kelasisuite.ui.components.friendlyErrorMessage
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,8 +32,17 @@ fun CommunicationScreen(
     viewModel: CommunicationViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.sendError) {
+        if (state.sendError != null) {
+            snackbarHostState.showSnackbar(friendlyErrorMessage(state.sendError))
+            viewModel.dismissSendError()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Messages", fontWeight = FontWeight.Bold) },
@@ -53,13 +67,23 @@ fun CommunicationScreen(
                     .padding(end = 1.dp)
             ) {
                 if (state.isLoading && state.conversations.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    LoadingState(modifier = Modifier.fillMaxSize())
+                } else if (state.conversationError != null) {
+                    ErrorStateCard(
+                        message = state.conversationError,
+                        onRetry = viewModel::retryConversations,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    )
                 } else if (state.conversations.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Aucune conversation")
-                    }
+                    EmptyStateCard(
+                        title = "Aucune conversation",
+                        subtitle = "Vos conversations apparaîtront ici.",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(state.conversations) { conversation ->
@@ -92,6 +116,14 @@ fun CommunicationScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                } else if (state.messageError != null) {
+                    ErrorStateCard(
+                        message = state.messageError,
+                        onRetry = viewModel::retryMessages,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    )
                 } else {
                     ChatPane(
                         state = state,
@@ -196,11 +228,29 @@ fun ChatPane(
                 .padding(horizontal = 16.dp),
             reverseLayout = false
         ) {
-            items(state.messages) { message ->
-                MessageBubble(
-                    message = message,
-                    isMine = message.senderId == state.currentUserId
-                )
+            if (state.messages.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Aucun message pour le moment. Écrivez le premier !",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                items(state.messages) { message ->
+                    MessageBubble(
+                        message = message,
+                        isMine = message.senderId == state.currentUserId
+                    )
+                }
             }
         }
 
