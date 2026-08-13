@@ -21,7 +21,8 @@ data class AuthViewModelState(
     val rememberMe: Boolean = false,
     val authState: AuthState = AuthState.Idle,
     val emailError: String? = null,
-    val passwordError: String? = null
+    val passwordError: String? = null,
+    val errorMessage: String? = null
 )
 
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
@@ -56,7 +57,8 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                             _state.value = _state.value.copy(
                                 authState = AuthState.Error(
                                     message = resource.message ?: "Une erreur est survenue"
-                                )
+                                ),
+                                errorMessage = resource.message ?: "Une erreur est survenue"
                             )
                         }
 
@@ -95,5 +97,17 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     fun clearError() {
         _state.value = _state.value.copy(authState = AuthState.Idle)
+    }
+
+    fun clearEmailError() {
+        _state.value = _state.value.copy(emailError = null)
+    }
+
+    fun clearPasswordError() {
+        _state.value = _state.value.copy(passwordError = null)
+    }
+
+    fun dismissError() {
+        _state.value = _state.value.copy(errorMessage = null, authState = AuthState.Idle)
     }
 }
