@@ -11,7 +11,9 @@ interface SettingsStorage {
         username: String,
         role: String,
         userId: Long? = null,
-        schoolId: Long? = null
+        schoolId: Long? = null,
+        firstName: String? = null,
+        lastName: String? = null
     )
     fun getUserInfo(): UserInfo
     fun getToken(): String?

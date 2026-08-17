@@ -60,7 +60,7 @@ class TeacherDashboardViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         TeacherDashboardState(
-            username = settingsStorage.getUserInfo().username?.ifEmpty { "Professeur" } ?: "Professeur",
+            username = settingsStorage.getUserInfo().displayName.ifEmpty { "Professeur" },
             dateLabel = buildDateLabel(),
             weekNumber = currentSchoolWeekNumber()
         )

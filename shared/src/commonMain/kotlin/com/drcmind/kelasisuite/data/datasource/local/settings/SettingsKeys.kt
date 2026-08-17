@@ -4,6 +4,8 @@ object SettingsKeys {
     const val KEY_TOKEN = "TOKEN"
     const val KEY_ROLE = "ROLE"
     const val KEY_USERNAME = "USERNAME"
+    const val KEY_FIRST_NAME = "FIRST_NAME"
+    const val KEY_LAST_NAME = "LAST_NAME"
     const val KEY_USER_ID = "USER_ID"
     const val KEY_SCHOOL_ID = "SCHOOL_ID"
     const val KEY_SCHOOL_DATA = "SCHOOL_DATA"

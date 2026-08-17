@@ -1,6 +1,8 @@
 package com.drcmind.kelasisuite.data.datasource.local.settings
 
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_ACTIVE_ACADEMIC_YEAR
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_FIRST_NAME
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_LAST_NAME
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_ROLE
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_SCHOOL_DATA
 import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsKeys.KEY_SCHOOL_ID
@@ -22,22 +24,27 @@ class SettingsStorageImpl(
     private val settings: Settings
 ) : SettingsStorage {
     override fun saveUserInfo(
-        token: String, username: String, role: String, userId: Long?, schoolId: Long?
+        token: String, username: String, role: String, userId: Long?, schoolId: Long?,
+        firstName: String?, lastName: String?
     ) {
         settings.putString(KEY_TOKEN, token)
         settings.putString(KEY_USERNAME, username)
         settings.putString(KEY_ROLE, role)
         if (userId != null) settings.putLong(KEY_USER_ID, userId)
         if (schoolId != null) settings.putLong(KEY_SCHOOL_ID, schoolId)
+        if (!firstName.isNullOrBlank()) settings.putString(KEY_FIRST_NAME, firstName)
+        if (!lastName.isNullOrBlank()) settings.putString(KEY_LAST_NAME, lastName)
     }
 
     override fun getUserInfo(): UserInfo {
         val storedToken = settings.getStringOrNull(KEY_TOKEN)
         val storedUsername = settings.getString(KEY_USERNAME, "Utilisateur")
+        val storedFirstName = settings.getStringOrNull(KEY_FIRST_NAME)
+        val storedLastName = settings.getStringOrNull(KEY_LAST_NAME)
         val storedRole = settings.getString(KEY_ROLE, "Role")
         val storedUserId = settings.getLongOrNull(KEY_USER_ID)
         val storedSchoolId = settings.getLongOrNull(KEY_SCHOOL_ID)
-        return UserInfo(storedToken, storedUsername, storedRole, storedUserId, storedSchoolId)
+        return UserInfo(storedToken, storedUsername, storedFirstName, storedLastName, storedRole, storedUserId, storedSchoolId)
     }
 
     override fun getToken(): String? {
@@ -48,6 +55,8 @@ class SettingsStorageImpl(
     override fun clearUserInfo() {
         settings.remove(KEY_TOKEN)
         settings.remove(KEY_USERNAME)
+        settings.remove(KEY_FIRST_NAME)
+        settings.remove(KEY_LAST_NAME)
         settings.remove(KEY_ROLE)
         settings.remove(KEY_USER_ID)
         settings.remove(KEY_SCHOOL_ID)

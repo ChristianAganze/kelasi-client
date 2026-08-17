@@ -15,6 +15,8 @@ data class UserResponseDTO(
     val id: Long,
     val username: String,
     val email: String,
+    val firstName: String? = null,
+    val lastName: String? = null,
     val roles: List<String>,
     val schoolId: Long? = null
 )

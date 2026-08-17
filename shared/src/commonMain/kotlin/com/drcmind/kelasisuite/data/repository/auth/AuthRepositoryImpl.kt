@@ -33,7 +33,9 @@ class AuthRepositoryImpl(
                     username = userResponse.username,
                     role = userResponse.roles.firstOrNull() ?: loginResponse.roles.first(),
                     userId = userResponse.id,
-                    schoolId = userInfoResponse.schoolId
+                    schoolId = userInfoResponse.schoolId,
+                    firstName = userResponse.firstName,
+                    lastName = userResponse.lastName
                 )
             } catch (e: Exception) {
                 println("AuthRepositoryImpl: Failed to fetch profile after login: ${e.message}")
@@ -55,7 +57,9 @@ class AuthRepositoryImpl(
                 username = userResponse.username,
                 role = userResponse.roles.firstOrNull() ?: userInfo.role ?: "",
                 userId = userResponse.id,
-                schoolId = userInfoResponse.schoolId
+                schoolId = userInfoResponse.schoolId,
+                firstName = userResponse.firstName,
+                lastName = userResponse.lastName
             )
             emit(Resource.Success(userResponse))
         }.catch {
