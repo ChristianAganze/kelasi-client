@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,7 +46,7 @@ fun SchoolAdminAppScreen(
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
             NavigationSuiteType.WideNavigationRailExpanded
         } else {
-            NavigationSuiteType.WideNavigationRailExpanded
+            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
         }
     }
 
