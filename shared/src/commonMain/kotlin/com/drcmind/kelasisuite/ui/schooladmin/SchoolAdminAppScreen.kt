@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -35,7 +36,11 @@ import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalMaterial3AdaptiveApi::class
+)
 fun SchoolAdminAppScreen(
     viewModel: SchoolAdminViewModel = koinViewModel(),
     onLogout: () -> Unit
@@ -126,44 +131,33 @@ fun SchoolAdminAppScreen(
                 },
                 actions = {
                     Box(modifier = Modifier){
-                        SplitButtonLayout(
-                            leadingButton = {
-                                SplitButtonDefaults.LeadingButton(onClick = {}){
-                                    Icon(
-                                        Icons.Filled.DateRange,
-                                        modifier = Modifier.size(SplitButtonDefaults.LeadingIconSize),
-                                        contentDescription = "Localized description",
-                                    )
-                                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text(uiState.activeAcademicYear?.label ?: "Pas définie")
-                                }
-                            },
-                            trailingButton = {
-                                SplitButtonDefaults.TrailingButton(
-                                    checked = checked,
-                                    onCheckedChange = { checked = it },
-                                    modifier =
-                                        Modifier.semantics {
-                                            stateDescription = if (checked) "Expanded" else "Collapsed"
-                                            contentDescription = "description"
-                                        },
-                                ) {
-                                    val rotation: Float by
-                                    animateFloatAsState(
-                                        targetValue = if (checked) 180f else 0f,
-                                        label = "Trailing Icon Rotation",
-                                    )
-                                    Icon(
-                                        Icons.Filled.KeyboardArrowDown,
-                                        modifier =
-                                            Modifier.size(SplitButtonDefaults.TrailingIconSize).graphicsLayer {
-                                                this.rotationZ = rotation
-                                            },
-                                        contentDescription = "Localized description",
-                                    )
-                                }
+                        OutlinedButton(
+                            onClick = { checked = !checked },
+                            modifier = Modifier.semantics {
+                                stateDescription = if (checked) "Expanded" else "Collapsed"
+                                contentDescription = "Menu de sélection d'année académique"
                             }
-                        )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.DateRange,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                            Text(uiState.activeAcademicYear?.label ?: "Pas définie")
+                            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                            val rotation: Float by animateFloatAsState(
+                                targetValue = if (checked) 180f else 0f,
+                                label = "Trailing Icon Rotation"
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(ButtonDefaults.IconSize)
+                                    .graphicsLayer { this.rotationZ = rotation }
+                            )
+                        }
                         DropdownMenu(expanded = checked, onDismissRequest = { checked = false }) {
                             uiState.academicYears.forEach { academicYear->
                                 DropdownMenuItem(

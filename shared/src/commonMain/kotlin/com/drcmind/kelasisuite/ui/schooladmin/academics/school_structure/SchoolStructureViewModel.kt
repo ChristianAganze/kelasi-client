@@ -74,8 +74,8 @@ class SchoolStructureViewModel(
 ) : ViewModel() {
 
     // --- États généraux ---
-    val uiState: StateFlow<SchoolStructureState>
-        field = MutableStateFlow(SchoolStructureState())
+    private val _uiState = MutableStateFlow(SchoolStructureState())
+    val uiState: StateFlow<SchoolStructureState> = _uiState.asStateFlow()
 
     init {
         loadRoots()
@@ -85,21 +85,21 @@ class SchoolStructureViewModel(
     }
 
     fun getAllAllSubjectsForClass() {
-        uiState.update { it.copy(filteredCombinedAssignmentAndPendings = it.combinedAssignmentAndPendings) }
+        _uiState.update { it.copy(filteredCombinedAssignmentAndPendings = it.combinedAssignmentAndPendings) }
     }
 
     fun getAssignedSubjectsForClass() {
-        uiState.update { it.copy(filteredCombinedAssignmentAndPendings = it.combinedAssignmentAndPendings.filter { it.status == AssignmentStatus.ASSIGNED }) }
+        _uiState.update { it.copy(filteredCombinedAssignmentAndPendings = it.combinedAssignmentAndPendings.filter { it.status == AssignmentStatus.ASSIGNED }) }
     }
 
     fun getPendingSubjectsForClass() {
-        uiState.update { it.copy(filteredCombinedAssignmentAndPendings = it.combinedAssignmentAndPendings.filter { it.status == AssignmentStatus.PENDING }) }
+        _uiState.update { it.copy(filteredCombinedAssignmentAndPendings = it.combinedAssignmentAndPendings.filter { it.status == AssignmentStatus.PENDING }) }
     }
 
     private fun loadClasses() {
         schoolRepository.getClassesForSchool().onEach { resource ->
             if (resource is Resource.Success) {
-                uiState.update { it.copy(classes = resource.data ?: emptyList()) }
+                _uiState.update { it.copy(classes = resource.data ?: emptyList()) }
             }
         }.launchIn(viewModelScope)
     }
@@ -107,7 +107,7 @@ class SchoolStructureViewModel(
     private fun loadAcademicYears() {
         schoolRepository.getAcademicYears().onEach { resource ->
             if (resource is Resource.Success) {
-                uiState.update { it.copy(academicYears = resource.data ?: emptyList()) }
+                _uiState.update { it.copy(academicYears = resource.data ?: emptyList()) }
             }
         }.launchIn(viewModelScope)
     }
@@ -115,12 +115,12 @@ class SchoolStructureViewModel(
     fun loadClassStudents(classId: Long) {
         studentsRepository.getStudentsForClass(classId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isLoading = true) }
-                is Resource.Success -> {
-                    uiState.update { it.copy(isLoading = false, classStudents = resource.data ?: emptyList()) }
+                is Resource.Loading<*> -> _uiState.update { it.copy(isLoading = true) }
+                is Resource.Success<*> -> {
+                    _uiState.update { it.copy(isLoading = false, classStudents = resource.data ?: emptyList()) }
                 }
 
-                is Resource.Error -> uiState.update { it.copy(isLoading = false, errorMessage = resource.message) }
+                is Resource.Error<*> -> _uiState.update { it.copy(isLoading = false, errorMessage = resource.message) }
             }
         }.launchIn(viewModelScope)
     }
@@ -130,7 +130,7 @@ class SchoolStructureViewModel(
         val schoolId = settingsStorage.getUserInfo().schoolId ?: return
         teachersRepository.getTeachers(schoolId).onEach { resource ->
             if (resource is Resource.Success) {
-                uiState.update { it.copy(teachers = resource.data ?: emptyList()) }
+                _uiState.update { it.copy(teachers = resource.data ?: emptyList()) }
             }
         }.launchIn(viewModelScope)
     }
@@ -138,9 +138,9 @@ class SchoolStructureViewModel(
     fun loadHomeroomTeacher(classId: Long) {
         teachersRepository.getHomeroomTeacherForClass(classId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isLoading = true) }
+                is Resource.Loading -> _uiState.update { it.copy(isLoading = true) }
                 is Resource.Success -> {
-                    uiState.update {
+                    _uiState.update {
                         it.copy(
                             homeroomAssignment = resource.data,
                             isLoadingHomeroomTeacher = resource.data != null
@@ -149,7 +149,7 @@ class SchoolStructureViewModel(
                 }
 
                 is Resource.Error -> {
-                    uiState.update { it.copy(isLoading = false, errorMessage = resource.message) }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = resource.message) }
                 }
             }
         }.launchIn(viewModelScope)
@@ -159,13 +159,13 @@ class SchoolStructureViewModel(
         val request = HomeroomAssignmentRequest(teacherProfileId, classId)
         teachersRepository.assignHomeroomTeacher(request).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isAssigningHomeroomTeacher = true) }
+                is Resource.Loading -> _uiState.update { it.copy(isAssigningHomeroomTeacher = true) }
                 is Resource.Success -> {
-                    uiState.update { it.copy(isAssigningHomeroomTeacher = false, homeroomAssignment = resource.data) }
+                    _uiState.update { it.copy(isAssigningHomeroomTeacher = false, homeroomAssignment = resource.data) }
                     loadHomeroomTeacher(classId)
                 }
 
-                is Resource.Error -> uiState.update {
+                is Resource.Error -> _uiState.update {
                     it.copy(
                         isAssigningHomeroomTeacher = false,
                         errorMessage = resource.message
@@ -178,14 +178,14 @@ class SchoolStructureViewModel(
     fun loadClassTeachingAssignments(classId: Long) {
         assignmentRepository.getAssignmentsForClass(classId).onEach { resource1 ->
             when (resource1) {
-                is Resource.Loading -> uiState.update { it.copy(isLoadingAssignments = true) }
+                is Resource.Loading -> _uiState.update { it.copy(isLoadingAssignments = true) }
                 is Resource.Success -> {
 
                     assignmentRepository.getPendingAssignmentsForClass(classId).onEach { resource2 ->
                         when (resource2) {
-                            is Resource.Loading -> uiState.update { it.copy(isLoadingPendingAssignments = true) }
+                            is Resource.Loading -> _uiState.update { it.copy(isLoadingPendingAssignments = true) }
                             is Resource.Success -> {
-                                uiState.update {
+                                _uiState.update {
                                     it.copy(
                                         isLoadingAssignments = false,
                                         combinedAssignmentAndPendings = ((resource1.data
@@ -204,7 +204,7 @@ class SchoolStructureViewModel(
                             }
 
                             is Resource.Error -> {
-                                uiState.update {
+                                _uiState.update {
                                     it.copy(
                                         isLoadingPendingAssignments = false,
                                         errorMessage = resource2.message
@@ -216,7 +216,7 @@ class SchoolStructureViewModel(
                 }
 
                 is Resource.Error -> {
-                    uiState.update { it.copy(isLoadingAssignments = false, errorMessage = resource1.message) }
+                    _uiState.update { it.copy(isLoadingAssignments = false, errorMessage = resource1.message) }
                 }
             }
         }.launchIn(viewModelScope)
@@ -225,13 +225,13 @@ class SchoolStructureViewModel(
     fun loadPendingTeachingAssignments(classId: Long) {
         assignmentRepository.getPendingAssignmentsForClass(classId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isLoadingPendingAssignments = true) }
+                is Resource.Loading -> _uiState.update { it.copy(isLoadingPendingAssignments = true) }
                 is Resource.Success -> {
 
                 }
 
                 is Resource.Error -> {
-                    uiState.update { it.copy(isLoadingPendingAssignments = false, errorMessage = resource.message) }
+                    _uiState.update { it.copy(isLoadingPendingAssignments = false, errorMessage = resource.message) }
                 }
             }
         }.launchIn(viewModelScope)
@@ -240,20 +240,20 @@ class SchoolStructureViewModel(
     fun assignTeacherToSubject(subjectId: Long, teacherProfileId: Long, classId: Long) {
         val academicYearId = settingsStorage.getActiveAcademicYear()?.id
         if (academicYearId == null) {
-            uiState.update { it.copy(isAssigningTeachingAssignment = false) }
+            _uiState.update { it.copy(isAssigningTeachingAssignment = false) }
             return
         }
         val request = TeachingAssignmentRequest(classId, subjectId, teacherProfileId, academicYearId)
         assignmentRepository.createTeachingAssignment(request).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isAssigningTeachingAssignment = false) }
+                is Resource.Loading -> _uiState.update { it.copy(isAssigningTeachingAssignment = false) }
                 is Resource.Success -> {
-                    uiState.update { it.copy(isAssigningTeachingAssignment = true) }
+                    _uiState.update { it.copy(isAssigningTeachingAssignment = true) }
                     loadClassTeachingAssignments(classId)
                     loadPendingTeachingAssignments(classId)
                 }
 
-                is Resource.Error -> uiState.update {
+                is Resource.Error -> _uiState.update {
                     it.copy(
                         isLoadingAssignments = false,
                         errorMessage = resource.message
@@ -266,14 +266,14 @@ class SchoolStructureViewModel(
     fun deleteTeachingAssignment(assignmentId: Long, classId: Long) {
         assignmentRepository.deleteTeachingAssignment(assignmentId).onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isDeletingTeachingAssignment = true) }
+                is Resource.Loading -> _uiState.update { it.copy(isDeletingTeachingAssignment = true) }
                 is Resource.Success -> {
-                    uiState.update { it.copy(isDeletingTeachingAssignment = false) }
+                    _uiState.update { it.copy(isDeletingTeachingAssignment = false) }
                     loadClassTeachingAssignments(classId)
                     loadPendingTeachingAssignments(classId)
                 }
 
-                is Resource.Error -> uiState.update {
+                is Resource.Error -> _uiState.update {
                     it.copy(
                         isLoadingAssignments = false,
                         errorMessage = resource.message
@@ -551,26 +551,26 @@ class SchoolStructureViewModel(
             NodeAction.INFO_GRADE_LEVEL,
             NodeAction.INFO_CLASS,
             NodeAction.EDIT_CLASS -> {
-                uiState.update { it.copy(infoNode = node) }
+                _uiState.update { it.copy(infoNode = node) }
             }
         }
     }
 
     fun dismissInfoNode() {
-        uiState.update { it.copy(infoNode = null) }
+        _uiState.update { it.copy(infoNode = null) }
     }
 
     fun createClassFromTemplate(request: CreateClassFromTemplateRequest) {
-        uiState.update { it.copy(isLoading = true) }
+        _uiState.update { it.copy(isLoading = true) }
         schoolRepository.createClass(request).onEach { resource ->
             when (resource) {
                 is Resource.Loading -> Unit
                 is Resource.Success -> {
-                    uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(isLoading = false) }
                     refreshGradeLevelChildren(request.templateGradeLevelId)
                 }
 
-                is Resource.Error -> uiState.update {
+                is Resource.Error -> _uiState.update {
                     it.copy(isLoading = false, errorMessage = resource.message)
                 }
             }
@@ -578,16 +578,16 @@ class SchoolStructureViewModel(
     }
 
     fun deleteClass(classId: Long) {
-        uiState.update { it.copy(isDeleting = true) }
+        _uiState.update { it.copy(isDeleting = true) }
         schoolRepository.deleteClass(classId).onEach { resource ->
             when (resource) {
                 is Resource.Loading -> Unit
                 is Resource.Success -> {
-                    uiState.update { it.copy(isDeleting = false) }
-                    uiState.value.nodes.removeAll { it.originalId == classId && it.type == NodeType.CLASSROOM }
+                    _uiState.update { it.copy(isDeleting = false) }
+                    _uiState.value.nodes.removeAll { it.originalId == classId && it.type == NodeType.CLASSROOM }
                 }
 
-                is Resource.Error -> uiState.update {
+                is Resource.Error -> _uiState.update {
                     it.copy(isDeleting = false, errorMessage = resource.message)
                 }
             }

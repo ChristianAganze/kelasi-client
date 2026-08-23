@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 class TeachersViewModel(
     private val teachersRepository: TeachersRepository,

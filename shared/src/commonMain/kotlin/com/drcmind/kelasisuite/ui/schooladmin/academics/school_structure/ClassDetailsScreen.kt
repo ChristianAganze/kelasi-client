@@ -91,8 +91,7 @@ fun ClassDetailsScreen(
                 },
             )
         },
-
-        ) { padding ->
+    ) { padding ->
 
         Column(modifier = Modifier.padding(padding)) {
             val backStack = rememberNavBackStack(
@@ -132,96 +131,22 @@ fun ClassDetailsScreen(
                     entry<Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail.Main>(
                         metadata = SupportingPaneSceneStrategy.mainPane()
                     ) {
-                        Column(modifier = Modifier.padding(horizontal = 32.dp)) {
-                            var selectedDestination by rememberSaveable {
-                                mutableStateOf(SchoolClassDetailsScreenTabs.StudentList.ordinal)
-                            }
-                            SecondaryScrollableTabRow(
-                                selectedTabIndex = selectedDestination, edgePadding = 0.dp, divider = {}) {
-                                SchoolClassDetailsScreenTabs.entries.forEachIndexed { index, destination ->
-                                    Tab(selected = selectedDestination == index, onClick = {
-                                        selectedDestination = index
-                                    }, text = {
-                                        Text(
-                                            text = if (destination == SchoolClassDetailsScreenTabs.StudentList) "${destination.name} (${uiState.assignments.size})" else destination.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = if (selectedDestination == index) FontWeight.Bold else FontWeight.Normal,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    })
-
-                                }
-                            }
-
-                            when (selectedDestination) {
-                                0 -> {
-                                    StudentsList(
-                                        classStudents = uiState.classStudents,
-                                        isLoadingClassStudents = uiState.isLoadingClassStudents,
-                                        onNavigateToStudentDetail = onNavigateToStudentDetail
-                                    )
-                                }
-
-                                1 -> {
-                                    SubjectAssignmentsList(
-                                        teachers = uiState.teachers,
-                                        isAssigning = uiState.isAssigningTeachingAssignment,
-                                        assignTeacherToSubject = { subjectId, teacherId ->
-                                            viewModel.assignTeacherToSubject(subjectId, teacherId, classId)
-                                        },
-                                        deleteTeachingAssignment = {
-                                            viewModel.deleteTeachingAssignment(it, classId)
-                                        },
-                                        isDeleting = uiState.isDeleting,
-                                        onNavigateToTeacherDetail = onNavigateToTeacherDetail,
-                                        combinedAssignment = uiState.filteredCombinedAssignmentAndPendings,
-                                        isLoadingAssignments = uiState.isLoadingAssignments,
-                                        onFilterClicked = {
-                                            when (it) {
-                                                0 -> {
-                                                    viewModel.getAllAllSubjectsForClass()
-                                                }
-
-                                                1 -> {
-                                                    viewModel.getAssignedSubjectsForClass()
-                                                }
-
-                                                2 -> {
-                                                    viewModel.getPendingSubjectsForClass()
-                                                }
-                                            }
-                                        },
-                                    )
-                                }
-
-                                2 -> {
-                                    TeachersList(
-                                        classTeachers = uiState.classTeachers
-                                    )
-                                }
-                            }
-                        }
+                        ClassDetailMainPane(
+                            uiState = uiState,
+                            classId = classId,
+                            viewModel = viewModel,
+                            onNavigateToStudentDetail = onNavigateToStudentDetail,
+                            onNavigateToTeacherDetail = onNavigateToTeacherDetail
+                        )
                     }
                     entry<Route.SchoolAdmin.Academics.SchoolStructure.ClassDetail.Supporting>(
                         metadata = SupportingPaneSceneStrategy.supportingPane()
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(32.dp),
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                DailyPlanningCard()
-                                TeacherMiniCard(
-                                    uiState.homeroomAssignment,
-                                    onAssignClick = { showAssignTeacherDialog = true },
-                                    onTeacherClick = {
-                                        uiState.homeroomAssignment?.teacherProfileId?.let(
-                                            onNavigateToTeacherDetail
-                                        )
-                                    })
-                            }
-                        }
+                        ClassDetailSupportingPane(
+                            homeroomAssignment = uiState.homeroomAssignment,
+                            onAssignClick = { showAssignTeacherDialog = true },
+                            onNavigateToTeacherDetail = onNavigateToTeacherDetail
+                        )
                     }
                 })
         }
@@ -234,6 +159,111 @@ fun ClassDetailsScreen(
             isAssigning = uiState.isAssigningHomeroomTeacher,
             assignHomeroomTeacher = { viewModel.assignHomeroomTeacher(it, classId) },
             onDismiss = { showAssignTeacherDialog = false })
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ClassDetailMainPane(
+    uiState: SchoolStructureState,
+    classId: Long,
+    viewModel: SchoolStructureViewModel,
+    onNavigateToStudentDetail: (Long) -> Unit,
+    onNavigateToTeacherDetail: (Long) -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 32.dp)) {
+        var selectedDestination by rememberSaveable {
+            mutableStateOf(SchoolClassDetailsScreenTabs.StudentList.ordinal)
+        }
+        SecondaryScrollableTabRow(
+            selectedTabIndex = selectedDestination, edgePadding = 0.dp, divider = {}) {
+            SchoolClassDetailsScreenTabs.entries.forEachIndexed { index, destination ->
+                Tab(selected = selectedDestination == index, onClick = {
+                    selectedDestination = index
+                }, text = {
+                    Text(
+                        text = if (destination == SchoolClassDetailsScreenTabs.StudentList) "${destination.name} (${uiState.assignments.size})" else destination.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (selectedDestination == index) FontWeight.Bold else FontWeight.Normal,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                })
+
+            }
+        }
+
+        when (selectedDestination) {
+            0 -> {
+                StudentsList(
+                    classStudents = uiState.classStudents,
+                    isLoadingClassStudents = uiState.isLoadingClassStudents,
+                    onNavigateToStudentDetail = onNavigateToStudentDetail
+                )
+            }
+
+            1 -> {
+                SubjectAssignmentsList(
+                    teachers = uiState.teachers,
+                    isAssigning = uiState.isAssigningTeachingAssignment,
+                    assignTeacherToSubject = { subjectId, teacherId ->
+                        viewModel.assignTeacherToSubject(subjectId, teacherId, classId)
+                    },
+                    deleteTeachingAssignment = {
+                        viewModel.deleteTeachingAssignment(it, classId)
+                    },
+                    isDeleting = uiState.isDeleting,
+                    onNavigateToTeacherDetail = onNavigateToTeacherDetail,
+                    combinedAssignment = uiState.filteredCombinedAssignmentAndPendings,
+                    isLoadingAssignments = uiState.isLoadingAssignments,
+                    onFilterClicked = {
+                        when (it) {
+                            0 -> {
+                                viewModel.getAllAllSubjectsForClass()
+                            }
+
+                            1 -> {
+                                viewModel.getAssignedSubjectsForClass()
+                            }
+
+                            2 -> {
+                                viewModel.getPendingSubjectsForClass()
+                            }
+                        }
+                    },
+                )
+            }
+
+            2 -> {
+                TeachersList(
+                    classTeachers = uiState.classTeachers
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ClassDetailSupportingPane(
+    homeroomAssignment: HomeroomAssignmentDTO?,
+    onAssignClick: () -> Unit,
+    onNavigateToTeacherDetail: (Long) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(32.dp),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            DailyPlanningCard()
+            TeacherMiniCard(
+                homeroomAssignment,
+                onAssignClick = onAssignClick,
+                onTeacherClick = {
+                    homeroomAssignment?.teacherProfileId?.let(
+                        onNavigateToTeacherDetail
+                    )
+                })
+        }
     }
 }
 
@@ -841,6 +871,3 @@ fun TeacherMiniCard(
         }
     }
 }
-
-
-

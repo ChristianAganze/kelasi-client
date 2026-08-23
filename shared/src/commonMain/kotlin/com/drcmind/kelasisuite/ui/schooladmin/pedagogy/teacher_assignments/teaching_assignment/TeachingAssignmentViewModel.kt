@@ -8,6 +8,7 @@ import com.drcmind.kelasisuite.domain.util.Resource
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teachers.ActivityType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -15,8 +16,8 @@ import kotlinx.coroutines.flow.update
 class TeachingAssignmentViewModel(
     private val teachingAssignmentRepository: AssignmentRepository
 ) : ViewModel(){
-    val uiState : StateFlow<TeachingAssignmenState>
-        field = MutableStateFlow(TeachingAssignmenState())
+    private val _uiState = MutableStateFlow(TeachingAssignmenState())
+    val uiState: StateFlow<TeachingAssignmenState> = _uiState.asStateFlow()
 
 
     init {
@@ -26,18 +27,18 @@ class TeachingAssignmentViewModel(
 
 
     fun onSearchQueryChange(query: String) {
-        uiState.update { it.copy(searchQuery = query) }
+        _uiState.update { it.copy(searchQuery = query) }
         filterTeachers()
     }
 
     private fun filterTeachers() {
-        val query = uiState.value.searchQuery.lowercase()
-        val filtered = uiState.value.allTeachingAssignments.filter { assignment ->
+        val query = _uiState.value.searchQuery.lowercase()
+        val filtered = _uiState.value.allTeachingAssignments.filter { assignment ->
             assignment.teacherName.lowercase().contains(query) ||
                     assignment.subjectName.lowercase().contains(query) ||
                     assignment.className.lowercase().contains(query)
         }
-        uiState.update {
+        _uiState.update {
             it.copy(
                 isLoading = false,
                 teachingAssignments = filtered,
@@ -46,17 +47,17 @@ class TeachingAssignmentViewModel(
     }
 
     fun setActiveTeachingAssignment(assignment: TeachingAssignmentDTO) {
-        uiState.update { it.copy(activeTeachinggAssignment = assignment) }
+        _uiState.update { it.copy(activeTeachinggAssignment = assignment) }
     }
 
     fun loadSchoolTeachingAssignments() {
-        uiState.update { it.copy(isLoading = true, error = null) }
+        _uiState.update { it.copy(isLoading = true, error = null) }
         teachingAssignmentRepository.getAssignmentsForSchool().onEach { resource ->
             when (resource) {
-                is Resource.Loading -> uiState.update { it.copy(isLoading = true, error = null) }
+                is Resource.Loading -> _uiState.update { it.copy(isLoading = true, error = null) }
                 is Resource.Success -> {
                     val data = resource.data ?: listOf()
-                    uiState.update {
+                    _uiState.update {
                         it.copy(
                             isLoading = false,
                             teachingAssignments = data,
@@ -65,7 +66,7 @@ class TeachingAssignmentViewModel(
                     }
                 }
                 is Resource.Error -> {
-                    uiState.update { it.copy(isLoading = false, teachingAssignments = listOf(), error = resource.message) }
+                    _uiState.update { it.copy(isLoading = false, teachingAssignments = listOf(), error = resource.message) }
                 }
             }
         }.launchIn(viewModelScope)

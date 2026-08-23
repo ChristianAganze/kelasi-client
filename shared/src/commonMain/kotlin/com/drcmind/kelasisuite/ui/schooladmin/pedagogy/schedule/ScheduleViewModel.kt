@@ -52,7 +52,7 @@ class ScheduleViewModel(
     }
 
     private fun getCurrentWeekNumber(): Int {
-        val today = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val today = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         return today.dayOfYear / 7 + 1
     }
 

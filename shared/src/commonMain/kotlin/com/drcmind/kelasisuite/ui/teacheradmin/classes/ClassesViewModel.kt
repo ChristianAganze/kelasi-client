@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 data class ClassesState(
     val availableClasses: List<TeachingAssignmentDTO> = emptyList(),
@@ -208,7 +208,7 @@ class ClassesViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             // Get current date string 
-            val currentDate = Clock.System.now().toString()
+            val currentDate = kotlinx.datetime.Clock.System.now().toString()
 
             var hasError = false
             for (student in currentState.students) {

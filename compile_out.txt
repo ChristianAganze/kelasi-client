@@ -1,0 +1,66 @@
+﻿Reusing configuration cache.
+> Task :shared:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :shared:convertXmlValueResourcesForJvmMain NO-SOURCE
+> Task :shared:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:copyNonXmlValueResourcesForJvmMain NO-SOURCE
+> Task :shared:generateComposeResClass UP-TO-DATE
+> Task :shared:checkJvmMainComposeLibrariesCompatibility
+> Task :shared:prepareComposeResourcesTaskForJvmMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmMain NO-SOURCE
+> Task :shared:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonMain UP-TO-DATE
+> Task :shared:prepareComposeResourcesTaskForCommonMain UP-TO-DATE
+> Task :shared:generateResourceAccessorsForCommonMain UP-TO-DATE
+> Task :shared:generateActualResourceCollectorsForJvmMain UP-TO-DATE
+> Task :shared:compileKotlinJvm
+w: ATTENTION!
+This build uses unsafe internal compiler arguments:
+
+-XXLanguage:+ExplicitBackingFields
+
+This mode is not recommended for production use,
+as no stability/compatibility guarantees are given on
+compiler or generated code. Use it at your own risk!
+
+w: Following manually enabled features will force generation of pre-release binaries: ExplicitBackingFields
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/domain/util/InstantDateFormater.kt:66:5 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/auth/AuthViewModel.kt:67:25 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/components/AppIcons.kt:14:39 'val Icons.Rounded.Chat: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.Chat.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/parentadmin/dashboard/ParentDashboardScreen.kt:81:54 'val Icons.Filled.Message: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Message.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/CalendarPeriodsScreen.kt:216:56 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/CalendarPeriodsViewModel.kt:349:21 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/CalendarPeriodsViewModel.kt:368:56 Unnecessary safe call on a non-null receiver of type 'Long'.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/CalendarPeriodsViewModel.kt:374:21 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/CalendarPeriodsViewModel.kt:394:56 Unnecessary safe call on a non-null receiver of type 'Long'.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/CalendarPeriodsViewModel.kt:400:21 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/CalendarPeriodsViewModel.kt:430:21 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/TimeSlotsConfigurationScreen.kt:359:60 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/calendar_periods/TimeSlotsConfigurationScreen.kt:489:60 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/deliberation/DeliberationsConductScreen.kt:125:45 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/deliberation/DeliberationsConductScreen.kt:152:45 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/deliberation/DeliberationsConductScreen.kt:321:37 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/grading/EvaluationGradingScreen.kt:127:45 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/grading/EvaluationGradingScreen.kt:152:45 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/grading/EvaluationGradingScreen.kt:177:45 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/reports/ReportCardsScreen.kt:109:49 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/reports/ReportCardsScreen.kt:143:49 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/school_structure/ClassDetailsScreen.kt:265:56 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/school_structure/ClassDetailsScreen.kt:724:45 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/student_enrollment/enrollment/AddEnrollmentDialog.kt:665:18 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/student_enrollment/student/StudentDetailScreen.kt:303:48 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/student_enrollment/student/StudentDetailScreen.kt:410:47 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/student_enrollment/student/StudentsViewModel.kt:118:17 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/academics/student_enrollment/student/StudentsViewModel.kt:146:17 'when' is exhaustive so 'else' is redundant here.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/parents/ParentsScreen.kt:630:60 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/parents/ParentsScreen.kt:710:60 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/parents/ParentsScreen.kt:740:60 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/schooladmin/pedagogy/teacher_assignments/teaching_assignment/TeachingAssignmentScreen.kt:318:48 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/teacheradmin/classlog/ClassLogScreen.kt:260:44 'val Icons.Filled.Send: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Send.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/teacheradmin/preparation/PreparationScreen.kt:195:56 'val Icons.Filled.Send: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Send.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/teacheradmin/preparation/PreparationScreen.kt:223:44 'val Icons.Filled.ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack.
+w: file:///F:/project/kelasi/kelasi-client/shared/src/commonMain/kotlin/com/drcmind/kelasisuite/ui/teacheradmin/preparation/PreparationScreen.kt:255:13 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+
+BUILD SUCCESSFUL in 1m 57s
+9 actionable tasks: 3 executed, 6 up-to-date
+Configuration cache entry reused.

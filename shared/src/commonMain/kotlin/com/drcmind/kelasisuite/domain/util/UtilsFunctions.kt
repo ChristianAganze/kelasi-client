@@ -1,8 +1,5 @@
 package com.drcmind.kelasisuite.domain.util
 
-import kotlin.time.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -11,9 +8,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 fun currentSchoolWeekNumber(): Int {
-    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    val now = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     return now.dayOfYear / 7 + 1
 }
 
@@ -32,9 +32,9 @@ object UtilsFunctions {
         AlertDialog(
             modifier = modifier,
             onDismissRequest = onDismissRequest,
-            icon = icon?.let {
-                { Icon(imageVector = it, contentDescription = null) }
-            },
+            icon = if (icon != null) {
+                { Icon(imageVector = icon, contentDescription = null) }
+            } else null,
             title = {
                 Text(text = title)
             },

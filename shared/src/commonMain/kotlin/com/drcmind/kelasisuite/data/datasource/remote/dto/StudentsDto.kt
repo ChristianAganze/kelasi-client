@@ -4,8 +4,8 @@ import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.stude
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlin.time.Instant
 
 //CREATE
 @Serializable

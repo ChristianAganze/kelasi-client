@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Kelasi" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- On laisse Compose gérer tout le reste -->
+    </style>
+</resources>

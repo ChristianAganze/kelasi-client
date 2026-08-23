@@ -51,7 +51,9 @@ fun NavigationRoot(
         val targetRoute = navigationState
 
         if (rootBackStack.isNotEmpty()) {
-            rootBackStack.set(0, targetRoute)
+            if (rootBackStack[0] != targetRoute) {
+                rootBackStack.set(0, targetRoute)
+            }
 
             while (rootBackStack.size > 1) {
                 rootBackStack.removeLast()
@@ -92,9 +94,7 @@ fun NavigationRoot(
                             else -> Route.SchoolAdmin
                         }
 
-                        if (rootBackStack.lastOrNull() != nextRoute) {
-                            rootBackStack.add(nextRoute)
-                        }
+                        appViewModel.setNavigationState(nextRoute)
                     }
                 )
             }

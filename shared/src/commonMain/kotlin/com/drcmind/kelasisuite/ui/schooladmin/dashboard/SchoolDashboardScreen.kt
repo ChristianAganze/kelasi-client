@@ -99,7 +99,6 @@ fun HeaderSection(username: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BentoCard(
     title: String,

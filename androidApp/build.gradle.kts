@@ -18,6 +18,7 @@ dependencies{
     implementation(projects.shared)
     implementation(libs.compose.uiToolingPreview)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.androidx.core.ktx)
     debugImplementation(libs.compose.uiTooling)

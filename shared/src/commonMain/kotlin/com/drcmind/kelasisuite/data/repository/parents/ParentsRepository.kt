@@ -7,7 +7,7 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.ParentStudentLinkageRe
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
-interface ParentsRepository {
+interface  ParentsRepository {
     fun createParent(createParentRequest: CreateParentRequest) : Flow<Resource<ParentDto>>
     fun linkStudentToParent(parentStudentLinkageRequest: ParentStudentLinkageRequest) : Flow<Resource<ParentStudentLinkageDto>>
     fun unlinkStudentFromParent(linkageId: Long) : Flow<Resource<Unit>>

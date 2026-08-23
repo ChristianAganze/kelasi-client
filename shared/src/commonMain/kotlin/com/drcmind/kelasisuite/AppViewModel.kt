@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -75,7 +75,7 @@ class AppViewModel(
                     break // Exit the timer loop
                 }
 
-                val remainingDuration = expirationInstant - Clock.System.now()
+                val remainingDuration = expirationInstant - kotlinx.datetime.Clock.System.now()
                 _tokenRemainingDuration.value = remainingDuration
 
                 if (remainingDuration <= Duration.ZERO) {
@@ -108,6 +108,10 @@ class AppViewModel(
     fun logout() {
         println("AppViewModel: Logout initiated by UI.")
         handleTokenExpired() // Calls the internal function that handles cleanup and navigation
+    }
+
+    fun setNavigationState(route: Route) {
+        _navigationRouteState.value = route
     }
 
     // Don't forget to cancel jobs when the ViewModel is no longer needed

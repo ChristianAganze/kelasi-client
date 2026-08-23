@@ -7,14 +7,6 @@ plugins {
 }
 
 kotlin {
-    js {
-        browser()
-        binaries.executable()
-        compilerOptions {
-            freeCompilerArgs.add("-Xskip-prerelease-check")
-        }
-    }
-
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()

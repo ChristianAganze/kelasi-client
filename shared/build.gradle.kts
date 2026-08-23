@@ -13,40 +13,24 @@ plugins {
 }
 
 kotlin {
+    // 1. Configuration globale (s'applique à toutes les cibles)
+    compilerOptions.freeCompilerArgs.addAll("-Xskip-prerelease-check")
+
     androidLibrary {
         namespace = "com.drcmind.kelasisuite.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
-
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_11
-        }
-        androidResources {
-            enable = true
-        }
-        withHostTest {
-            isIncludeAndroidResources = true
-        }
     }
 
-    jvm()
-
-    js {
-        browser()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
-    }
-
-    applyDefaultHierarchyTemplate {
-        common {
-            group("web") {
-                withJs()
-                withWasmJs()
-            }
-        }
     }
 
     listOf(
@@ -63,11 +47,12 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
+
             implementation(libs.compose.ui)
+            implementation(libs.compose.material3)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
+
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
             implementation(libs.kotlinx.datetime)
@@ -94,14 +79,9 @@ kotlin {
             implementation(libs.filekit.core)
             implementation(libs.filekit.compose)
 
-            implementation(libs.vicoCompose)
-            implementation(libs.vicoComposeM3)
 
             implementation(libs.multiplatform.settings.no.arg)
-
             implementation(libs.compose.multiplatform)
-
-
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -109,11 +89,13 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
-        all {
-            languageSettings.enableLanguageFeature("ExplicitBackingFields")
-            compilerOptions {
-                freeCompilerArgs.add("-Xskip-prerelease-check")
-            }
+        jvmMain.dependencies {
+        }
+        androidMain.dependencies {
         }
     }
+}
+
+dependencies {
+    "androidRuntimeClasspath"(libs.compose.uiTooling)
 }

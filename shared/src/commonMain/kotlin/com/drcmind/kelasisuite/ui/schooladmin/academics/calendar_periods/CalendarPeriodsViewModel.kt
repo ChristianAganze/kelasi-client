@@ -21,8 +21,8 @@ import kotlin.collections.map
 class CalendarPeriodsViewModel(
     private val schoolRepository: SchoolRepository
 ) : ViewModel() {
-    val uiState: StateFlow<CalendarPeriodsUiState>
-        field = MutableStateFlow(CalendarPeriodsUiState())
+    private val _uiState = MutableStateFlow(CalendarPeriodsUiState())
+    val uiState: StateFlow<CalendarPeriodsUiState> = _uiState.asStateFlow()
 
     init {
         getActiveAcademicYear()
@@ -35,22 +35,22 @@ class CalendarPeriodsViewModel(
 
     private fun getActiveAcademicYear() {
         val loadActiveAcademicYear = schoolRepository.getActiveAcademicYear()
-        uiState.update { it.copy(activeAcademicYear = loadActiveAcademicYear) }
+        _uiState.update { it.copy(activeAcademicYear = loadActiveAcademicYear) }
     }
 
     private fun loadActiveAcademicYear() {
         schoolRepository.getAcademicYears().onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
-                    uiState.update { it.copy(academicYears = ressource.data ?: emptyList()) }
+                    _uiState.update { it.copy(academicYears = ressource.data ?: emptyList()) }
                 }
 
             }
@@ -61,15 +61,15 @@ class CalendarPeriodsViewModel(
         schoolRepository.getOfferedMajorsForSchool().onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
-                    uiState.update { it.copy(majors = ressource.data ?: emptyList()) }
+                    _uiState.update { it.copy(majors = ressource.data ?: emptyList()) }
                 }
 
             }
@@ -80,15 +80,15 @@ class CalendarPeriodsViewModel(
         schoolRepository.getSchoolSections().onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
-                    uiState.update { it.copy(schoolSections = ressource.data ?: emptyList()) }
+                    _uiState.update { it.copy(schoolSections = ressource.data ?: emptyList()) }
                 }
             }
         }.launchIn(viewModelScope)
@@ -98,16 +98,16 @@ class CalendarPeriodsViewModel(
         schoolRepository.getAllSchoolSectionConfigsBySchool().onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                     print(ressource.message.toString())
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
-                    uiState.update {
+                    _uiState.update {
                         it.copy(
                             schoolSectionConfigs = ressource.data ?: emptyList(),
                             isLoading = false
@@ -124,11 +124,11 @@ class CalendarPeriodsViewModel(
         schoolRepository.createSchoolSectionConfig(configDto).onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
@@ -143,11 +143,11 @@ class CalendarPeriodsViewModel(
         schoolRepository.updateSchoolSectionConfig(id, configDto).onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
@@ -162,11 +162,11 @@ class CalendarPeriodsViewModel(
         schoolRepository.deleteSchoolSectionConfig(id).onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
@@ -180,15 +180,15 @@ class CalendarPeriodsViewModel(
         schoolRepository.getEvaluationPeriodsBySchool().onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
-                    uiState.update { it.copy(evaluationPeriods = ressource.data ?: emptyMap()) }
+                    _uiState.update { it.copy(evaluationPeriods = ressource.data ?: emptyMap()) }
                 }
 
             }
@@ -199,11 +199,11 @@ class CalendarPeriodsViewModel(
         schoolRepository.getLearningTimeConfigsBySchoolSectionConfigId(schoolSectionConfigId).onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = false, error = ressource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = true) }
+                    _uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = true) }
                 }
 
                 is Resource.Success<*> -> {
@@ -227,7 +227,7 @@ class CalendarPeriodsViewModel(
                                 daysWithIds = values.associate { it.dayOfWeek to it.id!! }
                             )
                         } ?: emptyList()
-                    uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = false,learningTimeConfigs = results) }
+                    _uiState.update { it.copy(isLoadingSchoolSectionConfigDetails = false,learningTimeConfigs = results) }
                 }
 
             }
@@ -238,16 +238,16 @@ class CalendarPeriodsViewModel(
         schoolRepository.getLearningTimeConfigById(id).onEach { resource ->
             when (resource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = resource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = resource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
                     // Handle single config if needed, or just update loading state
-                    uiState.update { it.copy(isLoading = false, error = null) }
+                    _uiState.update { it.copy(isLoading = false, error = null) }
                 }
 
             }
@@ -258,11 +258,11 @@ class CalendarPeriodsViewModel(
         schoolRepository.getAllLearningTimeConfigs().onEach { resource ->
             when (resource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = resource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = resource.message) }
                 }
 
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success<*> -> {
@@ -289,7 +289,7 @@ class CalendarPeriodsViewModel(
                         } ?: emptyList()
 
 
-                    uiState.update {
+                    _uiState.update {
                         it.copy(
                             learningTimeConfigs = results,
                             isLoading = false,
@@ -307,11 +307,11 @@ class CalendarPeriodsViewModel(
             .onEach { resource ->
                 when (resource) {
                     is Resource.Error<*> -> {
-                        uiState.update { it.copy(isLoading = false, error = resource.message) }
+                        _uiState.update { it.copy(isLoading = false, error = resource.message) }
                     }
 
                     is Resource.Loading<*> -> {
-                        uiState.update { it.copy(isLoading = true) }
+                        _uiState.update { it.copy(isLoading = true) }
                     }
 
                     is Resource.Success<*> -> {
@@ -337,7 +337,7 @@ class CalendarPeriodsViewModel(
                                 )
                             } ?: emptyList()
 
-                        uiState.update {
+                        _uiState.update {
                             it.copy(
                                 learningTimeConfigs = results,
                                 isLoading = false,
@@ -356,11 +356,11 @@ class CalendarPeriodsViewModel(
             schoolRepository.createLearningTimeConfig(configDto).onEach { resource ->
                 when (resource) {
                     is Resource.Error<*> -> {
-                        uiState.update { it.copy(isLoading = false, error = resource.message) }
+                        _uiState.update { it.copy(isLoading = false, error = resource.message) }
                     }
 
                     is Resource.Loading<*> -> {
-                        uiState.update { it.copy(isLoading = true) }
+                        _uiState.update { it.copy(isLoading = true) }
                     }
 
                     is Resource.Success<*> -> {
@@ -368,7 +368,7 @@ class CalendarPeriodsViewModel(
                         configDto.schoolSectionConfigId?.let {
                             loadLearningTimeConfigsBySchoolSectionConfigId(it)
                         }
-                        uiState.update { it.copy(isLoading = false, error = null) }
+                        _uiState.update { it.copy(isLoading = false, error = null) }
                     }
 
                     else -> {}
@@ -382,11 +382,11 @@ class CalendarPeriodsViewModel(
             schoolRepository.updateLearningTimeConfig(id, configDto).onEach { resource ->
                 when (resource) {
                     is Resource.Error<*> -> {
-                        uiState.update { it.copy(isLoading = false, error = resource.message) }
+                        _uiState.update { it.copy(isLoading = false, error = resource.message) }
                     }
 
                     is Resource.Loading<*> -> {
-                        uiState.update { it.copy(isLoading = true) }
+                        _uiState.update { it.copy(isLoading = true) }
                     }
 
                     is Resource.Success<*> -> {
@@ -394,7 +394,7 @@ class CalendarPeriodsViewModel(
                         configDto.schoolSectionConfigId?.let {
                             loadLearningTimeConfigsBySchoolSectionConfigId(it)
                         }
-                        uiState.update { it.copy(isLoading = false, error = null) }
+                        _uiState.update { it.copy(isLoading = false, error = null) }
                     }
 
                     else -> {}
@@ -407,16 +407,16 @@ class CalendarPeriodsViewModel(
         viewModelScope.launch {
             // Find the schoolSectionConfigId before deletion to reload correctly
             val schoolSectionConfigIdToReload =
-                uiState.value.learningTimeConfigs.firstOrNull { it.daysWithIds.values.contains(id) }?.schoolSectionConfigId
+                _uiState.value.learningTimeConfigs.firstOrNull { it.daysWithIds.values.contains(id) }?.schoolSectionConfigId
 
             schoolRepository.deleteLearningTimeConfig(id).onEach { resource ->
                 when (resource) {
                     is Resource.Error<*> -> {
-                        uiState.update { it.copy(isLoading = false, error = resource.message) }
+                        _uiState.update { it.copy(isLoading = false, error = resource.message) }
                     }
 
                     is Resource.Loading<*> -> {
-                        uiState.update { it.copy(isLoading = true) }
+                        _uiState.update { it.copy(isLoading = true) }
                     }
 
                     is Resource.Success<*> -> {
@@ -424,7 +424,7 @@ class CalendarPeriodsViewModel(
                         schoolSectionConfigIdToReload?.let {
                             loadLearningTimeConfigsBySchoolSectionConfigId(it)
                         }
-                        uiState.update { it.copy(isLoading = false, error = null) }
+                        _uiState.update { it.copy(isLoading = false, error = null) }
                     }
 
                     else -> {}

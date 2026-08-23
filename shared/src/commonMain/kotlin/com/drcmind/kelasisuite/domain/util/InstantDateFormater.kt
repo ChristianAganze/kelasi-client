@@ -9,16 +9,11 @@ import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 
 @OptIn(FormatStringsInDatetimeFormats::class)
 private val dateTimeFormatter = LocalDateTime.Format {
     byUnicodePattern("dd/MM/yyyy HH:mm")
-}
-
-@OptIn(FormatStringsInDatetimeFormats::class)
-private val dateFormatter = LocalDate.Format {
-    byUnicodePattern("dd/MM/yyyy")
 }
 
 fun Instant.toDdMmYyyyWithTime(
@@ -29,17 +24,6 @@ fun Instant.toDdMmYyyyWithTime(
         .format(dateTimeFormatter)
 }
 
-
-
-fun Instant.toDdMmYyyy(
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
-): String {
-    return this
-        .toLocalDateTime(timeZone)
-        .date
-        .format(dateFormatter)
-}
-
 fun DayOfWeek.toFrench(): String = when (this) {
     DayOfWeek.MONDAY -> "Lundi"
     DayOfWeek.TUESDAY -> "Mardi"
@@ -48,6 +32,7 @@ fun DayOfWeek.toFrench(): String = when (this) {
     DayOfWeek.FRIDAY -> "Vendredi"
     DayOfWeek.SATURDAY -> "Samedi"
     DayOfWeek.SUNDAY -> "Dimanche"
+    else -> this.name
 }
 
 fun kotlinx.datetime.Month.toFrench(): String = when (this) {
@@ -68,6 +53,6 @@ fun kotlinx.datetime.Month.toFrench(): String = when (this) {
 
 val dateFormatterOnlyDay by lazy {
     LocalDate.Format {
-        day(padding = Padding.ZERO)
+        dayOfMonth(padding = Padding.ZERO)
     }
 }

@@ -7,6 +7,7 @@ import com.drcmind.kelasisuite.data.repository.schools.SchoolRepository
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -14,8 +15,8 @@ import kotlinx.coroutines.flow.update
 class SchoolAdminViewModel(
     private val schoolRepository: SchoolRepository,
 ) : ViewModel() {
-    val uiState : StateFlow<SchoolAdminState>
-        field = MutableStateFlow(SchoolAdminState(activeAcademicYear = schoolRepository.getActiveAcademicYear()))
+    private val _uiState = MutableStateFlow(SchoolAdminState(activeAcademicYear = schoolRepository.getActiveAcademicYear()))
+    val uiState: StateFlow<SchoolAdminState> = _uiState.asStateFlow()
 
     init {
         loadAcademicYears()
@@ -24,20 +25,20 @@ class SchoolAdminViewModel(
         schoolRepository.getAcademicYears().onEach { ressource ->
             when (ressource) {
                 is Resource.Error<*> -> {
-                    uiState.update { it.copy(isLoading = false, error = ressource.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ressource.message) }
                 }
                 is Resource.Loading<*> -> {
-                    uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
                 is Resource.Success<*> -> {
-                    uiState.update { it.copy(academicYears = ressource.data ?: emptyList()) }
+                    _uiState.update { it.copy(academicYears = ressource.data ?: emptyList()) }
                 }
             }
         }.launchIn(viewModelScope)
     }
 
     fun selectAcademicYear(academicYear: AcademicYearDTO){
-        uiState.update { it.copy(activeAcademicYear = academicYear) }
+        _uiState.update { it.copy(activeAcademicYear = academicYear) }
         schoolRepository.saveActiveAcademicYearLocally(academicYear)
     }
 }

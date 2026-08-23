@@ -11,7 +11,7 @@ import com.drcmind.kelasisuite.data.repository.students.StudentsRepository
 import com.drcmind.kelasisuite.domain.util.Resource
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.LocalDate
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 class StudentsViewModel(
     private val studentsRepository: StudentsRepository,
@@ -255,8 +255,8 @@ data class AddStudentState(
     val religion: String = "",
     val previousSchool: String = "",
     val address: String = "",
-    val studentIdNumber: String = "STU-${(100..999).random()}-${Clock.System.now().toEpochMilliseconds()}",
-    val sernieNumber: String = "SER-${(100..999).random()}-${Clock.System.now().toEpochMilliseconds()}",
+    val studentIdNumber: String = "STU-${(100..999).random()}-${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
+    val sernieNumber: String = "SER-${(100..999).random()}-${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
     val isLoading: Boolean = false,
     val error: String? = null,
     val isSuccess: Boolean = false

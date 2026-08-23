@@ -37,7 +37,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -180,7 +180,7 @@ fun CalendarPeriodsScreen(
 @Composable
 fun AcademicYearCard(uiState: CalendarPeriodsUiState) {
     val dateFormat = LocalDate.Format {
-        day(); char('/'); monthNumber(); char('/'); year()
+        dayOfMonth(); char('/'); monthNumber(); char('/'); year()
     }
 
     var expanded by remember { mutableStateOf(false) }
@@ -362,7 +362,7 @@ fun EvaluationSectionHeader(sectionName: String) {
 fun EvaluationPeriodRow(
     period: EvaluationPeriodDTO, onStartDateChange: (LocalDate) -> Unit, onEndDateChange: (LocalDate) -> Unit
 ) {
-    val format = LocalDate.Format { day(); char('/'); monthNumber(); char('/'); year() }
+    val format = LocalDate.Format { dayOfMonth(); char('/'); monthNumber(); char('/'); year() }
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
@@ -494,7 +494,7 @@ fun getEvaluationStatus(
     startDate: LocalDate?, endDate: LocalDate?
 ): EvaluationStatus {
 
-    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val today = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     return when {
         startDate == null || endDate == null -> EvaluationStatus.NOT_YET_ACTIVE
@@ -506,4 +506,3 @@ fun getEvaluationStatus(
         else -> EvaluationStatus.ONGOING
     }
 }
-

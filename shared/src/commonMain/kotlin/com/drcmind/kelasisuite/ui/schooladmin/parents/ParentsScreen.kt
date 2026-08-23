@@ -40,9 +40,8 @@ import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(
-    ExperimentalMaterial3AdaptiveApi::class,
-    ExperimentalMaterial3ExpressiveApi::class,
-    ExperimentalMaterial3Api::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3AdaptiveApi::class
 )
 @Composable
 fun ParentsScreen(

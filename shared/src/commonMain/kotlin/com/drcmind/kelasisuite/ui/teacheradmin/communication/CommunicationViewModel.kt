@@ -96,7 +96,7 @@ class CommunicationViewModel(
             senderId = currentUserId,
             receiverId = receiverId,
             content = content,
-            timestamp = kotlin.time.Clock.System.now().toString()
+            timestamp = kotlinx.datetime.Clock.System.now().toString()
         )
 
         viewModelScope.launch {

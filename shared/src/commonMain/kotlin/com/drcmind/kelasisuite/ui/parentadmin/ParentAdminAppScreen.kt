@@ -36,7 +36,7 @@ fun ParentAdminAppScreen(
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            NavigationSuiteType.WideNavigationRailExpanded
+            NavigationSuiteType.NavigationRail
         } else {
             NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
         }

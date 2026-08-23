@@ -14,11 +14,12 @@ import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolDTO
 import com.drcmind.kelasisuite.domain.model.JwtPayload
 import com.drcmind.kelasisuite.domain.model.UserInfo
 import com.russhwolf.settings.Settings
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.time.Clock
-import kotlin.time.Instant
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 class SettingsStorageImpl(
     private val settings: Settings
@@ -65,7 +66,7 @@ class SettingsStorageImpl(
 
     override fun isTokenExpired(): Boolean {
         val expirationInstant = getTokenExpirationDate()
-        val currentTime = Clock.System.now()
+        val currentTime = kotlinx.datetime.Clock.System.now()
 
         if (expirationInstant == null) {
             return true // If no expiration date, assume expired
@@ -150,8 +151,8 @@ class SettingsStorageImpl(
         return try {
             val academicYearJson = settings.getStringOrNull(KEY_ACTIVE_ACADEMIC_YEAR)
             if (academicYearJson != null) {
-                val academicYearJson = Json.decodeFromString<AcademicYearDTO>(academicYearJson)
-                academicYearJson
+                val academicYear = Json.decodeFromString<AcademicYearDTO>(academicYearJson)
+                academicYear
             } else {
                 null
             }
