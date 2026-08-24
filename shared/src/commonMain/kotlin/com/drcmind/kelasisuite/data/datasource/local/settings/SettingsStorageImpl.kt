@@ -18,8 +18,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class SettingsStorageImpl(
     private val settings: Settings
@@ -66,7 +66,7 @@ class SettingsStorageImpl(
 
     override fun isTokenExpired(): Boolean {
         val expirationInstant = getTokenExpirationDate()
-        val currentTime = kotlinx.datetime.Clock.System.now()
+        val currentTime = Clock.System.now()
 
         if (expirationInstant == null) {
             return true // If no expiration date, assume expired

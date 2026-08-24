@@ -90,6 +90,10 @@ fun NavigationRoot(
                                 "ROLE_TEACHER",
                                 ignoreCase = true
                             ) -> Route.TeacherAdmin
+                            role.contains(
+                                "ROLE_PARENT",
+                                ignoreCase = true
+                            ) -> Route.ParentAdmin
 
                             else -> Route.SchoolAdmin
                         }
@@ -110,6 +114,11 @@ fun NavigationRoot(
             }
             entry<Route.TeacherAdmin> {
                 TeacherAdminAppScreen(
+                    onLogout = {appViewModel.logout()}
+                )
+            }
+            entry<Route.ParentAdmin> {
+                com.drcmind.kelasisuite.ui.parentadmin.ParentAdminAppScreen(
                     onLogout = {appViewModel.logout()}
                 )
             }

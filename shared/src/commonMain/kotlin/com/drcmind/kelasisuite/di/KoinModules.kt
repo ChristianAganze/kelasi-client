@@ -52,6 +52,12 @@ import com.drcmind.kelasisuite.ui.schooladmin.parents.ParentsViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.grading.EvaluationGradingViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.deliberation.DeliberationsConductViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.reports.ReportCardsViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.finance.SchoolFinanceViewModel
+import com.drcmind.kelasisuite.data.repository.finance.SchoolFinanceRepository
+import com.drcmind.kelasisuite.data.repository.finance.SchoolFinanceRepositoryImpl
+import com.drcmind.kelasisuite.ui.schooladmin.communication.SchoolAdminCommunicationViewModel
+import com.drcmind.kelasisuite.data.repository.communication.SchoolAdminCommunicationRepository
+import com.drcmind.kelasisuite.data.repository.communication.SchoolAdminCommunicationRepositoryImpl
 import com.drcmind.kelasisuite.ui.schooladmin.profile.ProfileViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teachers.TeachersViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.student.StudentsViewModel
@@ -59,6 +65,9 @@ import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.classlog.ClassLogsViewMod
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.preparation.PreparationsViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.program_radar.ProgramRadarViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule.ScheduleViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.inspections.InspectionsViewModel
+import com.drcmind.kelasisuite.data.repository.pedagogy.SchoolInspectionRepository
+import com.drcmind.kelasisuite.data.repository.pedagogy.SchoolInspectionRepositoryImpl
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teaching_assignment.TeachingAssignmentViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.classlog.ClassLogViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.dashboard.TeacherDashboardViewModel
@@ -137,6 +146,9 @@ val repositoryModule = module {
     single<ParentDashboardRepository> { ParentDashboardRepositoryImpl(get()) }
     single<ParentChildrenRepository> { ParentChildrenRepositoryImpl(get()) }
     single<ParentFinanceRepository> { ParentFinanceRepositoryImpl(get()) }
+    single<SchoolFinanceRepository> { SchoolFinanceRepositoryImpl() }
+    single<SchoolAdminCommunicationRepository> { SchoolAdminCommunicationRepositoryImpl() }
+    single<SchoolInspectionRepository> { SchoolInspectionRepositoryImpl() }
 }
 
 val viewModelModule = module {
@@ -156,9 +168,12 @@ val viewModelModule = module {
     viewModelOf(::ProgramRadarViewModel)
     viewModelOf(::PreparationsViewModel)
     viewModelOf(::ClassLogsViewModel)
+    viewModelOf(::InspectionsViewModel)
     viewModelOf(::EvaluationGradingViewModel)
     viewModelOf(::DeliberationsConductViewModel)
     viewModelOf(::ReportCardsViewModel)
+    viewModelOf(::SchoolFinanceViewModel)
+    viewModelOf(::SchoolAdminCommunicationViewModel)
     viewModelOf(::TeacherDashboardViewModel)
     viewModelOf(::TeacherScheduleViewModel)
     viewModelOf(::CommunicationViewModel)

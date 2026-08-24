@@ -8,12 +8,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 fun currentSchoolWeekNumber(): Int {
-    val now = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     return now.dayOfYear / 7 + 1
 }
 

@@ -27,13 +27,15 @@ import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,7 +61,7 @@ fun AuthScreen(
     onAuthSuccess: (String) -> Unit,
     viewModel: AuthViewModel = koinViewModel()
 ) {
-    val adaptiveInfo = currentWindowAdaptiveInfoV2()
+    val adaptiveInfo = currentWindowAdaptiveInfo()
     val sizeClass = adaptiveInfo.windowSizeClass.windowWidthSizeClass
     val state by viewModel.state.collectAsState()
 
@@ -80,6 +82,7 @@ fun AuthScreen(
                 onEmailChange = viewModel::clearEmailError,
                 onPasswordChange = viewModel::clearPasswordError,
                 onLogin = viewModel::login,
+                onDemoLogin = viewModel::loginAsDemo,
                 onDismissError = viewModel::dismissError,
                 isMedium = sizeClass == WindowWidthSizeClass.MEDIUM
             )
@@ -90,6 +93,7 @@ fun AuthScreen(
                 onEmailChange = viewModel::clearEmailError,
                 onPasswordChange = viewModel::clearPasswordError,
                 onLogin = viewModel::login,
+                onDemoLogin = viewModel::loginAsDemo,
                 onDismissError = viewModel::dismissError
             )
         }
@@ -103,6 +107,7 @@ private fun ExpandedLoginLayout(
     onEmailChange: () -> Unit,
     onPasswordChange: () -> Unit,
     onLogin: (String, String) -> Unit,
+    onDemoLogin: (String) -> Unit,
     onDismissError: () -> Unit,
     isMedium: Boolean = false
 ) {
@@ -141,6 +146,7 @@ private fun ExpandedLoginLayout(
                     onEmailChange = onEmailChange,
                     onPasswordChange = onPasswordChange,
                     onLogin = onLogin,
+                    onDemoLogin = onDemoLogin,
                     onDismissError = onDismissError
                 )
                 Spacer(modifier = Modifier.height(32.dp))
@@ -157,6 +163,7 @@ private fun CenteredLoginLayout(
     onEmailChange: () -> Unit,
     onPasswordChange: () -> Unit,
     onLogin: (String, String) -> Unit,
+    onDemoLogin: (String) -> Unit,
     onDismissError: () -> Unit
 ) {
     Box(
@@ -189,6 +196,7 @@ private fun CenteredLoginLayout(
                 onEmailChange = onEmailChange,
                 onPasswordChange = onPasswordChange,
                 onLogin = onLogin,
+                onDemoLogin = onDemoLogin,
                 onDismissError = onDismissError,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -313,6 +321,7 @@ fun AuthFormSection(
     onEmailChange: () -> Unit,
     onPasswordChange: () -> Unit,
     onLogin: (String, String) -> Unit,
+    onDemoLogin: (String) -> Unit,
     onDismissError: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -459,6 +468,60 @@ fun AuthFormSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+
+        HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+
+        Text(
+            text = "Accès Rapide / Démo Directe",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = { onDemoLogin("ROLE_SCHOOL_ADMIN") },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Admin École", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+            OutlinedButton(
+                onClick = { onDemoLogin("ROLE_TEACHER") },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Enseignant", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = { onDemoLogin("ROLE_PARENT") },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Parent", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+            OutlinedButton(
+                onClick = { onDemoLogin("ROLE_SUPER_USER") },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Super Admin", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

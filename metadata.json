@@ -1,0 +1,6 @@
+{
+  "name": "Kelasi Suite",
+  "description": "Portail de gestion scolaire et espace enseignant avec messagerie adaptive.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

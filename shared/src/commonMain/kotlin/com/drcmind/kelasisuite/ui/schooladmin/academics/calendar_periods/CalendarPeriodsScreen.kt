@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -37,7 +37,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.viewmodel.koinViewModel
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +66,7 @@ fun CalendarPeriodsScreen(
             }
         }, Route.SchoolAdmin.Academics.CalendarPeriod.AcademicPeriod
     )
-    val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryTabRow(selectedTabIndex = selectedDestination, containerColor = Color.Transparent) {
@@ -494,7 +494,7 @@ fun getEvaluationStatus(
     startDate: LocalDate?, endDate: LocalDate?
 ): EvaluationStatus {
 
-    val today = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     return when {
         startDate == null || endDate == null -> EvaluationStatus.NOT_YET_ACTIVE

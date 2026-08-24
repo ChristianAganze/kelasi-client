@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import com.drcmind.kelasisuite.data.datasource.remote.dto.GradeLevelDTO
 import com.drcmind.kelasisuite.data.datasource.remote.dto.MajorDto
 import com.drcmind.kelasisuite.data.datasource.remote.dto.SchoolSectionConfigDto
@@ -52,7 +53,7 @@ class ScheduleViewModel(
     }
 
     private fun getCurrentWeekNumber(): Int {
-        val today = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         return today.dayOfYear / 7 + 1
     }
 

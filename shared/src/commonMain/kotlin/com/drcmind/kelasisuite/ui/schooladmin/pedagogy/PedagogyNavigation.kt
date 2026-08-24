@@ -16,6 +16,7 @@ import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.preparation.PreparationsS
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.program_radar.ProgramRadarScreen
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.schedule.ScheduleScreen
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.TeacherAssignmentsScreen
+import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.inspections.InspectionsScreen
 
 @Composable
 fun PedagogyNavigation(
@@ -49,9 +50,7 @@ fun PedagogyNavigation(
             }
 
             entry<Route.SchoolAdmin.Pedagogy.Inspections> {
-                Column {
-                    Text("Rapports des visites de classes.")
-                }
+                InspectionsScreen()
             }
         }
     )

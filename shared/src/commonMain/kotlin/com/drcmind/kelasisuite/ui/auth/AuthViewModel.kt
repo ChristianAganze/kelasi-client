@@ -33,6 +33,27 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         _state.value = _state.value.copy(rememberMe = rememberMe)
     }
 
+    fun loginAsDemo(role: String) {
+        val roleClean = when (role.uppercase()) {
+            "SUPER_ADMIN", "ROLE_SUPER_USER" -> "ROLE_SUPER_USER"
+            "TEACHER", "ROLE_TEACHER" -> "ROLE_TEACHER"
+            "PARENT", "ROLE_PARENT" -> "ROLE_PARENT"
+            else -> "ROLE_SCHOOL_ADMIN"
+        }
+        val username = when (roleClean) {
+            "ROLE_SUPER_USER" -> "admin@kelasi.cd"
+            "ROLE_TEACHER" -> "prof.kasongo@kelasi.cd"
+            "ROLE_PARENT" -> "parent.kabila@kelasi.cd"
+            else -> "direction@kelasi.cd"
+        }
+        _state.value = _state.value.copy(
+            authState = AuthState.Success(
+                username = username,
+                role = roleClean
+            )
+        )
+    }
+
     fun login(email: String, password: String) {
         if (validateInputs(email, password)) {
             _state.value = _state.value.copy(authState = AuthState.Loading)

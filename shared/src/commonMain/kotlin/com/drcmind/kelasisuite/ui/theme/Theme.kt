@@ -2,7 +2,7 @@ package com.drcmind.kelasisuite.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -70,7 +70,7 @@ fun KelasiSuiteTheme(
         colorScheme = colorScheme,
         typography = rememberTypography(
             fontFamily = lexendFontFamily(),
-            windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
+            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
         ),
         content = content
     )

@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -52,6 +52,7 @@ class AppViewModel(
                         UserRole.ROLE_SCHOOL_ADMIN.name -> _navigationRouteState.value = Route.SchoolAdmin
                         UserRole.ROLE_TEACHER.name -> _navigationRouteState.value = Route.TeacherAdmin
                         UserRole.ROLE_PARENT.name -> _navigationRouteState.value = Route.ParentAdmin
+                        else -> _navigationRouteState.value = Route.SchoolAdmin
                     }
                     startTokenExpirationCheckTimer() // Start timer if token is valid
                 }
@@ -75,7 +76,7 @@ class AppViewModel(
                     break // Exit the timer loop
                 }
 
-                val remainingDuration = expirationInstant - kotlinx.datetime.Clock.System.now()
+                val remainingDuration = expirationInstant - Clock.System.now()
                 _tokenRemainingDuration.value = remainingDuration
 
                 if (remainingDuration <= Duration.ZERO) {

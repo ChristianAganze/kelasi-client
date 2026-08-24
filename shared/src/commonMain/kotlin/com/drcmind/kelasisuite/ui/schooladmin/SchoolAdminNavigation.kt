@@ -47,13 +47,13 @@ fun SchoolAdminNavigation(
                 StaffHrScreen()
             }
             entry<Route.SchoolAdmin.Finance> {
-                Text("Finance & Comptabilité")
+                com.drcmind.kelasisuite.ui.schooladmin.finance.SchoolFinanceScreen()
             }
             entry<Route.SchoolAdmin.Logistics> {
                 Text("Logistique & Opérations")
             }
             entry<Route.SchoolAdmin.Communication> {
-                Text("Communicationn")
+                com.drcmind.kelasisuite.ui.schooladmin.communication.SchoolAdminCommunicationScreen()
             }
             entry<Route.SchoolAdmin.Settings> {
                 Text("Paramètres")

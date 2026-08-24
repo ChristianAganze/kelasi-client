@@ -9,7 +9,10 @@ data class MessageDTO(
     val receiverId: Long,
     val content: String,
     val timestamp: String,
-    val isRead: Boolean = false
+    val isRead: Boolean = false,
+    val attachmentUrl: String? = null,
+    val attachmentName: String? = null,
+    val attachmentType: String? = null // e.g. "bulletin", "discipline", "attendance", "document"
 )
 
 @Serializable
@@ -18,5 +21,8 @@ data class ConversationDTO(
     val participants: List<Long>,
     val participantNames: Map<Long, String>, // To easily display the names
     val lastMessage: MessageDTO?,
-    val unreadCount: Int = 0
+    val unreadCount: Int = 0,
+    val participantRoles: Map<Long, String> = emptyMap(), // e.g. "Parent de Kabila Marc (6ème A)", "Direction des Études"
+    val participantOnlineStatus: Map<Long, Boolean> = emptyMap(),
+    val category: String = "PARENTS" // "PARENTS", "ADMIN", "TEACHERS"
 )
