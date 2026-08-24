@@ -60,7 +60,16 @@ data class PreparationState(
     // Steps Draft (App)
     val draftAppDuration: String = "",
     val draftAppMethod: String = "",
-    val draftAppContent: String = ""
+    val draftAppContent: String = "",
+
+    // Word Document Preview & Templates
+    val isWordPreviewOpen: Boolean = false,
+    val previewPreparation: LessonPreparation? = null,
+    val showTemplateSelector: Boolean = false,
+
+    // Electronic Signature Dialog
+    val showSignatureDialog: Boolean = false,
+    val signingPreparation: LessonPreparation? = null
 )
 
 class PreparationViewModel(
@@ -204,29 +213,92 @@ class PreparationViewModel(
     fun updateAppMethod(v: String) = _state.update { it.copy(draftAppMethod = v) }
     fun updateAppContent(v: String) = _state.update { it.copy(draftAppContent = v) }
 
+    fun openPreview(prep: LessonPreparation) {
+        _state.update { it.copy(isWordPreviewOpen = true, previewPreparation = prep) }
+    }
+
+    fun closePreview() {
+        _state.update { it.copy(isWordPreviewOpen = false, previewPreparation = null) }
+    }
+
+    fun openTemplateSelector() {
+        _state.update { it.copy(showTemplateSelector = true) }
+    }
+
+    fun closeTemplateSelector() {
+        _state.update { it.copy(showTemplateSelector = false) }
+    }
+
+    fun applyTemplate(template: com.drcmind.kelasisuite.domain.model.teacher.PreparationTemplate) {
+        _state.update {
+            it.copy(
+                showTemplateSelector = false,
+                isCreating = true,
+                draftSubBranch = template.subBranch,
+                draftRevisionSubject = template.revisionSubject,
+                draftLessonSubject = template.lessonSubject,
+                draftObjective = template.objective,
+                draftMaterial = template.material,
+                draftBibliography = template.bibliography,
+                draftIntroDuration = template.introDuration,
+                draftIntroMethod = template.introMethod,
+                draftIntroContent = template.introContent,
+                draftDevDuration = template.devDuration,
+                draftDevMethod = template.devMethod,
+                draftDevContent = template.devContent,
+                draftSynthDuration = template.synthDuration,
+                draftSynthMethod = template.synthMethod,
+                draftSynthContent = template.synthContent,
+                draftAppDuration = template.appDuration,
+                draftAppMethod = template.appMethod,
+                draftAppContent = template.appContent
+            )
+        }
+    }
+
     fun dismissSnackbar() {
         _state.update { it.copy(saveSuccess = false, saveError = null) }
     }
 
-    fun submitPreparation(prepId: String) {
-        val id = prepId.toLongOrNull() ?: return
-        viewModelScope.launch {
-            preparationRepository.submitPreparation(id).collect { res ->
-                when (res) {
-                    is Resource.Success -> {
-                        _state.update { state ->
-                            val updated = state.preparations.map {
-                                if (it.id == prepId) it.copy(status = PreparationStatus.SUBMITTED) else it
-                            }
-                            state.copy(preparations = updated, saveSuccess = true, saveError = null)
-                        }
-                    }
+    fun openSignatureDialog(prep: LessonPreparation) {
+        _state.update { it.copy(showSignatureDialog = true, signingPreparation = prep) }
+    }
 
-                    is Resource.Error -> _state.update { it.copy(saveError = res.message) }
+    fun closeSignatureDialog() {
+        _state.update { it.copy(showSignatureDialog = false, signingPreparation = null) }
+    }
 
-                    is Resource.Loading -> {}
-                }
+    fun applySignatureAndSubmit(signature: com.drcmind.kelasisuite.domain.model.common.ElectronicSignature) {
+        val prep = _state.value.signingPreparation ?: return
+        val id = prep.id.toLongOrNull()
+        
+        _state.update { state ->
+            val updated = state.preparations.map {
+                if (it.id == prep.id) it.copy(
+                    status = PreparationStatus.SUBMITTED,
+                    teacherSignature = signature
+                ) else it
             }
+            state.copy(
+                preparations = updated,
+                showSignatureDialog = false,
+                signingPreparation = null,
+                saveSuccess = true,
+                saveError = null
+            )
+        }
+
+        if (id != null) {
+            viewModelScope.launch {
+                preparationRepository.submitPreparation(id).collect { }
+            }
+        }
+    }
+
+    fun submitPreparation(prepId: String) {
+        val prep = _state.value.preparations.firstOrNull { it.id == prepId }
+        if (prep != null) {
+            openSignatureDialog(prep)
         }
     }
 

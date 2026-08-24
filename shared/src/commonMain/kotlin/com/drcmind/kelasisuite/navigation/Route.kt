@@ -421,7 +421,13 @@ sealed interface Route : NavKey {
             override val label: String = "Messages"
         }
 
-        val items: List<NavigationBarRoute> = listOf(Dashboard, Children, Finance, Communication)
+        @Serializable
+        data object Settings : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Settings
+            override val label: String = "Paramètres"
+        }
+
+        val items: List<NavigationBarRoute> = listOf(Dashboard, Children, Finance, Communication, Settings)
 
         val stateSaver = Saver<NavigationBarRoute, String>(
             save = { it.label },

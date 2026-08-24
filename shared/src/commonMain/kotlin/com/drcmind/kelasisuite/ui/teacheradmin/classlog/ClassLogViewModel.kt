@@ -39,7 +39,9 @@ data class ClassLogState(
     val showLinkDialog: Boolean = false,
     val showPresenceDialog: Boolean = false,
     val presenceStudents: List<StudentEval> = emptyList(),
-    val presenceStudentIds: Set<Long> = emptySet()
+    val presenceStudentIds: Set<Long> = emptySet(),
+    val showSignatureDialog: Boolean = false,
+    val signingEntryId: String? = null
 )
 
 class ClassLogViewModel(
@@ -229,12 +231,7 @@ class ClassLogViewModel(
     }
 
     fun submitEntry(id: String) {
-        _state.update { state ->
-            val updatedSchedule = state.scheduleToday.map {
-                if (it.id == id) it.copy(submitted = true) else it
-            }
-            state.copy(scheduleToday = updatedSchedule)
-        }
+        openSignatureDialog(id)
     }
 
     fun updateStatus(status: LogStatus, note: String, homework: String) {
@@ -262,6 +259,34 @@ class ClassLogViewModel(
             }
             state.copy(scheduleToday = updatedSchedule, showLinkDialog = false, selectedEntryId = null)
         }
+    }
+
+    fun openSignatureDialog(entryId: String) {
+        _state.update { it.copy(showSignatureDialog = true, signingEntryId = entryId) }
+    }
+
+    fun closeSignatureDialog() {
+        _state.update { it.copy(showSignatureDialog = false, signingEntryId = null) }
+    }
+
+    fun applySignature(signature: com.drcmind.kelasisuite.domain.model.common.ElectronicSignature) {
+        val entryId = _state.value.signingEntryId ?: return
+        _state.update { state ->
+            val updatedSchedule = state.scheduleToday.map {
+                if (it.id == entryId) it.copy(
+                    status = LogStatus.COMPLETED,
+                    submitted = true,
+                    teacherSignature = signature
+                ) else it
+            }
+            state.copy(
+                scheduleToday = updatedSchedule,
+                showSignatureDialog = false,
+                signingEntryId = null,
+                saveSuccess = true
+            )
+        }
+        saveClassLogs()
     }
 
     fun saveClassLogs() {

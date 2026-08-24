@@ -27,6 +27,8 @@ import com.drcmind.kelasisuite.domain.model.teacher.PreparationStatus
 import com.drcmind.kelasisuite.ui.components.EmptyStateCard
 import com.drcmind.kelasisuite.ui.components.ErrorStateCard
 import com.drcmind.kelasisuite.ui.components.LoadingState
+import com.drcmind.kelasisuite.ui.components.signature.ElectronicSignatureDialog
+import androidx.compose.material.icons.filled.Draw
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,6 +138,20 @@ fun ClassLogScreen(
             onConfirm = { viewModel.confirmPresence() }
         )
     }
+
+    if (state.showSignatureDialog && state.signingEntryId != null) {
+        val entry = state.scheduleToday.find { it.id == state.signingEntryId }
+        val title = entry?.let { "${it.subject} • ${it.className}" } ?: "Journal de classe"
+        ElectronicSignatureDialog(
+            signerName = "Enseignant titulaire",
+            signerRole = title,
+            documentTitle = "Séance de cours du journal de classe",
+            onDismiss = { viewModel.closeSignatureDialog() },
+            onConfirmSignature = { signature ->
+                viewModel.applySignature(signature)
+            }
+        )
+    }
 }
 
 @Composable
@@ -239,7 +255,22 @@ fun ClassLogCard(
             }
 
             Column(horizontalAlignment = Alignment.End) {
-                if (entry.submitted) {
+                if (entry.teacherSignature != null) {
+                    Surface(
+                        color = Color(0xFFE8F5E9),
+                        shape = MaterialTheme.shapes.extraSmall,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Icon(Icons.Default.Draw, contentDescription = null, tint = Color(0xFF2E7D32), modifier = Modifier.size(12.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Signé (${entry.teacherSignature.signatureToken})", color = Color(0xFF2E7D32), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                } else if (entry.submitted) {
                     Badge(modifier = Modifier.align(Alignment.End)) {
                         Text("Soumis")
                     }
@@ -257,9 +288,9 @@ fun ClassLogCard(
                 if (!entry.submitted) {
                     Spacer(modifier = Modifier.height(4.dp))
                     TextButton(onClick = onSubmitClick, enabled = entry.status == LogStatus.COMPLETED) {
-                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Draw, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Soumettre pour signature")
+                        Text("Signer & Soumettre")
                     }
                 }
             }
@@ -381,27 +412,86 @@ fun PresenceDialog(
     onToggle: (Long) -> Unit,
     onConfirm: () -> Unit
 ) {
+    val totalCount = state.presenceStudents.size
+    val presentCount = state.presenceStudents.count { it.id.toLong() in state.presenceStudentIds }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Élèves présents") },
+        title = {
+            Column {
+                Text("Appel & Présences au cours", fontWeight = FontWeight.Bold)
+                Text(
+                    text = "$presentCount sur $totalCount élève(s) présent(s)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        },
         text = {
-            LazyColumn {
-                items(state.presenceStudents) { student ->
-                    ListItem(
-                        headlineContent = { Text("${student.firstName} ${student.lastName}") },
-                        leadingContent = {
-                            Checkbox(
-                                checked = student.id.toLong() in state.presenceStudentIds,
-                                onCheckedChange = { onToggle(student.id.toLong()) }
-                            )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TextButton(onClick = {
+                        state.presenceStudents.forEach { s ->
+                            val sId = s.id.toLong()
+                            if (sId !in state.presenceStudentIds) {
+                                onToggle(sId)
+                            }
                         }
-                    )
+                    }) {
+                        Text("Tous présents")
+                    }
+
+                    TextButton(onClick = {
+                        state.presenceStudents.forEach { s ->
+                            val sId = s.id.toLong()
+                            if (sId in state.presenceStudentIds) {
+                                onToggle(sId)
+                            }
+                        }
+                    }) {
+                        Text("Tous absents")
+                    }
+                }
+
+                HorizontalDivider()
+
+                LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                    items(state.presenceStudents) { student ->
+                        val isPresent = student.id.toLong() in state.presenceStudentIds
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    text = "${student.firstName} ${student.lastName}",
+                                    fontWeight = if (isPresent) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = if (isPresent) "Présent(e)" else "Absent(e)",
+                                    color = if (isPresent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            },
+                            leadingContent = {
+                                Checkbox(
+                                    checked = isPresent,
+                                    onCheckedChange = { onToggle(student.id.toLong()) }
+                                )
+                            },
+                            modifier = Modifier.clickable { onToggle(student.id.toLong()) }
+                        )
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    }
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Valider")
+            Button(onClick = onConfirm) {
+                Text("Enregistrer les présences")
             }
         },
         dismissButton = {

@@ -1,11 +1,15 @@
 package com.drcmind.kelasisuite.domain.model.teacher
 
+import com.drcmind.kelasisuite.domain.model.common.ElectronicSignature
+
 data class LessonPreparation(
     val id: String,
     val header: PrepHeader,
     val steps: PrepSteps,
     val status: PreparationStatus = PreparationStatus.DRAFT,
-    val dateCreated: String
+    val dateCreated: String,
+    val teacherSignature: ElectronicSignature? = null,
+    val validatorSignature: ElectronicSignature? = null
 )
 
 data class PrepHeader(

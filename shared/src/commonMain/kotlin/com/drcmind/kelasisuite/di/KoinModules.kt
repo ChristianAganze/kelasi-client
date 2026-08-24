@@ -79,6 +79,7 @@ import com.drcmind.kelasisuite.ui.teacheradmin.schedule.TeacherScheduleViewModel
 import com.drcmind.kelasisuite.ui.parentadmin.dashboard.ParentDashboardViewModel
 import com.drcmind.kelasisuite.ui.parentadmin.children.ChildrenViewModel
 import com.drcmind.kelasisuite.ui.parentadmin.finance.FinanceViewModel
+import com.drcmind.kelasisuite.ui.parentadmin.settings.ParentSettingsViewModel
 import com.russhwolf.settings.Settings
 import io.ktor.client.*
 import io.ktor.client.plugins.*
@@ -184,6 +185,7 @@ val viewModelModule = module {
     viewModelOf(::ParentDashboardViewModel)
     viewModelOf(::ChildrenViewModel)
     viewModelOf(::FinanceViewModel)
+    viewModelOf(::ParentSettingsViewModel)
 }
 
 private fun createKtorHttpClient(settingsStorage: SettingsStorage): HttpClient {

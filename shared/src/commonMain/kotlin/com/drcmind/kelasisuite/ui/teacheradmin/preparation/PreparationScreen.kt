@@ -25,6 +25,7 @@ import com.drcmind.kelasisuite.domain.model.teacher.labelFr
 import com.drcmind.kelasisuite.ui.components.EmptyStateCard
 import com.drcmind.kelasisuite.ui.components.ErrorStateCard
 import com.drcmind.kelasisuite.ui.components.LoadingState
+import com.drcmind.kelasisuite.ui.components.signature.ElectronicSignatureDialog
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -90,6 +91,33 @@ fun PreparationScreen(
             }
         }
     }
+
+    if (state.isWordPreviewOpen && state.previewPreparation != null) {
+        WordPreparationPreviewDialog(
+            preparation = state.previewPreparation!!,
+            onDismiss = { viewModel.closePreview() }
+        )
+    }
+
+    if (state.showTemplateSelector) {
+        TemplateSelectorDialog(
+            onDismiss = { viewModel.closeTemplateSelector() },
+            onSelectTemplate = { viewModel.applyTemplate(it) }
+        )
+    }
+
+    if (state.showSignatureDialog && state.signingPreparation != null) {
+        val prep = state.signingPreparation!!
+        ElectronicSignatureDialog(
+            signerName = "Enseignant titulaire",
+            signerRole = "${prep.header.branch} • ${prep.header.className}",
+            documentTitle = "Fiche de préparation - ${prep.header.lessonSubject}",
+            onDismiss = { viewModel.closeSignatureDialog() },
+            onConfirmSignature = { signature ->
+                viewModel.applySignatureAndSubmit(signature)
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,11 +143,24 @@ fun PreparationListScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Text(
-                    text = "Fiches de Préparation",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Fiches de Préparation",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    OutlinedButton(
+                        onClick = { viewModel.openTemplateSelector() },
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Text("Modèles (Templates)")
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
             
@@ -186,15 +227,27 @@ fun PreparationListScreen(
                             Text("${prep.header.branch} - ${prep.header.className}", style = MaterialTheme.typography.bodyMedium)
                             Text("Obj: ${prep.header.operationalObjective.take(50)}...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-                            if (prep.status == PreparationStatus.DRAFT) {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                TextButton(
-                                    onClick = { viewModel.submitPreparation(prep.id) },
-                                    modifier = Modifier.align(Alignment.End)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedButton(
+                                    onClick = { viewModel.openPreview(prep) },
+                                    shape = MaterialTheme.shapes.small
                                 ) {
-                                    Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Soumettre pour validation")
+                                    Text("Aperçu Document (Word)")
+                                }
+
+                                if (prep.status == PreparationStatus.DRAFT) {
+                                    TextButton(
+                                        onClick = { viewModel.submitPreparation(prep.id) }
+                                    ) {
+                                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Soumettre")
+                                    }
                                 }
                             }
                         }

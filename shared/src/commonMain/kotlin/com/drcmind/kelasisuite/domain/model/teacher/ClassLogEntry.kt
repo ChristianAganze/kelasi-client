@@ -1,5 +1,7 @@
 package com.drcmind.kelasisuite.domain.model.teacher
 
+import com.drcmind.kelasisuite.domain.model.common.ElectronicSignature
+
 data class ClassLogEntry(
     val id: String,
     val timeSlot: String,
@@ -16,7 +18,8 @@ data class ClassLogEntry(
     val teacherNote: String = "",
     val homework: String = "",
     val presentStudentIds: Set<Long> = emptySet(),
-    val submitted: Boolean = false
+    val submitted: Boolean = false,
+    val teacherSignature: ElectronicSignature? = null
 )
 
 enum class LogStatus {

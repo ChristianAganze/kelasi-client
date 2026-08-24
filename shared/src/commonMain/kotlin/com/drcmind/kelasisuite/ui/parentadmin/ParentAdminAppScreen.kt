@@ -50,6 +50,7 @@ fun ParentAdminAppScreen(
                     subclass(Route.ParentAdmin.Children::class, Route.ParentAdmin.Children.serializer())
                     subclass(Route.ParentAdmin.Finance::class, Route.ParentAdmin.Finance.serializer())
                     subclass(Route.ParentAdmin.Communication::class, Route.ParentAdmin.Communication.serializer())
+                    subclass(Route.ParentAdmin.Settings::class, Route.ParentAdmin.Settings.serializer())
                 }
             }
         },

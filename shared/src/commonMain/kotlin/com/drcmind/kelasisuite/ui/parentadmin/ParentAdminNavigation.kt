@@ -14,6 +14,7 @@ import com.drcmind.kelasisuite.navigation.Route
 import com.drcmind.kelasisuite.ui.parentadmin.children.ChildrenScreen
 import com.drcmind.kelasisuite.ui.parentadmin.dashboard.ParentDashboardScreen
 import com.drcmind.kelasisuite.ui.parentadmin.finance.FinanceScreen
+import com.drcmind.kelasisuite.ui.parentadmin.settings.ParentSettingsScreen
 import com.drcmind.kelasisuite.ui.teacheradmin.communication.CommunicationScreen
 
 @Composable
@@ -36,6 +37,9 @@ fun ParentAdminNavigation(
             }
             entry<Route.ParentAdmin.Communication> {
                 CommunicationScreen()
+            }
+            entry<Route.ParentAdmin.Settings> {
+                ParentSettingsScreen()
             }
         }
     )
