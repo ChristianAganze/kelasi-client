@@ -70,6 +70,7 @@ import com.drcmind.kelasisuite.data.repository.pedagogy.SchoolInspectionReposito
 import com.drcmind.kelasisuite.data.repository.pedagogy.SchoolInspectionRepositoryImpl
 import com.drcmind.kelasisuite.ui.schooladmin.pedagogy.teacher_assignments.teaching_assignment.TeachingAssignmentViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.classlog.ClassLogViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.TeacherAdminViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.dashboard.TeacherDashboardViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.preparation.PreparationViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.classes.ClassesViewModel
@@ -175,6 +176,7 @@ val viewModelModule = module {
     viewModelOf(::ReportCardsViewModel)
     viewModelOf(::SchoolFinanceViewModel)
     viewModelOf(::SchoolAdminCommunicationViewModel)
+    viewModelOf(::TeacherAdminViewModel)
     viewModelOf(::TeacherDashboardViewModel)
     viewModelOf(::TeacherScheduleViewModel)
     viewModelOf(::CommunicationViewModel)

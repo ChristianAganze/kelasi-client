@@ -350,42 +350,81 @@ sealed interface Route : NavKey {
         }
 
         @Serializable
-        data object Preparation : NavigationBarRoute {
+        data object Pedagogy : NavigationBarRoute {
             override val icon: ImageVector = Icons.Default.WorkspacePremium
-            override val label: String = "Préparations"
+            override val label: String = "Pédagogique"
+
+            @Serializable data object Preparations : Route
+            @Serializable data object AnnualDistribution : Route
+            @Serializable data object NationalCurriculum : Route
+
+            enum class TabDestination(val label: String, val route: Route) {
+                PREPARATIONS("Préparations de leçon", Preparations),
+                ANNUAL_DISTRIBUTION("Répartition annuelle", AnnualDistribution),
+                NATIONAL_CURRICULUM("Programme national", NationalCurriculum)
+            }
         }
 
         @Serializable
         data object ClassLog : NavigationBarRoute {
             override val icon: ImageVector = Icons.AutoMirrored.Filled.Notes
             override val label: String = "Journal de classe"
+
+            @Serializable data object NewEntry : Route
+            @Serializable data object History : Route
+
+            enum class TabDestination(val label: String, val route: Route) {
+                NEW_ENTRY("Remplir Journal", NewEntry),
+                HISTORY("Historique & Signatures", History)
+            }
         }
 
         @Serializable
-        data object Schedule : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.CalendarMonth
-            override val label: String = "Horaire"
-        }
+        data object Evaluations : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Assessment
+            override val label: String = "Évaluations et cotes"
 
-        @Serializable
-        data object Classes : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.School
-            override val label: String = "Mes Classes"
+            @Serializable data object GradeEntry : Route
+            @Serializable data object ClassHeadmaster : Route
+
+            enum class TabDestination(val label: String, val route: Route) {
+                GRADE_ENTRY("Saisie des cotes", GradeEntry),
+                CLASS_HEADMASTER("Espace Titulaire", ClassHeadmaster)
+            }
         }
 
         @Serializable
         data object Communication : NavigationBarRoute {
             override val icon: ImageVector = Icons.AutoMirrored.Filled.Chat
-            override val label: String = "Messages"
+            override val label: String = "Communication"
+
+            @Serializable data object Administration : Route
+            @Serializable data object Parents : Route
+            @Serializable data object Teachers : Route
+            @Serializable data object Announcements : Route
+
+            enum class TabDestination(val label: String, val route: Route) {
+                ADMINISTRATION("Direction", Administration),
+                PARENTS("Parents d'élèves", Parents),
+                TEACHERS("Autres enseignants", Teachers),
+                ANNOUNCEMENTS("Avis & Circulaires", Announcements)
+            }
         }
 
         @Serializable
-        data object Reports : NavigationBarRoute {
-            override val icon: ImageVector = Icons.Default.Assessment
-            override val label: String = "Bulletins"
+        data object Settings : NavigationBarRoute {
+            override val icon: ImageVector = Icons.Default.Settings
+            override val label: String = "Paramètres"
         }
 
-        val items: List<NavigationBarRoute> = listOf(Dashboard, Preparation, ClassLog, Schedule, Classes, Communication, Reports)
+        val items: List<NavigationBarRoute> = listOf(
+            Dashboard,
+            Pedagogy,
+            ClassLog,
+            Evaluations,
+            Communication,
+            Settings
+        )
 
         val stateSaver = Saver<NavigationBarRoute, String>(
             save = { it.label },

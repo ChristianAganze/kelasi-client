@@ -18,65 +18,51 @@ import com.drcmind.kelasisuite.ui.components.ErrorStateCard
 import com.drcmind.kelasisuite.ui.components.LoadingState
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeacherScheduleScreen(
     viewModel: TeacherScheduleViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Horaire de la Semaine", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        if (state.isLoading) {
+            LoadingState(modifier = Modifier.fillMaxSize())
+        } else if (state.errorMessage != null) {
+            ErrorStateCard(
+                message = state.errorMessage,
+                onRetry = viewModel::retry,
+                modifier = Modifier.align(Alignment.Center).padding(16.dp)
             )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            if (state.isLoading) {
-                LoadingState(modifier = Modifier.fillMaxSize())
-            } else if (state.errorMessage != null) {
-                ErrorStateCard(
-                    message = state.errorMessage,
-                    onRetry = viewModel::retry,
-                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
-                )
-            } else if (state.scheduleEntries.isEmpty()) {
-                EmptyStateCard(
-                    title = "Aucun cours pour la semaine ${state.currentWeekNumber}",
-                    subtitle = "L'horaire de cette semaine est vide. Revenez plus tard pour consulter votre planning.",
-                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    val groupedEntries = state.scheduleEntries.groupBy { it.dayOfWeek }
+        } else if (state.scheduleEntries.isEmpty()) {
+            EmptyStateCard(
+                title = "Aucun cours pour la semaine ${state.currentWeekNumber}",
+                subtitle = "L'horaire de cette semaine est vide. Revenez plus tard pour consulter votre planning.",
+                modifier = Modifier.align(Alignment.Center).padding(16.dp)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val groupedEntries = state.scheduleEntries.groupBy { it.dayOfWeek }
+                
+                groupedEntries.forEach { (dayOfWeek, entries) ->
+                    item {
+                        Text(
+                            text = dayOfWeek.name,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
                     
-                    groupedEntries.forEach { (dayOfWeek, entries) ->
-                        item {
-                            Text(
-                                text = dayOfWeek.name,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                        }
-                        
-                        items(entries) { entry ->
-                            ScheduleEntryCard(entry)
-                        }
+                    items(entries) { entry ->
+                        ScheduleEntryCard(entry)
                     }
                 }
             }

@@ -1,23 +1,20 @@
 package com.drcmind.kelasisuite.ui.teacheradmin
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.drcmind.kelasisuite.navigation.Route
-import com.drcmind.kelasisuite.ui.teacheradmin.classlog.ClassLogScreen
-import com.drcmind.kelasisuite.ui.teacheradmin.dashboard.TeacherDashboardScreen
-import com.drcmind.kelasisuite.ui.teacheradmin.schedule.TeacherScheduleScreen
-import com.drcmind.kelasisuite.ui.teacheradmin.classes.ClassesScreen
+import com.drcmind.kelasisuite.ui.teacheradmin.classlog.TeacherClassLogScreen
 import com.drcmind.kelasisuite.ui.teacheradmin.communication.CommunicationScreen
-import com.drcmind.kelasisuite.ui.teacheradmin.reports.ReportsScreen
-import com.drcmind.kelasisuite.ui.teacheradmin.preparation.PreparationScreen
+import com.drcmind.kelasisuite.ui.teacheradmin.dashboard.TeacherDashboardScreen
+import com.drcmind.kelasisuite.ui.teacheradmin.evaluations.TeacherEvaluationsScreen
+import com.drcmind.kelasisuite.ui.teacheradmin.pedagogy.TeacherPedagogyScreen
+import com.drcmind.kelasisuite.ui.teacheradmin.settings.TeacherSettingsScreen
 
 @Composable
 fun TeacherAdminNavigation(
@@ -27,27 +24,28 @@ fun TeacherAdminNavigation(
     NavDisplay(
         modifier = modifier,
         backStack = teacherAdminBackStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
         entryProvider = entryProvider {
             entry<Route.TeacherAdmin.Dashboard> {
                 TeacherDashboardScreen()
             }
-            entry<Route.TeacherAdmin.Preparation> {
-                PreparationScreen()
+            entry<Route.TeacherAdmin.Pedagogy> {
+                TeacherPedagogyScreen()
             }
             entry<Route.TeacherAdmin.ClassLog> {
-                ClassLogScreen()
+                TeacherClassLogScreen()
             }
-            entry<Route.TeacherAdmin.Schedule> {
-                TeacherScheduleScreen()
-            }
-            entry<Route.TeacherAdmin.Classes> {
-                ClassesScreen()
+            entry<Route.TeacherAdmin.Evaluations> {
+                TeacherEvaluationsScreen()
             }
             entry<Route.TeacherAdmin.Communication> {
                 CommunicationScreen()
             }
-            entry<Route.TeacherAdmin.Reports> {
-                ReportsScreen()
+            entry<Route.TeacherAdmin.Settings> {
+                TeacherSettingsScreen()
             }
         }
     )
