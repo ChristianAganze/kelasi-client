@@ -37,6 +37,10 @@ fun TeacherEvaluationsScreen() {
                         Route.TeacherAdmin.Evaluations.ClassHeadmaster::class,
                         Route.TeacherAdmin.Evaluations.ClassHeadmaster.serializer()
                     )
+                    subclass(
+                        Route.TeacherAdmin.Evaluations.OfficialBulletin::class,
+                        Route.TeacherAdmin.Evaluations.OfficialBulletin.serializer()
+                    )
                 }
             }
         },

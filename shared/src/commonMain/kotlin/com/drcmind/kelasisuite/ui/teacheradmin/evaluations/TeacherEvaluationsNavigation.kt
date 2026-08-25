@@ -29,6 +29,9 @@ fun TeacherEvaluationsNavigation(
             entry<Route.TeacherAdmin.Evaluations.ClassHeadmaster> {
                 ClassHeadmasterScreen()
             }
+            entry<Route.TeacherAdmin.Evaluations.OfficialBulletin> {
+                OfficialRdcBulletinScreen()
+            }
         }
     )
 }

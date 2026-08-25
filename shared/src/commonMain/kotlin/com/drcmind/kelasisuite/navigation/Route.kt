@@ -386,10 +386,12 @@ sealed interface Route : NavKey {
 
             @Serializable data object GradeEntry : Route
             @Serializable data object ClassHeadmaster : Route
+            @Serializable data object OfficialBulletin : Route
 
             enum class TabDestination(val label: String, val route: Route) {
                 GRADE_ENTRY("Saisie des cotes", GradeEntry),
-                CLASS_HEADMASTER("Espace Titulaire", ClassHeadmaster)
+                CLASS_HEADMASTER("Espace Titulaire", ClassHeadmaster),
+                OFFICIAL_BULLETIN("Bulletin Scolaire RDC", OfficialBulletin)
             }
         }
 
