@@ -30,6 +30,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.savedstate.serialization.SavedStateConfiguration
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.drcmind.kelasisuite.navigation.Route
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -48,9 +49,14 @@ fun TeacherAdminAppScreen(
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+            // Desktop (JVM) / Web : Navigation Rail étendu avec Icône et Texte en Row
             NavigationSuiteType.WideNavigationRailExpanded
+        } else if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)) {
+            // Tablette : Navigation Rail standard avec Icône et Label empilés en Column
+            NavigationSuiteType.NavigationRail
         } else {
-            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+            // Smartphone / Mobile : Navigation Bar inférieure
+            NavigationSuiteType.NavigationBar
         }
     }
 
@@ -190,6 +196,10 @@ fun TeacherAdminAppScreen(
                                 },
                                 onClick = {
                                     showMenu = false
+                                    if (currentKey != Route.TeacherAdmin.Settings) {
+                                        currentKey = Route.TeacherAdmin.Settings
+                                        teacherAdminBackStack.add(Route.TeacherAdmin.Settings)
+                                    }
                                 }
                             )
                             HorizontalDivider()
@@ -219,7 +229,9 @@ fun TeacherAdminAppScreen(
             navigationSuiteColors = NavigationSuiteDefaults.colors(
                 wideNavigationRailColors = WideNavigationRailDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                )
+                ),
+                navigationRailContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                navigationBarContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
             ),
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {

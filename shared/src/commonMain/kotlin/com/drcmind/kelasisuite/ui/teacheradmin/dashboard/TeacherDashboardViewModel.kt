@@ -82,8 +82,12 @@ class TeacherDashboardViewModel(
     }
 
     private fun fetchDashboardData() {
+        val userInfo = settingsStorage.getUserInfo()
+        val currentUsername = userInfo.displayName.ifBlank { userInfo.username ?: "Professeur" }
+        _state.update { it.copy(username = currentUsername) }
+
         val schoolId = settingsStorage.getSchool()?.id
-        val userId = settingsStorage.getUserInfo().userId
+        val userId = userInfo.userId
         if (schoolId == null || userId == null) {
             _state.update {
                 it.copy(isLoading = false, errorMessage = "Connexion incomplète : impossible de charger le tableau de bord.")
@@ -98,6 +102,8 @@ class TeacherDashboardViewModel(
                 if (teachersResource is Resource.Success) {
                     val myProfile = teachersResource.data?.find { it.userId == userId }
                     if (myProfile != null) {
+                        val teacherName = myProfile.fullName.trim().ifEmpty { currentUsername }
+                        _state.update { it.copy(username = teacherName) }
                         fetchDashboardSummary(myProfile.id, userId)
                     } else {
                         _state.update { it.copy(isLoading = false, errorMessage = "Profil enseignant introuvable.") }

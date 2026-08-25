@@ -27,35 +27,70 @@ import androidx.compose.ui.unit.sp
 import com.drcmind.kelasisuite.ui.components.AppIcons
 import org.koin.compose.koinInject
 
-@Suppress("SuspiciousIndentation")
 @Composable
 fun SchoolDashboardScreen(
     viewModel: SchoolDashboardViewModel = koinInject(),
     onAcademicClick: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
 
-        ) {
-            Icon(Icons.Default.School, contentDescription = null)
-           Text(
-               text = "Cet Ecran sera Bientot implementer",
-               fontSize = 16.sp,
-               fontWeight = FontWeight.Bold,
-               color = MaterialTheme.colorScheme.onSurface,
-               letterSpacing = (-0.5).sp
-           )
-
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 280.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            HeaderSection(username = state.username)
         }
 
+        item {
+            BentoCard(
+                title = "Académique",
+                description = "Gestion des classes, options, horaires et programmes de cours.",
+                icon = Icons.Default.School,
+                isDark = true,
+                modifier = Modifier.height(160.dp),
+                onClick = onAcademicClick
+            )
+        }
 
+        item {
+            BentoCard(
+                title = "Élèves & Inscriptions",
+                description = "Effectifs scolaires, dossiers des élèves et admissions de l'année.",
+                icon = AppIcons.enrollment,
+                modifier = Modifier.height(160.dp)
+            )
+        }
 
+        item {
+            BentoCard(
+                title = "Corps Enseignant",
+                description = "Gestion des professeurs, affectations des cours et suivi pédagogique.",
+                icon = AppIcons.peoples,
+                modifier = Modifier.height(160.dp)
+            )
+        }
 
+        item {
+            BentoCard(
+                title = "Finances & Frais",
+                description = "Suivi des paiements, minervals, solvabilité et rapports de caisse.",
+                icon = AppIcons.financial,
+                modifier = Modifier.height(160.dp)
+            )
+        }
+
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            FooterSection(
+                status = state.systemStatus,
+                lastConnection = state.lastConnection
+            )
+        }
+    }
 }
 
 @Composable

@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.drcmind.kelasisuite.data.datasource.remote.dto.NotificationDTO
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -47,12 +48,15 @@ fun ParentDashboardScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                com.drcmind.kelasisuite.ui.components.LoadingState(
+                    modifier = Modifier.align(Alignment.Center),
+                    message = "Chargement du tableau de bord..."
+                )
             } else if (state.errorMessage != null) {
-                Text(
-                    text = state.errorMessage ?: "Erreur inconnue",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
+                com.drcmind.kelasisuite.ui.components.ErrorStateCard(
+                    message = state.errorMessage,
+                    onRetry = { viewModel.fetchDashboardData(state.currentParentId) },
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
                 )
             } else if (state.dashboardData != null) {
                 val data = state.dashboardData!!
@@ -60,6 +64,42 @@ fun ParentDashboardScreen(
                     modifier = Modifier.fillMaxSize().padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        ) {
+                            Surface(
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(52.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = state.username.take(1).uppercase(),
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Bonjour, ${state.username}",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Espace Parent • Suivi de la scolarité",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
                     item {
                         // Statistiques rapides
                         Row(

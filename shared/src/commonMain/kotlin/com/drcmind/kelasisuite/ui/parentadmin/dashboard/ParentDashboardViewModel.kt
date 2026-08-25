@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ParentDashboardState(
+    val username: String = "Parent d'élève",
     val currentParentId: Long = -1L,
     val isLoading: Boolean = false,
     val dashboardData: ParentDashboardDTO? = null,
@@ -29,8 +30,10 @@ class ParentDashboardViewModel(
     val state: StateFlow<ParentDashboardState> = _state.asStateFlow()
 
     init {
-        val parentId = settingsStorage.getUserInfo().userId ?: 1L
-        _state.update { it.copy(currentParentId = parentId) }
+        val userInfo = settingsStorage.getUserInfo()
+        val parentId = userInfo.userId ?: 1L
+        val currentUsername = userInfo.displayName.ifBlank { userInfo.username ?: "Parent d'élève" }
+        _state.update { it.copy(currentParentId = parentId, username = currentUsername) }
         fetchDashboardData(parentId)
     }
 

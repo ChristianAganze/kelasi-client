@@ -77,6 +77,7 @@ import com.drcmind.kelasisuite.ui.teacheradmin.classes.ClassesViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.communication.CommunicationViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.reports.ReportsViewModel
 import com.drcmind.kelasisuite.ui.teacheradmin.schedule.TeacherScheduleViewModel
+import com.drcmind.kelasisuite.ui.teacheradmin.settings.TeacherSettingsViewModel
 import com.drcmind.kelasisuite.ui.parentadmin.dashboard.ParentDashboardViewModel
 import com.drcmind.kelasisuite.ui.parentadmin.children.ChildrenViewModel
 import com.drcmind.kelasisuite.ui.parentadmin.finance.FinanceViewModel
@@ -184,6 +185,7 @@ val viewModelModule = module {
     viewModelOf(::PreparationViewModel)
     viewModelOf(::ClassLogViewModel)
     viewModelOf(::ClassesViewModel)
+    viewModelOf(::TeacherSettingsViewModel)
     viewModelOf(::ParentDashboardViewModel)
     viewModelOf(::ChildrenViewModel)
     viewModelOf(::FinanceViewModel)

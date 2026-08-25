@@ -1,6 +1,7 @@
 package com.drcmind.kelasisuite.ui.schooladmin.dashboard
 
 import androidx.lifecycle.ViewModel
+import com.drcmind.kelasisuite.data.datasource.local.settings.SettingsStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +13,15 @@ data class SchoolDashboardState(
     val lastConnection: String = "Aujourd'hui, 09:41"
 )
 
-class SchoolDashboardViewModel : ViewModel() {
-    private val _state = MutableStateFlow(SchoolDashboardState())
+class SchoolDashboardViewModel(
+    private val settingsStorage: SettingsStorage
+) : ViewModel() {
+    private val userInfo = settingsStorage.getUserInfo()
+    private val _state = MutableStateFlow(
+        SchoolDashboardState(
+            username = userInfo.displayName.ifBlank { userInfo.username ?: "Administrateur" },
+            role = userInfo.role ?: "Core Admin"
+        )
+    )
     val state: StateFlow<SchoolDashboardState> = _state.asStateFlow()
 }
