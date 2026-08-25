@@ -11,7 +11,6 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -38,7 +37,6 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3AdaptiveApi::class
 )
 fun SchoolAdminAppScreen(
@@ -49,7 +47,7 @@ fun SchoolAdminAppScreen(
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            NavigationSuiteType.WideNavigationRailExpanded
+            NavigationSuiteType.NavigationRail
         } else {
             NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
         }
@@ -245,11 +243,6 @@ fun SchoolAdminAppScreen(
         }
     ) { innerPadding ->
         NavigationSuiteScaffold(
-            navigationSuiteColors = NavigationSuiteDefaults.colors(
-                wideNavigationRailColors = WideNavigationRailDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                )
-            ),
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
                 Route.SchoolAdmin.items.forEach { item ->

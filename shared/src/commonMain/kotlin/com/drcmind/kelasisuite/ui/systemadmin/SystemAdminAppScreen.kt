@@ -38,13 +38,11 @@ fun SystemAdminAppScreen(
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            NavigationSuiteType.WideNavigationRailExpanded
+            NavigationSuiteType.NavigationRail
         } else {
             NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
         }
     }
-
-    val isCompact = layoutType == NavigationSuiteType.NavigationBar
 
     val systemAdminBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
@@ -93,7 +91,7 @@ fun SystemAdminAppScreen(
                         IconButton(onClick = {  }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Help,
-                                contentDescription = "Notifications",
+                                contentDescription = "Help",
                                 modifier = Modifier.size(32.dp)
                             )
                         }
