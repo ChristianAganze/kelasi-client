@@ -270,7 +270,6 @@ fun SchoolAdminAppScreen(
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) },
                         modifier = Modifier.padding(start = 4.dp, end = 16.dp)
-
                     )
                 }
             },
