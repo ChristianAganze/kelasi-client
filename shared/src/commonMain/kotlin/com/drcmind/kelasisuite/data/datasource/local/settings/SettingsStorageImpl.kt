@@ -96,7 +96,7 @@ class SettingsStorageImpl(
 
             val payloadBase64 = parts[1]
 
-            // Fix padding if needed
+
             val padded = payloadBase64.padEnd(
                 payloadBase64.length + (4 - payloadBase64.length % 4) % 4, '='
             )

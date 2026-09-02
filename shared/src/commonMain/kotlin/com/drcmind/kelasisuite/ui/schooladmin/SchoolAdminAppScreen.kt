@@ -113,7 +113,9 @@ fun SchoolAdminAppScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                ),
                 title = {
                     Text(
                         text = "Kelasi School Admin",
@@ -122,7 +124,7 @@ fun SchoolAdminAppScreen(
                     )
                 },
                 navigationIcon = {
-                    Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+                    Box(modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
                         Icon(imageVector = Icons.Filled.School, contentDescription = "logo")
                     }
 
@@ -176,7 +178,9 @@ fun SchoolAdminAppScreen(
                             )
                         }
                     }
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Notifications",

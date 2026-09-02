@@ -49,13 +49,12 @@ fun TeacherAdminAppScreen(
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            // Desktop (JVM) / Web : Navigation Rail étendu avec Icône et Texte en Row
             NavigationSuiteType.WideNavigationRailExpanded
         } else if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)) {
-            // Tablette : Navigation Rail standard avec Icône et Label empilés en Column
+
             NavigationSuiteType.NavigationRail
         } else {
-            // Smartphone / Mobile : Navigation Bar inférieure
+
             NavigationSuiteType.NavigationBar
         }
     }
@@ -97,7 +96,7 @@ fun TeacherAdminAppScreen(
                     )
                 },
                 navigationIcon = {
-                    Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+                    Box(modifier = Modifier.padding(start = 16.dp, end =8.dp)) {
                         Icon(imageVector = Icons.Filled.School, contentDescription = "logo")
                     }
                 },

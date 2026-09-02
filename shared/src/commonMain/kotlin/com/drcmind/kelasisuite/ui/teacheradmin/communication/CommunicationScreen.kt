@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -207,7 +208,9 @@ fun ConversationListPane(
                     value = state.searchQuery,
                     onValueChange = onSearchQueryChange,
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Rechercher un parent, élève...", style = MaterialTheme.typography.bodyMedium) },
+                    placeholder = { Text("Rechercher un parent, élève...",
+                        style = MaterialTheme.typography.bodyMedium)
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -360,7 +363,7 @@ fun ConversationListItem(
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(2.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF4CAF50))
+                            .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
                     )
                 }
             }
@@ -901,7 +904,7 @@ fun AttachmentSelectionDialog(
                     icon = Icons.Default.Assessment,
                     title = "Bulletin de notes (Trimestre)",
                     subtitle = "Transmettre le relevé officiel en PDF",
-                    iconColor = Color(0xFFE91E63),
+                    iconColor = MaterialTheme.colorScheme.tertiary,
                     onClick = {
                         onSelectAttachment("Bulletin_Trimestre_Synthese.pdf", "bulletin")
                     }
@@ -910,16 +913,16 @@ fun AttachmentSelectionDialog(
                     icon = Icons.Default.Warning,
                     title = "Fiche de conduite & discipline",
                     subtitle = "Rapport disciplinaire ou mot d'absence",
-                    iconColor = Color(0xFFFF9800),
+                    iconColor = MaterialTheme.colorScheme.tertiaryContainer,
                     onClick = {
                         onSelectAttachment("Fiche_Discipline_Observation.pdf", "discipline")
                     }
                 )
                 AttachmentOptionRow(
-                    icon = Icons.Default.FactCheck,
+                    icon = Icons.AutoMirrored.Filled.FactCheck,
                     title = "Relevé de présence & retards",
                     subtitle = "Bilan des cours et présences",
-                    iconColor = Color(0xFF2196F3),
+                    iconColor = MaterialTheme.colorScheme.onSecondary,
                     onClick = {
                         onSelectAttachment("Releve_Presences_Mensuel.pdf", "attendance")
                     }
@@ -928,7 +931,7 @@ fun AttachmentSelectionDialog(
                     icon = Icons.Default.Description,
                     title = "Autre document / Devoir à domicile",
                     subtitle = "Fiche d'exercices ou circulaire",
-                    iconColor = Color(0xFF4CAF50),
+                    iconColor = MaterialTheme.colorScheme.surfaceTint,
                     onClick = {
                         onSelectAttachment("Devoir_Maison_Mathematiques.pdf", "document")
                     }

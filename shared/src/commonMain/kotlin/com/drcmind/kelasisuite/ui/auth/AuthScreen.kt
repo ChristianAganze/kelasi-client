@@ -371,11 +371,15 @@ fun AuthFormSection(
             },
             label = { Text("Email") },
             placeholder = { Text("nom@gmail.com") },
-            leadingIcon = { Icon(Icons.Default.Mail, contentDescription = "Email", modifier = Modifier.size(20.dp)) },
+            leadingIcon = { Icon(Icons.Default.Mail,
+                contentDescription = "Email",
+                modifier = Modifier.size(20.dp)) },
             isError = state.emailError != null,
             supportingText = state.emailError?.let { { Text(it) } },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         )
@@ -390,7 +394,10 @@ fun AuthFormSection(
             },
             label = { Text("Mot de passe") },
             placeholder = { Text("••••••••") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Mot de passe", modifier = Modifier.size(20.dp)) },
+            leadingIcon = { Icon(Icons.Default.Lock,
+                contentDescription = "Mot de passe",
+                modifier = Modifier.size(20.dp))
+           },
             trailingIcon = {
                 IconButton(
                     onClick = { passwordVisible = !passwordVisible }

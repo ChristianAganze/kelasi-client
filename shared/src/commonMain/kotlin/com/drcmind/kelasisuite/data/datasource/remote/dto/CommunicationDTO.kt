@@ -19,7 +19,7 @@ data class MessageDTO(
 data class ConversationDTO(
     val id: Long,
     val participants: List<Long>,
-    val participantNames: Map<Long, String>, // To easily display the names
+    val participantNames: Map<Long, String>,
     val lastMessage: MessageDTO?,
     val unreadCount: Int = 0,
     val participantRoles: Map<Long, String> = emptyMap(), // e.g. "Parent de Kabila Marc (6ème A)", "Direction des Études"
