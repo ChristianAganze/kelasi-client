@@ -32,8 +32,8 @@ class ParentDashboardViewModel(
     init {
         val userInfo = settingsStorage.getUserInfo()
         val parentId = userInfo.userId ?: 1L
-        val currentUsername = userInfo.displayName.ifBlank { userInfo.username ?: "Parent d'élève" }
-        _state.update { it.copy(currentParentId = parentId, username = currentUsername) }
+        val currentFirstName = userInfo.preferredFirstName.ifBlank { "Parent d'élève" }
+        _state.update { it.copy(currentParentId = parentId, username = currentFirstName) }
         fetchDashboardData(parentId)
     }
 

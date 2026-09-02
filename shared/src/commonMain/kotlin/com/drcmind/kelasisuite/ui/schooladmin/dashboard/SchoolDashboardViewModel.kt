@@ -19,7 +19,7 @@ class SchoolDashboardViewModel(
     private val userInfo = settingsStorage.getUserInfo()
     private val _state = MutableStateFlow(
         SchoolDashboardState(
-            username = userInfo.displayName.ifBlank { userInfo.username ?: "Administrateur" },
+            username = userInfo.preferredFirstName.ifBlank { "Administrateur" },
             role = userInfo.role ?: "Core Admin"
         )
     )

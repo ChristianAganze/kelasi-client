@@ -60,7 +60,7 @@ class TeacherDashboardViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         TeacherDashboardState(
-            username = settingsStorage.getUserInfo().displayName.ifEmpty { "Professeur" },
+            username = settingsStorage.getUserInfo().preferredFirstName.ifEmpty { "Professeur" },
             dateLabel = buildDateLabel(),
             weekNumber = currentSchoolWeekNumber()
         )
@@ -83,8 +83,8 @@ class TeacherDashboardViewModel(
 
     private fun fetchDashboardData() {
         val userInfo = settingsStorage.getUserInfo()
-        val currentUsername = userInfo.displayName.ifBlank { userInfo.username ?: "Professeur" }
-        _state.update { it.copy(username = currentUsername) }
+        val currentFirstName = userInfo.preferredFirstName.ifBlank { "Professeur" }
+        _state.update { it.copy(username = currentFirstName) }
 
         val schoolId = settingsStorage.getSchool()?.id
         val userId = userInfo.userId
@@ -102,7 +102,9 @@ class TeacherDashboardViewModel(
                 if (teachersResource is Resource.Success) {
                     val myProfile = teachersResource.data?.find { it.userId == userId }
                     if (myProfile != null) {
-                        val teacherName = myProfile.fullName.trim().ifEmpty { currentUsername }
+                        val teacherName = userInfo.firstName?.takeIf { it.isNotBlank() }
+                            ?: myProfile.fullName.trim().split(" ").firstOrNull()?.takeIf { it.isNotBlank() }
+                            ?: currentFirstName
                         _state.update { it.copy(username = teacherName) }
                         fetchDashboardSummary(myProfile.id, userId)
                     } else {

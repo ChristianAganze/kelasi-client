@@ -43,7 +43,7 @@ fun SystemAdminNavigation(
             entry<Route.SystemAdmin.Dashboard> {
                 val settingsStorage = koinInject<SettingsStorage>()
                 val userInfo = settingsStorage.getUserInfo()
-                val username = userInfo.displayName.ifBlank { userInfo.username ?: "Super Administrateur" }
+                val username = userInfo.preferredFirstName.ifBlank { "Super Administrateur" }
 
                 LazyColumn(
                     modifier = Modifier

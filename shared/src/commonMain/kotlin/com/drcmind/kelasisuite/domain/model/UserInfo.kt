@@ -16,4 +16,11 @@ data class UserInfo(
             !username.isNullOrBlank() -> username
             else -> "Utilisateur"
         }
+
+    val preferredFirstName: String
+        get() = when {
+            !firstName.isNullOrBlank() -> firstName
+            !username.isNullOrBlank() -> username
+            else -> "Utilisateur"
+        }
 }

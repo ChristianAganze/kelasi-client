@@ -146,7 +146,22 @@ fun friendlyErrorMessage(technical: String?): String {
 @Composable
 fun ErrorStateCard(
     message: String?,
-    onRetry: () -> Unit,
+    onRetry: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Outlined.ErrorOutline
+) {
+    ErrorMessage(
+        message = message,
+        onRetry = onRetry,
+        modifier = modifier,
+        icon = icon
+    )
+}
+
+@Composable
+fun ErrorMessage(
+    message: String?,
+    onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Outlined.ErrorOutline
 ) {
@@ -154,86 +169,54 @@ fun ErrorStateCard(
         it.contains("connect") || it.contains("timeout") || it.contains("unknownhost") || it.contains("socket")
     } == true
 
-    Card(
+    val displayIcon = if (isNetworkError) Icons.Outlined.WifiOff else icon
+    val displayText = friendlyErrorMessage(message)
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-        ),
-        shape = RoundedCornerShape(16.dp),
-        border = CardDefaults.outlinedCardBorder().copy(
-            brush = Brush.linearGradient(
-                listOf(
-                    MaterialTheme.colorScheme.error.copy(alpha = 0.4f),
-                    MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
-                )
-            )
-        )
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // Icon Badge
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-                modifier = Modifier.size(56.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = if (isNetworkError) Icons.Outlined.WifiOff else icon,
-                        contentDescription = "Erreur",
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
+            Icon(
+                imageVector = displayIcon,
+                contentDescription = "Erreur",
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = displayText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+        }
 
-            // Text info
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = if (isNetworkError) "Problème de connexion réseau" else "Échec de l'opération",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = friendlyErrorMessage(message),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 20.sp,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-            }
-
-            // Retry action
-            Button(
+        if (onRetry != null) {
+            TextButton(
                 onClick = onRetry,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                ),
-                shape = RoundedCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    contentDescription = "Réessayer",
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Réessayer",
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
