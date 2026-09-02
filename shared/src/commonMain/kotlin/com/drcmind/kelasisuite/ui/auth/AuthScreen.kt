@@ -88,7 +88,6 @@ fun AuthScreen(
                 onEmailChange = viewModel::clearEmailError,
                 onPasswordChange = viewModel::clearPasswordError,
                 onLogin = viewModel::login,
-                onDemoLogin = viewModel::loginAsDemo,
                 onDismissError = viewModel::dismissError,
                 isMedium = sizeClass == WindowWidthSizeClass.MEDIUM
             )
@@ -99,7 +98,6 @@ fun AuthScreen(
                 onEmailChange = viewModel::clearEmailError,
                 onPasswordChange = viewModel::clearPasswordError,
                 onLogin = viewModel::login,
-                onDemoLogin = viewModel::loginAsDemo,
                 onDismissError = viewModel::dismissError
             )
         }
@@ -113,7 +111,6 @@ private fun ExpandedLoginLayout(
     onEmailChange: () -> Unit,
     onPasswordChange: () -> Unit,
     onLogin: (String, String) -> Unit,
-    onDemoLogin: (String) -> Unit,
     onDismissError: () -> Unit,
     isMedium: Boolean = false
 ) {
@@ -152,7 +149,6 @@ private fun ExpandedLoginLayout(
                     onEmailChange = onEmailChange,
                     onPasswordChange = onPasswordChange,
                     onLogin = onLogin,
-                    onDemoLogin = onDemoLogin,
                     onDismissError = onDismissError
                 )
                 Spacer(modifier = Modifier.height(32.dp))
@@ -169,7 +165,6 @@ private fun CenteredLoginLayout(
     onEmailChange: () -> Unit,
     onPasswordChange: () -> Unit,
     onLogin: (String, String) -> Unit,
-    onDemoLogin: (String) -> Unit,
     onDismissError: () -> Unit
 ) {
     Box(
@@ -202,7 +197,6 @@ private fun CenteredLoginLayout(
                 onEmailChange = onEmailChange,
                 onPasswordChange = onPasswordChange,
                 onLogin = onLogin,
-                onDemoLogin = onDemoLogin,
                 onDismissError = onDismissError,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -327,7 +321,6 @@ fun AuthFormSection(
     onEmailChange: () -> Unit,
     onPasswordChange: () -> Unit,
     onLogin: (String, String) -> Unit,
-    onDemoLogin: (String) -> Unit,
     onDismissError: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -371,15 +364,11 @@ fun AuthFormSection(
             },
             label = { Text("Email") },
             placeholder = { Text("nom@gmail.com") },
-            leadingIcon = { Icon(Icons.Default.Mail,
-                contentDescription = "Email",
-                modifier = Modifier.size(20.dp)) },
+            leadingIcon = { Icon(Icons.Default.Mail, contentDescription = "Email", modifier = Modifier.size(20.dp)) },
             isError = state.emailError != null,
             supportingText = state.emailError?.let { { Text(it) } },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         )
@@ -394,10 +383,7 @@ fun AuthFormSection(
             },
             label = { Text("Mot de passe") },
             placeholder = { Text("••••••••") },
-            leadingIcon = { Icon(Icons.Default.Lock,
-                contentDescription = "Mot de passe",
-                modifier = Modifier.size(20.dp))
-           },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Mot de passe", modifier = Modifier.size(20.dp)) },
             trailingIcon = {
                 IconButton(
                     onClick = { passwordVisible = !passwordVisible }
@@ -502,8 +488,5 @@ fun AuthFormSection(
                 Text(text = "Se connecter", fontWeight = FontWeight.Bold)
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
     }
 }

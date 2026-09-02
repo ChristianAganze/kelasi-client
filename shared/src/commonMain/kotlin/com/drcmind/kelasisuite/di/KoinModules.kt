@@ -49,6 +49,7 @@ import com.drcmind.kelasisuite.ui.schooladmin.academics.school_structure.SchoolS
 import com.drcmind.kelasisuite.ui.schooladmin.academics.student_enrollment.enrollment.EnrollmentViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.dashboard.SchoolDashboardViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.parents.ParentsViewModel
+import com.drcmind.kelasisuite.ui.schooladmin.staff_hr.StaffHrViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.grading.EvaluationGradingViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.deliberation.DeliberationsConductViewModel
 import com.drcmind.kelasisuite.ui.schooladmin.academics.reports.ReportCardsViewModel
@@ -164,6 +165,7 @@ val viewModelModule = module {
     viewModelOf(::CalendarPeriodsViewModel)
     viewModelOf(::TeachersViewModel)
     viewModelOf(::ParentsViewModel)
+    viewModelOf(::StaffHrViewModel)
     viewModelOf(::EnrollmentViewModel)
     viewModelOf(::SchoolAdminViewModel)
     viewModelOf(::TeachingAssignmentViewModel)

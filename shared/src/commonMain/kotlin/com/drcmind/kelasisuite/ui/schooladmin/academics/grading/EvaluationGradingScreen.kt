@@ -10,8 +10,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Class
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.PeopleOutline
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -230,10 +232,35 @@ fun EvaluationGradingScreen(
                         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                             if (uiState.isLoading) {
                                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                            } else if (uiState.error != null && uiState.classes.isEmpty()) {
-                                ErrorStateCard(message = uiState.error, onRetry = { viewModel.loadClassesAndPeriods() })
                             } else if (uiState.classes.isEmpty()) {
-                                EmptyStateCard(title = "Aucune classe", subtitle = "Veuillez configurer la structure.")
+                                if (uiState.error != null) {
+                                    ErrorStateCard(message = uiState.error, onRetry = { viewModel.loadClassesAndPeriods() })
+                                } else {
+                                    EmptyStateCard(
+                                        title = "Aucune classe",
+                                        subtitle = "Veuillez configurer la structure scolaire pour pouvoir attribuer des notes.",
+                                        icon = Icons.Default.Class
+                                    )
+                                }
+                            } else if (uiState.selectedClass == null) {
+                                EmptyStateCard(
+                                    title = "Sélectionnez une classe",
+                                    subtitle = "Veuillez sélectionner une classe dans le menu déroulant ci-dessus pour afficher la liste des élèves et saisir les cotes.",
+                                    icon = Icons.Default.Class
+                                )
+                            } else if (uiState.students.isEmpty()) {
+                                if (uiState.error != null) {
+                                    ErrorStateCard(
+                                        message = uiState.error,
+                                        onRetry = { uiState.selectedClass?.let { viewModel.selectClass(it) } }
+                                    )
+                                } else {
+                                    EmptyStateCard(
+                                        title = "Aucun élève dans cette classe",
+                                        subtitle = "Aucun élève n'est inscrit dans la classe « ${uiState.selectedClass?.name} » pour l'année académique active.",
+                                        icon = Icons.Default.PeopleOutline
+                                    )
+                                }
                             } else {
                                 OutlinedCard(
                                     modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),

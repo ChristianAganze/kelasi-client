@@ -11,6 +11,7 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -29,6 +30,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.savedstate.serialization.SavedStateConfiguration
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.drcmind.kelasisuite.navigation.Route
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -37,6 +39,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 @OptIn(
     ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3AdaptiveApi::class
 )
 fun SchoolAdminAppScreen(
@@ -47,9 +50,14 @@ fun SchoolAdminAppScreen(
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val layoutType = with(adaptiveInfo) {
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+            // Desktop (JVM) / Web : Navigation Rail étendu avec Icône et Libellé côte à côte
+            NavigationSuiteType.WideNavigationRailExpanded
+        } else if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)) {
+            // Tablette : Navigation Rail standard avec Icône et Libellé empilés en colonne
             NavigationSuiteType.NavigationRail
         } else {
-            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+            // Smartphone : Barre de navigation inférieure
+            NavigationSuiteType.NavigationBar
         }
     }
 
@@ -113,9 +121,7 @@ fun SchoolAdminAppScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)),
                 title = {
                     Text(
                         text = "Kelasi School Admin",
@@ -124,7 +130,7 @@ fun SchoolAdminAppScreen(
                     )
                 },
                 navigationIcon = {
-                    Box(modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
+                    Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                         Icon(imageVector = Icons.Filled.School, contentDescription = "logo")
                     }
 
@@ -178,9 +184,7 @@ fun SchoolAdminAppScreen(
                             )
                         }
                     }
-                    IconButton(onClick = {
-
-                    }) {
+                    IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Notifications",
@@ -247,6 +251,11 @@ fun SchoolAdminAppScreen(
         }
     ) { innerPadding ->
         NavigationSuiteScaffold(
+            navigationSuiteColors = NavigationSuiteDefaults.colors(
+                wideNavigationRailColors = WideNavigationRailDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                )
+            ),
             modifier = Modifier.padding(innerPadding),
             navigationSuiteItems = {
                 Route.SchoolAdmin.items.forEach { item ->

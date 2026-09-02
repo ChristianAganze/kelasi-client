@@ -294,6 +294,8 @@ sealed interface Route : NavKey {
             override val icon: ImageVector = Icons.Default.GroupWork
             override val label: String = "Staffs & HR"
 
+            @Serializable data object List : Route
+            @Serializable data class Detail(val userId: Long) : Route
         }
 
         @Serializable
