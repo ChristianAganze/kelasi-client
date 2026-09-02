@@ -505,58 +505,5 @@ fun AuthFormSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
-
-        Text(
-            text = "Accès Rapide / Démo Directe",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(
-                onClick = { onDemoLogin("ROLE_SCHOOL_ADMIN") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("Admin École", style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            }
-            OutlinedButton(
-                onClick = { onDemoLogin("ROLE_TEACHER") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("Enseignant", style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(
-                onClick = { onDemoLogin("ROLE_PARENT") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("Parent", style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            }
-            OutlinedButton(
-                onClick = { onDemoLogin("ROLE_SUPER_USER") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("Super Admin", style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
