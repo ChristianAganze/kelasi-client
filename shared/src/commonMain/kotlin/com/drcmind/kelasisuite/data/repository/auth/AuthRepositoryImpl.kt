@@ -25,17 +25,35 @@ class AuthRepositoryImpl(
             )
             try {
                 val userResponse = systemApiService.getUserMe()
-                val userInfoResponse = systemApiService.getUser (userResponse.id)
-                val school = systemApiService.getSchool(userInfoResponse.schoolId!!)
-                settingStorage.saveSchool(school)
+                val userInfoResponse = try {
+                    systemApiService.getUser(userResponse.id)
+                } catch (e: Exception) {
+                    null
+                }
+                val schoolId = userInfoResponse?.schoolId ?: userResponse.schoolId
+                if (schoolId != null && schoolId > 0) {
+                    try {
+                        val school = systemApiService.getSchool(schoolId)
+                        settingStorage.saveSchool(school)
+                    } catch (e: Exception) {
+                        println("AuthRepositoryImpl: Failed to fetch school: ${e.message}")
+                    }
+                }
+                val resolvedFirstName = userInfoResponse?.firstName?.takeIf { it.isNotBlank() }
+                    ?: userResponse.firstName?.takeIf { it.isNotBlank() }
+                val resolvedLastName = userInfoResponse?.lastName?.takeIf { it.isNotBlank() }
+                    ?: userResponse.lastName?.takeIf { it.isNotBlank() }
+                val resolvedUsername = userResponse.username.ifBlank { loginResponse.username }
+                val resolvedRole = userResponse.roles.firstOrNull() ?: loginResponse.roles.first()
+
                 settingStorage.saveUserInfo(
                     token = loginResponse.token,
-                    username = userResponse.username,
-                    role = userResponse.roles.firstOrNull() ?: loginResponse.roles.first(),
+                    username = resolvedUsername,
+                    role = resolvedRole,
                     userId = userResponse.id,
-                    schoolId = userInfoResponse.schoolId,
-                    firstName = userResponse.firstName,
-                    lastName = userResponse.lastName
+                    schoolId = schoolId,
+                    firstName = resolvedFirstName,
+                    lastName = resolvedLastName
                 )
             } catch (e: Exception) {
                 println("AuthRepositoryImpl: Failed to fetch profile after login: ${e.message}")
@@ -51,15 +69,37 @@ class AuthRepositoryImpl(
             emit(Resource.Loading())
             val userResponse = systemApiService.getUserMe()
             val userInfo = settingStorage.getUserInfo()
-            val userInfoResponse = systemApiService.getUser (userResponse.id)
+            val userInfoResponse = try {
+                systemApiService.getUser(userResponse.id)
+            } catch (e: Exception) {
+                null
+            }
+            val schoolId = userInfoResponse?.schoolId ?: userResponse.schoolId ?: userInfo.schoolId
+            if (schoolId != null && schoolId > 0) {
+                try {
+                    val school = systemApiService.getSchool(schoolId)
+                    settingStorage.saveSchool(school)
+                } catch (e: Exception) {
+                    println("AuthRepositoryImpl: Failed to fetch school: ${e.message}")
+                }
+            }
+            val resolvedFirstName = userInfoResponse?.firstName?.takeIf { it.isNotBlank() }
+                ?: userResponse.firstName?.takeIf { it.isNotBlank() }
+                ?: userInfo.firstName
+            val resolvedLastName = userInfoResponse?.lastName?.takeIf { it.isNotBlank() }
+                ?: userResponse.lastName?.takeIf { it.isNotBlank() }
+                ?: userInfo.lastName
+            val resolvedUsername = userResponse.username.ifBlank { userInfo.username ?: "" }
+            val resolvedRole = userResponse.roles.firstOrNull() ?: userInfo.role ?: ""
+
             settingStorage.saveUserInfo(
                 token = userInfo.token ?: "",
-                username = userResponse.username,
-                role = userResponse.roles.firstOrNull() ?: userInfo.role ?: "",
+                username = resolvedUsername,
+                role = resolvedRole,
                 userId = userResponse.id,
-                schoolId = userInfoResponse.schoolId,
-                firstName = userResponse.firstName,
-                lastName = userResponse.lastName
+                schoolId = schoolId,
+                firstName = resolvedFirstName,
+                lastName = resolvedLastName
             )
             emit(Resource.Success(userResponse))
         }.catch {

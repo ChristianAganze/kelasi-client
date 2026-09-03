@@ -84,34 +84,75 @@ class TeacherDashboardViewModel(
     private fun fetchDashboardData() {
         val userInfo = settingsStorage.getUserInfo()
         val currentFirstName = userInfo.preferredFirstName.ifBlank { "Professeur" }
-        _state.update { it.copy(username = currentFirstName) }
+        _state.update { it.copy(username = currentFirstName, isLoading = true, errorMessage = null) }
 
-        val schoolId = settingsStorage.getSchool()?.id
+        val schoolId = settingsStorage.getSchool()?.id ?: userInfo.schoolId
         val userId = userInfo.userId
-        if (schoolId == null || userId == null) {
-            _state.update {
-                it.copy(isLoading = false, errorMessage = "Connexion incomplète : impossible de charger le tableau de bord.")
-            }
-            return
-        }
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            if (schoolId == null || userId == null) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        username = currentFirstName,
+                        hasNextClass = false,
+                        nextClass = "Aucun cours assigné",
+                        todayClassesCount = 0,
+                        todaySchedule = emptyList(),
+                        upcomingThisWeek = emptyList(),
+                        alerts = listOf(
+                            DashboardAlert(
+                                title = "Bienvenue sur Kelasi Enseignant",
+                                message = "Vos cours, journal de classe et préparations pédagogiques seront disponibles dès leur configuration."
+                            )
+                        )
+                    )
+                }
+                return@launch
+            }
 
             teachersRepository.getTeachers(schoolId).collect { teachersResource ->
                 if (teachersResource is Resource.Success) {
                     val myProfile = teachersResource.data?.find { it.userId == userId }
+                    val teacherName = userInfo.firstName?.takeIf { it.isNotBlank() }
+                        ?: myProfile?.fullName?.trim()?.split(" ")?.firstOrNull()?.takeIf { it.isNotBlank() }
+                        ?: currentFirstName
+                    _state.update { it.copy(username = teacherName) }
+
                     if (myProfile != null) {
-                        val teacherName = userInfo.firstName?.takeIf { it.isNotBlank() }
-                            ?: myProfile.fullName.trim().split(" ").firstOrNull()?.takeIf { it.isNotBlank() }
-                            ?: currentFirstName
-                        _state.update { it.copy(username = teacherName) }
                         fetchDashboardSummary(myProfile.id, userId)
                     } else {
-                        _state.update { it.copy(isLoading = false, errorMessage = "Profil enseignant introuvable.") }
+                        _state.update { 
+                            it.copy(
+                                isLoading = false,
+                                hasNextClass = false,
+                                nextClass = "Aucun cours assigné",
+                                todayClassesCount = 0,
+                                todaySchedule = emptyList(),
+                                upcomingThisWeek = emptyList(),
+                                alerts = listOf(
+                                    DashboardAlert(
+                                        title = "Bienvenue dans votre Espace",
+                                        message = "Aucun cours ou classe ne vous est assigné pour le moment dans cet établissement."
+                                    )
+                                )
+                            ) 
+                        }
                     }
                 } else if (teachersResource is Resource.Error) {
-                    _state.update { it.copy(isLoading = false, errorMessage = teachersResource.message) }
+                    _state.update { 
+                        it.copy(
+                            isLoading = false,
+                            hasNextClass = false,
+                            nextClass = "Aucun cours programmé",
+                            alerts = listOf(
+                                DashboardAlert(
+                                    title = "Emploi du temps",
+                                    message = "Impossible de synchroniser les affectations pour le moment."
+                                )
+                            )
+                        ) 
+                    }
                 }
             }
         }

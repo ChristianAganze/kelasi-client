@@ -65,7 +65,7 @@ class ClassLogViewModel(
     }
 
     private fun fetchTodaySchedule() {
-        val schoolId = settingsStorage.getSchool()?.id ?: return
+        val schoolId = settingsStorage.getSchool()?.id ?: settingsStorage.getUserInfo().schoolId ?: return
         val userId = settingsStorage.getUserInfo().userId ?: return
 
         viewModelScope.launch {
@@ -78,7 +78,7 @@ class ClassLogViewModel(
                     if (myProfile != null) {
                         fetchAssignmentsAndSchedule(myProfile.id)
                     } else {
-                        _state.update { it.copy(isLoading = false, errorMessage = "Profil enseignant introuvable.") }
+                        _state.update { it.copy(isLoading = false, scheduleToday = emptyList(), availablePreparations = emptyList(), errorMessage = null) }
                     }
                 } else if (teachersResource is Resource.Error) {
                     _state.update { it.copy(isLoading = false, errorMessage = teachersResource.message) }

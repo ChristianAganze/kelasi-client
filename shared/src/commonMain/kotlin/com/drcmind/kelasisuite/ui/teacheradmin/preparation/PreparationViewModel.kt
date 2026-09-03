@@ -91,11 +91,11 @@ class PreparationViewModel(
     }
 
     private fun fetchAssignments() {
-        val schoolId = settingsStorage.getSchool()?.id
+        val schoolId = settingsStorage.getSchool()?.id ?: settingsStorage.getUserInfo().schoolId
         val userId = settingsStorage.getUserInfo().userId
         if (schoolId == null || userId == null) {
             _state.update {
-                it.copy(isLoading = false, errorMessage = "Connexion incomplète : impossible de charger les préparations.")
+                it.copy(isLoading = false, availableAssignments = emptyList(), preparations = emptyList(), errorMessage = null)
             }
             return
         }
@@ -109,7 +109,14 @@ class PreparationViewModel(
                     if (myProfile != null) {
                         fetchAssignmentsForTeacher(myProfile.id)
                     } else {
-                        _state.update { it.copy(isLoading = false, errorMessage = "Profil enseignant introuvable.") }
+                        _state.update { 
+                            it.copy(
+                                isLoading = false, 
+                                availableAssignments = emptyList(),
+                                preparations = emptyList(),
+                                errorMessage = null
+                            ) 
+                        }
                     }
                 } else if (teachersResource is Resource.Error) {
                     _state.update { it.copy(isLoading = false, errorMessage = teachersResource.message) }

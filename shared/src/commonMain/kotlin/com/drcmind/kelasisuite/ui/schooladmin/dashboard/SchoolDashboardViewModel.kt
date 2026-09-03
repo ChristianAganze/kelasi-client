@@ -168,8 +168,26 @@ class SchoolDashboardViewModel(
     }
 
     fun loadDashboardData() {
-        val schoolId = userInfo.schoolId ?: school?.id ?: 1L
-        _state.update { it.copy(isLoading = true) }
+        val currentInfo = settingsStorage.getUserInfo()
+        val currentSchool = settingsStorage.getSchool()
+        val resolvedUsername = currentInfo.preferredFirstName.ifBlank { "Administrateur" }
+        val resolvedRole = when (currentInfo.role?.uppercase()) {
+            "ROLE_SCHOOL_ADMIN", "ADMIN" -> "Chef d'Établissement"
+            "ROLE_SUPER_ADMIN", "ROLE_SUPER_USER" -> "Super Administrateur"
+            "ROLE_TEACHER" -> "Enseignant"
+            "ROLE_PARENT" -> "Parent d'Élève"
+            else -> currentInfo.role ?: "Chef d'Établissement"
+        }
+
+        val schoolId = currentInfo.schoolId ?: currentSchool?.id ?: 1L
+        _state.update {
+            it.copy(
+                username = resolvedUsername,
+                role = resolvedRole,
+                schoolName = currentSchool?.officialName ?: it.schoolName,
+                isLoading = true
+            )
+        }
 
         viewModelScope.launch {
             // Load School info & sections

@@ -83,11 +83,11 @@ class ClassesViewModel(
     }
 
     private fun fetchMyClasses() {
-        val schoolId = settingsStorage.getSchool()?.id
+        val schoolId = settingsStorage.getSchool()?.id ?: settingsStorage.getUserInfo().schoolId
         val userId = settingsStorage.getUserInfo().userId
         if (schoolId == null || userId == null) {
             _state.update {
-                it.copy(isLoadingClasses = false, errorMessage = "Connexion incomplète : impossible de charger vos classes.")
+                it.copy(isLoadingClasses = false, availableClasses = emptyList(), errorMessage = null)
             }
             return
         }
@@ -106,7 +106,7 @@ class ClassesViewModel(
                         if (myProfile != null) {
                             fetchAssignmentsForTeacher(myProfile.id)
                         } else {
-                            _state.update { it.copy(isLoadingClasses = false, errorMessage = "Profil enseignant non trouvé.") }
+                            _state.update { it.copy(isLoadingClasses = false, availableClasses = emptyList(), errorMessage = null) }
                         }
                     }
                 }
