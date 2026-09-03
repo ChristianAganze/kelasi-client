@@ -30,7 +30,9 @@ fun TeacherAdminNavigation(
         ),
         entryProvider = entryProvider {
             entry<Route.TeacherAdmin.Dashboard> {
-                TeacherDashboardScreen()
+                TeacherDashboardScreen(
+                    onNavigate = { key -> teacherAdminBackStack.add(key) }
+                )
             }
             entry<Route.TeacherAdmin.Pedagogy> {
                 TeacherPedagogyScreen()
