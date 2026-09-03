@@ -81,7 +81,7 @@ kotlin {
 
 
             implementation(libs.multiplatform.settings.no.arg)
-            implementation(libs.compose.multiplatform)
+            implementation(libs.calendar.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
