@@ -121,20 +121,28 @@ fun EvaluationGradingScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
-                        value = uiState.selectedClass?.name ?: "Classe",
+                        value = uiState.selectedClass?.name ?: "",
                         onValueChange = {},
                         readOnly = true,
+                        placeholder = { Text("Sélectionner une classe") },
                         label = { Text("Classe") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = classExpanded) },
                         modifier = Modifier.menuAnchor(),
                         shape = RoundedCornerShape(8.dp)
                     )
                     ExposedDropdownMenu(expanded = classExpanded, onDismissRequest = { classExpanded = false }) {
-                        uiState.classes.forEach { cls ->
+                        if (uiState.classes.isEmpty()) {
                             DropdownMenuItem(
-                                text = { Text(cls.name) },
-                                onClick = { viewModel.selectClass(cls); classExpanded = false }
+                                text = { Text("Aucune classe disponible", style = MaterialTheme.typography.bodyMedium) },
+                                onClick = { classExpanded = false }
                             )
+                        } else {
+                            uiState.classes.forEach { cls ->
+                                DropdownMenuItem(
+                                    text = { Text(cls.name) },
+                                    onClick = { viewModel.selectClass(cls); classExpanded = false }
+                                )
+                            }
                         }
                     }
                 }

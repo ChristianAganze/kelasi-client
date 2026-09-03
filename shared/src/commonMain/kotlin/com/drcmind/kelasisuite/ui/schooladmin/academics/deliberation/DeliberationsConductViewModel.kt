@@ -62,7 +62,7 @@ class DeliberationsConductViewModel(
                 when (resource) {
                     is Resource.Success -> {
                         val classes = resource.data ?: emptyList()
-                        _uiState.update { it.copy(classes = classes, isLoading = false) }
+                        _uiState.update { it.copy(classes = classes, isLoading = false, error = null) }
                         if (classes.isNotEmpty() && _uiState.value.selectedClass == null) {
                             selectClass(classes.first())
                         }
@@ -80,17 +80,15 @@ class DeliberationsConductViewModel(
                 when (resource) {
                     is Resource.Success -> {
                         val periods = resource.data?.values?.flatten() ?: emptyList()
-                        _uiState.update { it.copy(evaluationPeriods = periods, isLoading = false) }
+                        _uiState.update { it.copy(evaluationPeriods = periods) }
                         if (periods.isNotEmpty() && _uiState.value.selectedPeriod == null) {
                             _uiState.update { it.copy(selectedPeriod = periods.first()) }
                         }
                     }
                     is Resource.Error -> {
-                        _uiState.update { it.copy(error = resource.message, isLoading = false) }
+                        // Silent error for periods so it does not block classes display
                     }
-                    is Resource.Loading -> {
-                        _uiState.update { it.copy(isLoading = true) }
-                    }
+                    is Resource.Loading -> {}
                 }
             }.launchIn(viewModelScope)
         }

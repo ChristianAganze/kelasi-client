@@ -124,7 +124,24 @@ class SchoolAdminApiServiceImpl(private val httpClient: HttpClient) : SchoolAdmi
     }
 
     override suspend fun getClassesForSchool(schoolId: Long): List<SchoolClassDTO> {
-        return httpClient.get("schools/$schoolId/classes").body()
+        return try {
+            httpClient.get("schools/$schoolId/classes").body()
+        } catch (e: Exception) {
+            try {
+                val majors = getOfferedMajorsForSchool(schoolId)
+                val classes = mutableListOf<SchoolClassDTO>()
+                for (major in majors) {
+                    val gradeLevels = getGradeLevelsBySchoolAndByMajor(schoolId, major.id)
+                    for (gl in gradeLevels) {
+                        val glClasses = getClassesBySchoolAndGradeLevel(schoolId, gl.id)
+                        classes.addAll(glClasses)
+                    }
+                }
+                classes.distinctBy { it.id }
+            } catch (fallbackEx: Exception) {
+                emptyList()
+            }
+        }
     }
 
     override suspend fun getClassesForSchoolAndMajor(schoolId: Long, majorId: Long): List<SchoolClassDTO> {

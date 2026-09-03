@@ -119,8 +119,12 @@ class SchoolRepositoryImpl(
     override fun getClassesForSchool(): Flow<Resource<List<SchoolClassDTO>>> {
         return flow {
             emit(Resource.Loading())
-            val schoolId = settingsStorage.getUserInfo().schoolId
-            val response = apiService.getClassesForSchool(schoolId!!)
+            val schoolId = settingsStorage.getUserInfo().schoolId ?: settingsStorage.getSchool()?.id
+            if (schoolId == null) {
+                emit(Resource.Error(message = "Établissement introuvable."))
+                return@flow
+            }
+            val response = apiService.getClassesForSchool(schoolId)
             emit(Resource.Success(response))
         }.catch {
             emit(Resource.Error(message = it.message.toString()))
